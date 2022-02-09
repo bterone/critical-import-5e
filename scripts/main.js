@@ -38,10 +38,11 @@ async function createActorSheet(actorData) {
   // actorData = actorData.replace(/\n/g, "");
   // console.log(actorData);
 
-  var line = actorData.split(/\n/g);
-  for (var i = 0; i < line.length; i++) {
+  var lines = actorData.trim().split(/\n/g);
+  for (var i = 0; i < lines.length; i++) {
     // todo
-    console.log([i] + ". ", line[i]);
+    const line = lines[i].trim();
+    console.log([i] + ". ", line);
   }
 
   /**
@@ -113,10 +114,11 @@ async function createActorSheet(actorData) {
   // Scimitar. Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) slashing damage.
   // Shortbow. Ranged Weapon Attack: +4 to hit, range 80/320 ft., one target. Hit: 5 (1d6 + 2) piercing damage.
 
-  await Actor.create({
-    name: "Test NPC",
-    type: "npc",
-  });
+  // todo
+  // await Actor.create({
+  //   name: "Test NPC",
+  //   type: "npc",
+  // });
 }
 
 // used for item, spell, class, monster feature, racial feature
@@ -182,8 +184,7 @@ Hooks.on("ready", () => {
   console.log("critical-import-5e | starting ...");
 });
 
-const dialogId = "importDialog";
-
+const DIALOG_ID = "importDialog";
 // monster, NPC
 Hooks.on("renderActorDirectory", (args) => {
   const footer = args.element[0].getElementsByTagName("footer")[0];
@@ -191,7 +192,7 @@ Hooks.on("renderActorDirectory", (args) => {
   footer.appendChild(
     createImportButton("Import " + label, () => {
       openImportDialog(label, async () => {
-        const actorData = document.getElementById(dialogId + label).value;
+        const actorData = document.getElementById(DIALOG_ID + label).value;
         await createActorSheet(actorData);
       });
     })
