@@ -20,39 +20,57 @@ The following describes the core principle of the import algorithmic for actor's
 
 - Read user input as lines of strings
 - determine sections by cutting lines array by each empty row
-  - First section is always
+  - Core data section (always present)
     - Name
     - Size
     - Race / Subrace
     - Alignment
-  - Second section is always
+  - Core Attributes section (always present)
     - AC with armor type
     - HP flat and with calculation
     - Speed
-  - Third section is always
-    - Abilities
-      - STR label
-      - STR value and modifier
-      - DEX label
-      - DEX value and modifier
-      - CON label
-      - CON value and modifier
-      - INT label
-      - INT value and modifier
-      - WIS label
-      - WIS value and modifier
-      - CHA label
-      - CHA value and modifier
-  - Fourth section mixed but may contain
+  - Abilities (always present)
+    - STR label
+    - STR value and modifier
+    - DEX label
+    - DEX value and modifier
+    - CON label
+    - CON value and modifier
+    - INT label
+    - INT value and modifier
+    - WIS label
+    - WIS value and modifier
+    - CHA label
+    - CHA value and modifier
+  - Mixed section may contain the following elements in the following order
     - Saving throws
     - Skills
     - Damage resistences
     - Damage immunities
-    - Damage vulnerabilities
+    - Damage vulnerabilities => index unknown, need to check
     - Senses
     - Languages
     - CR with XP
     - Proficiency Bonus
+  - Legendary Resistances
+  - Features
+    - Feature
+      - Name
+      - Description
+  - Actions
+    - Actions header
+    - Action with;
+      - Name
+      - Type of Attack
+      - Hit bonus
+      - range | reach
+      - target
+      - damage
+        - flat
+        - formular
+        - type
+  - Legendary Actions
+    - Legendary Actions
 
 ### Import examples
 
