@@ -57,6 +57,7 @@ const SECTION_IDS = {
 
 function findParagraphEnd(lines, statIdx) {
   for (let j = statIdx + 1; j < lines.length; j++) {
+    const pLine = lines[j].trim().toLowerCase();
     if (KNOWN_SECTION_HEADERS.includes(pLine)) {
       console.log("found end of paragraph at", j - 1);
       return j - 1;
@@ -65,6 +66,13 @@ function findParagraphEnd(lines, statIdx) {
   console.log("no paragraph end found");
   return lines.length - 1;
 }
+
+function findParagraphIndexes(lines) {
+  const pIndices = { start: undefined, end: undefined };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+
     const isNotSectionHeader =
       !KNOWN_SECTION_HEADERS.includes(line.toLowerCase()) ||
       line === "" ||
@@ -80,6 +88,7 @@ function findParagraphEnd(lines, statIdx) {
     console.log("paragraph starts", pIndices.start, "ends", pIndices.end);
     return pIndices;
   }
+
   return pIndices;
 }
 
