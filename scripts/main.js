@@ -101,25 +101,22 @@ function extractParagrah(lines, paragraphIndices) {
 }
 
 function findParagraphs(lines) {
-  // const paragraphs = [];
+  const paragraphs = [];
 
-  /**
-   * Paragraph
-   * + header
-   * + value
-   */
   while (true) {
     const pIndices = findParagraphIndexes(lines);
     if (!pIndices.end) {
       console.log("no paragraphs left");
       break;
     }
-    const paragraph = extractParagrah(lines, pIndices);
+    const p = extractParagrah(lines, pIndices);
+    const header = p.splice(0, 1)[0];
+    const paragraph = { header, description: p };
     console.log("paragraph", paragraph);
     console.log("lines", lines);
-    // todo save paragraph
   }
   console.log("ending paragraph discovery");
+  return paragraphs;
 }
 
 function collectActionData(lines, sections) {
@@ -139,9 +136,20 @@ function collectActionData(lines, sections) {
    * 3. remove this part of the array
    */
 
-  // todo
   const p = findParagraphs(lines);
-  // console.log("p", p);
+  /**
+   * todo create action obj out of lines
+   * "actions",
+   * "bonus actions",
+   * "reactions",
+   * "legendary actions",
+   * "lair actions",
+   * "regional effects",
+   *
+   * "Bite. Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 19 (2d10 + 8) piercing damage plus 7 (2d6) fire damage."
+   *
+   * try using the created regex
+   */
 }
 
 function collectRemainingActorData(lines, sections) {
