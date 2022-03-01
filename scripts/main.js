@@ -1,8 +1,8 @@
 // For action titles, the first word has to start with a capital letter, followed by 0-3 other words, ignoring prepositions,
 // followed by a period. Support words with hyphens, non-capital first letter, and parentheses like '(Recharge 5-6)'.
 
-// const actionTitleRegex =
-//   /^(([A-Z]\w+[ \-]?)(\s(of|and|the|from|in|at|on|with|to|by)\s)?(\w+ ?){0,3}(\([\w –\-\/]+\))?)\./;
+const actionTitleRegex =
+  /^(([A-Z]\w+[ \-]?)(\s(of|and|the|from|in|at|on|with|to|by)\s)?(\w+ ?){0,3}(\([\w –\-\/]+\))?)\./;
 // const racialDetailsRegex =
 //   /^(?<size>\bfine\b|\bdiminutive\b|\btiny\b|\bsmall\b|\bmedium\b|\blarge\b|\bhuge\b|\bgargantuan\b|\bcolossal\b)\s(?<type>\w+)([,|\s]+\((?<race>[\w|\s]+)\))?([,|\s]+(?<alignment>[\w|\s]+))?/i;
 // const armorRegex =
@@ -59,11 +59,11 @@ function findParagraphEnd(lines, statIdx) {
   for (let j = statIdx + 1; j < lines.length; j++) {
     const pLine = lines[j].trim().toLowerCase();
     if (KNOWN_SECTION_HEADERS.includes(pLine)) {
-      console.log("found end of paragraph at", j - 1);
+      // console.log("found end of paragraph at", j - 1);
       return j - 1;
     }
   }
-  console.log("no paragraph end found");
+  // console.log("no paragraph end found");
   return lines.length - 1;
 }
 
@@ -81,11 +81,11 @@ function findParagraphIndexes(lines) {
       continue;
     }
 
-    console.log("found start of paragraph at", i);
+    // console.log("found start of paragraph at", i);
 
     pIndices.start = i;
     pIndices.end = findParagraphEnd(lines, i);
-    console.log("paragraph starts", pIndices.start, "ends", pIndices.end);
+    // console.log("paragraph starts", pIndices.start, "ends", pIndices.end);
     return pIndices;
   }
 
@@ -112,66 +112,59 @@ function findParagraphs(lines) {
     const p = extractParagrah(lines, pIndices);
     const header = p.splice(0, 1)[0];
     const paragraph = { header, description: p };
-    console.log("paragraph", paragraph);
-    console.log("lines", lines);
+    paragraphs.push(paragraph);
+    // console.log("paragraph", paragraph);
+    // console.log("lines", lines);
   }
-  console.log("ending paragraph discovery");
+  console.log("paragraph discovery finished");
   return paragraphs;
 }
 
 function collectActionData(lines, sections) {
-  console.log("starting with", lines);
-  /**
-   * todo
-   * check for presents of known section headers (actions, bonus actions, reactions, legendary actions, lair actions, regional effects)
-   * remove these sections from array
-   * remaining can be read line by line
-   * but section end will be end of array or empty line
-   */
-
-  /**
-   * todo
-   * 1. collect header start and end by index
-   * 2. add lines into sections
-   * 3. remove this part of the array
-   */
-
-  const p = findParagraphs(lines);
-  /**
-   * todo create action obj out of lines
-   * "actions",
-   * "bonus actions",
-   * "reactions",
-   * "legendary actions",
-   * "lair actions",
-   * "regional effects",
-   *
-   * "Bite. Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 19 (2d10 + 8) piercing damage plus 7 (2d6) fire damage."
-   *
-   * try using the created regex
-   */
+  const paragraphs = findParagraphs(lines);
+  paragraphs.forEach((p) => {
+    const desc = p.description;
+    const sectionHeader = p.header.toLowerCase();
+    switch (sectionHeader) {
+      case "actions":
+      case "bonus actions":
+      case "reactions":
+        sections.actions = desc;
+        break;
+      case "legendary actions":
+        sections.legendaryActions = desc;
+        break;
+      case "lair actions":
+      case "regional effects":
+        sections.other = desc;
+        break;
+      default:
+        console.log("unknown header", sectionHeader);
+        break;
+    }
+  });
 }
 
 function collectRemainingActorData(lines, sections) {
   let sectionIndex = 0;
-  for (let i = 0; i <= lines.length; i++) {
+  for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-    console.log("lines.length", lines.length);
-    console.log("line " + i, line);
+    // console.log("lines.length", lines.length);
+    // console.log("line " + i, line);
 
     const newSection = line.length <= 0 && i != lines.length;
     if (newSection) {
       sectionIndex += 1;
+      continue;
     }
-    console.log("sectionIds", SECTION_IDS);
-    console.log("sectionIndex", sectionIndex);
+    // console.log("sectionIds", SECTION_IDS);
+    // console.log("sectionIndex", sectionIndex);
 
     const sectionKey = SECTION_IDS[sectionIndex] ?? "other";
-    console.log("sectionKey", sectionKey);
-    console.log("sections", sections);
-
+    // console.log("sectionKey", sectionKey);
     sections[sectionKey].push(line);
   }
+  console.log("sections", sections);
 }
 
 function createActorSheet(actorData) {
@@ -188,8 +181,9 @@ function createActorSheet(actorData) {
   };
 
   const lines = actorData.trim().split(/\n/g);
+  console.log("user input", lines);
   collectActionData(lines, sections);
-  // collectRemainingActorData(lines, sections);
+  collectRemainingActorData(lines, sections);
 
   // for (const [key, val] of sections) {
   //   console.log(key, ": ", val);
