@@ -1,8 +1,8 @@
 // For action titles, the first word has to start with a capital letter, followed by 0-3 other words, ignoring prepositions,
 // followed by a period. Support words with hyphens, non-capital first letter, and parentheses like '(Recharge 5-6)'.
 
-const actionTitleRegex =
-  /^(([A-Z]\w+[ \-]?)(\s(of|and|the|from|in|at|on|with|to|by)\s)?(\w+ ?){0,3}(\([\w –\-\/]+\))?)\./;
+// const actionTitleRegex =
+//   /^(([A-Z]\w+[ \-]?)(\s(of|and|the|from|in|at|on|with|to|by)\s)?(\w+ ?){0,3}(\([\w –\-\/]+\))?)\./;
 // const racialDetailsRegex =
 //   /^(?<size>\bfine\b|\bdiminutive\b|\btiny\b|\bsmall\b|\bmedium\b|\blarge\b|\bhuge\b|\bgargantuan\b|\bcolossal\b)\s(?<type>\w+)([,|\s]+\((?<race>[\w|\s]+)\))?([,|\s]+(?<alignment>[\w|\s]+))?/i;
 // const armorRegex =
@@ -13,7 +13,7 @@ const actionTitleRegex =
 // const abilityNamesRegex = /\bstr\b|\bdex\b|\bcon\b|\bint\b|\bwis\b|\bcha\b/gi;
 // const abilitySavesRegex =
 //   /(?<name>\bstr\b|\bdex\b|\bcon\b|\bint\b|\bwis\b|\bcha\b) (?<modifier>[\+|-]\d+)/gi;
-// const abilityValuesRegex = /(?<base>\d+)\s?\((?<modifier>[\+|\-|−|–]\d+)\)/g;
+const abilityValuesRegex = /(?<base>\d+)\s?\((?<modifier>[\+|\-|−|–]\d+)\)/g;
 // const skillsRegex =
 //   /(?<name>\bacrobatics\b|\barcana\b|\banimal handling\b|\bathletics\b|\bdeception\b|\bhistory\b|\binsight\b|\bintimidation\b|\binvestigation\b|\bmedicine\b|\bnature\b|\bperception\b|\bperformance\b|\bpersuasion\b|\breligion\b|\bsleight of hand\b|\bstealth\b|\bsurvival\b) (?<modifier>[\+|-]\d+)/gi;
 // const damageTypesRegex =
@@ -120,7 +120,7 @@ function findParagraphs(lines) {
   return paragraphs;
 }
 
-function collectActionData(lines, sections) {
+function collectRawActionData(lines, sections) {
   const paragraphs = findParagraphs(lines);
   paragraphs.forEach((p) => {
     const desc = p.description;
@@ -145,7 +145,7 @@ function collectActionData(lines, sections) {
   });
 }
 
-function collectRemainingActorData(lines, sections) {
+function collectRemainingRawActorData(lines, sections) {
   let sectionIndex = 0;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -182,8 +182,9 @@ function createActorSheet(actorData) {
 
   const lines = actorData.trim().split(/\n/g);
   console.log("user input", lines);
-  collectActionData(lines, sections);
-  collectRemainingActorData(lines, sections);
+  collectRawActionData(lines, sections);
+  collectRemainingRawActorData(lines, sections);
+  const abilities = gatherAbilityData(sections.abilities);
 
   // for (const [key, val] of sections) {
   //   console.log(key, ": ", val);
@@ -263,6 +264,31 @@ function createActorSheet(actorData) {
   //   name: "Test NPC",
   //   type: "npc",
   // });
+}
+
+function gatherAbilityData(rawAbilities) {
+  // todo
+  const abilities = {};
+  let abilityName = "";
+  const isAbilityName = /^[A-Za-z]+$/;
+
+  rawAbilities.forEach((a) => {
+    if (isAbilityName.test(a)) {
+      abilityName = a.trim().toLowerCase();
+    } else {
+      // todo set value abilityValuesRegex
+      const results = abilityValuesRegex.exec(a);
+      if (results) {
+        const val = results.groups;
+        console.log(val);
+        abilities[abilityName] = val;
+        abilityName = "";
+      }
+    }
+  });
+
+  console.log(abilities);
+  return abilities;
 }
 
 // used for item, spell, class, monster feature, racial feature
