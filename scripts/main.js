@@ -1,8 +1,11 @@
 // For action titles, the first word has to start with a capital letter, followed by 0-3 other words, ignoring prepositions,
 // followed by a period. Support words with hyphens, non-capital first letter, and parentheses like '(Recharge 5-6)'.
 
-const attributesRegex =
+// const nameRgx = /(?<name>.+)(\r|\n|\r\n)/;
+const attributesRgx =
   /(?<attribute>[a-zA-z]{3})(\r\n|\r|\n)(?<base>\d+)\s+?\((?<mod>(\+|-)\d+)\)/g;
+const racialDetailsRgx =
+  /(?<name>.+)(\r|\n|\r\n)(?<size>(Tiny|Small|Medium|Large|Huge|Gargantuan))\s(?<type>.+)\s?(?<race>.+)?\s?,\s?(?<alignment>.+)(\r|\n|\r\n)/;
 
 // const actionTitleRegex =
 //   /^(([A-Z]\w+[ \-]?)(\s(of|and|the|from|in|at|on|with|to|by)\s)?(\w+ ?){0,3}(\([\w –\-\/]+\))?)\./;
@@ -52,10 +55,14 @@ function createActorSheet(actorData) {
 
   // todo
 
+  // name
+  const racialDetails = racialDetailsRgx.exec(actorData);
+  console.log("racialDetails", racialDetails);
+
   function gatherAttributes() {
     const attributes = {};
     let match;
-    while ((match = attributesRegex.exec(actorData)) != null) {
+    while ((match = attributesRgx.exec(actorData)) != null) {
       attributes[match.groups.attribute.toLocaleLowerCase()] = {
         base: match.groups.base,
         mod: match.groups.mod,
