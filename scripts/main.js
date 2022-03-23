@@ -1,26 +1,3 @@
-// For action titles, the first word has to start with a capital letter, followed by 0-3 other words, ignoring prepositions,
-// followed by a period. Support words with hyphens, non-capital first letter, and parentheses like '(Recharge 5-6)'.
-
-// const actionTitleRegex =
-//   /^(([A-Z]\w+[ \-]?)(\s(of|and|the|from|in|at|on|with|to|by)\s)?(\w+ ?){0,3}(\([\w –\-\/]+\))?)\./;
-// const damageTypesRegex =
-//   /\bbludgeoning\b|\bpiercing\b|\bslashing\b|\bacid\b|\bcold\b|\bfire\b |\blightning\b|\bnecrotic\b|\bpoison\b|\bpsychic\b|\bradiant\b|\bthunder\b|/gi;
-// const sensesRegex =
-//   /(?<name>\bdarkvision\b|\bblindsight\b|\btremorsense\b|\btruesight\b) (?<modifier>\d+)/i;
-// const spellCastingRegex =
-//   /\((?<slots>\d+) slot|(?<perday>\d+)\/day|spellcasting ability is (?<ability>\w+)|spell save dc (?<savedc>\d+)/gi;
-// const spellLevelRegex = /(?<level>\d+)(.+)level spellcaster/i;
-// const attackRegex = /(attack|damage): \+(?<tohit>\d+) to hit/i;
-// const reachRegex = /reach (?<reach>\d+) ?(ft|'|’)/i;
-// const rangeRegex = /range (?<near>\d+)\/(?<far>\d+) ?(ft|'|’)/i;
-// const rechargeRegex = /\(recharge (?<recharge>\d+)([–|-]\d+)?\)/i;
-// const savingThrowRegex = /dc (?<savedc>\d+) (?<saveability>\w+) saving throw/i;
-// const versatileRegex =
-//   /\((?<damageroll>\d+d\d+( ?\+ ?\d+)?)\) (?<damagetype>\w+) damage if used with two hands/i;
-// const targetRegex = /(?<range>\d+)?-(foot|ft?.|'|’) (?<shape>\w+)/i;
-// const damageRollsQuery =
-// "(?<={0})[\\s\\w\\d,]+\\((?<damageroll1>\\d+d\\d+)( \\+ (?<damagemod1>\\d+))?\\) (?<damagetype1>\\w+)(.+plus.+\\((?<damageroll2>\\d+d\\d+( \\+ (?<damagemod2>\\d+))?)\\) (?<damagetype2>\\w+))?";
-
 function createActorSheet(actorData) {
   const attributesRgx =
     /(?<attribute>[a-zA-z]{3})(\r\n|\r|\n)(?<base>\d+)\s+?\((?<mod>(\+|-)\d+)\)/gi;
@@ -45,20 +22,6 @@ function createActorSheet(actorData) {
     /(proficiency bonus|prof bonus)\s?(?<profBonus>\+\d+)/gi;
   const legendaryResistancesRgx =
     /legendary resistance\s?\(?(?<timesADay>\d+).day.?\.?(?<desc>.+)/gi;
-
-  const sections = {
-    coreData: [],
-    coreAttributes: [],
-    abilities: [],
-    mixedSection: [],
-    legendaryResistances: [],
-    features: [],
-    actions: [],
-    legendaryActions: [],
-    other: [],
-  };
-
-  // todo
 
   const racialDetails = racialDetailsRgx.exec(actorData);
   console.log("racialDetails", racialDetails.groups);
@@ -149,9 +112,152 @@ function createActorSheet(actorData) {
   const legendaryResistances = legendaryResistancesRgx.exec(actorData);
   console.log("legendaryResistances", legendaryResistances.groups);
 
-  // Features (see night hag)
+  function gatherSections() {
+    const sectionHeaders = [
+      "actions",
+      "bonus actions",
+      "reactions",
+      "legendary actions",
+      "lair actions",
+      "regional effects",
+    ];
+    const sections = {};
+    let header = "";
+    for (const line of actorData.trim().split(/\n/g)) {
+      const l = line.toLocaleLowerCase();
+      if (!l) {
+        continue;
+      } else if (sectionHeaders.includes(l)) {
+        header = l;
+        sections[header] = [];
+      } else if (sections[header]) {
+        sections[header].push(line);
+      }
+    }
+    return sections;
+  }
+  const sections = gatherSections();
+  console.log("sections", sections);
+
   // Actions
-  // legendary actions
+  function gatherActions(sections) {
+    // const spellCastingRegex =
+    //   /\((?<slots>\d+) slot|(?<perday>\d+)\/day|spellcasting ability is (?<ability>\w+)|spell save dc (?<savedc>\d+)/gi;
+    // const spellLevelRegex = /(?<level>\d+)(.+)level spellcaster/i;
+
+    const actionBasicsRgx = /(?<name>[a-zA-Z]+)(.|\s|(\r|\n|\r\n))(?<desc>.+)/i;
+    const dmgRgx =
+      /(?<flatDmg>\d+)\s?\((?<formula>\d+d\d+\s?(\+?\s?\d+)?).+?(?<type>\bbludgeoning\b|\bpiercing\b|\bslashing\b|\bacid\b|\bcold\b|\bfire\b|\blightning\b|\bnecrotic\b|\bpoison\b|\bpsychic\b|\bradiant\b|\bthunder\b)\s?damage/gi;
+    const actionVersatileRgx =
+      /\((?<dmgroll>\d+d\d+(\s??\+\s??\d+)?)\)\s?(?<dmgtype>\w+)\s?damage if used with two hands/i; // todo find test actor
+    const actionHitRgx = /(attack|damage):\s?\+(?<toHit>\d+)\s?to\s?hit/i;
+    const actionReachRgx = /reach (?<reach>\d+) ?(ft|'|’)/i;
+    const actionRangeRgx = /range\s?(?<normal>\d+)\/(?<far>\d+)\s??(ft|'|’)/i;
+    const actionShapedTargetRgx =
+      /(?<range>\d+)?-(foot|ft?.|'|’)\s?(?<shape>\w+)/i;
+    const actionRechargeRgx = /recharge\s?(?<from>\d+)((\–|\-)(?<to>\d+))?/i;
+    const actionSavingThrowRgx =
+      /dc\s?(?<dc>\d+)\s?(?<ability>\w+)\s?saving throw/i;
+
+    const acts = sections.actions;
+    const actions = [];
+
+    for (const a of acts) {
+      const action = {};
+
+      const actionBasics = actionBasicsRgx.exec(a);
+      const ab = actionBasics?.groups;
+      if (ab) {
+        action.name = ab.name;
+        action.desc = ab.desc;
+      }
+
+      const dmg = [];
+      let match;
+      while ((match = dmgRgx.exec(a)) != null) {
+        const m = match.groups;
+        if (m) {
+          dmg.push({ flat: m.flatDmg, formula: m.formula, type: m.type });
+        }
+      }
+      action.dmg = dmg;
+
+      const versatile = actionVersatileRgx.exec(a);
+      const v = versatile?.groups;
+      if (v) {
+        action.versatile = v; // todo
+      }
+
+      const hit = actionHitRgx.exec(a);
+      const h = hit?.groups;
+      if (h) {
+        action.hit = h.toHit;
+      }
+
+      const reach = actionReachRgx.exec(a);
+      const rea = reach?.groups;
+      if (rea) {
+        action.reach = rea.reach;
+      }
+
+      const range = actionRangeRgx.exec(a);
+      const r = range?.groups;
+      if (r) {
+        action.range = { normal: r.normal, far: r.far };
+      }
+
+      const shape = actionShapedTargetRgx.exec(a);
+      const sh = shape?.groups;
+      if (sh) {
+        action.shape = { range: sh.range, shape: sh.shape };
+      }
+
+      const recharge = actionRechargeRgx.exec(a);
+      const re = recharge?.groups;
+      if (re) {
+        action.recharge = { from: re.from, to: re.to };
+      }
+
+      const save = actionSavingThrowRgx.exec(a);
+      const s = save?.groups;
+      if (s) {
+        action.savingThrow = { ability: s.ability, dc: s.dc };
+      }
+
+      actions.push(action);
+    }
+    // todo actor action (from D&D 5e template.json)
+    // "action": {
+    //   "ability": null,
+    //   "actionType": null,
+    //   "attackBonus": 0,
+    //   "chatFlavor": "",
+    //   "critical": {
+    //     "threshold": null,
+    //     "damage": ""
+    //   },
+    //   "damage": {
+    //     "parts": [],
+    //     "versatile": ""
+    //   },
+    //   "formula": "",
+    //   "save": {
+    //     "ability": "",
+    //     "dc": null,
+    //     "scaling": "spell"
+    //   }
+    // },
+    return actions;
+  }
+  const actions = gatherActions(sections);
+  console.log("actions", actions);
+  // Bonus actions
+  // Reactions
+  // Legendary Actions
+  // Lair actions
+  // regional effects
+  // Spells
+  // Features (see night hag)
 
   // todo
   // await Actor.create({
