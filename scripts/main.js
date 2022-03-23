@@ -1,26 +1,26 @@
 // For action titles, the first word has to start with a capital letter, followed by 0-3 other words, ignoring prepositions,
 // followed by a period. Support words with hyphens, non-capital first letter, and parentheses like '(Recharge 5-6)'.
 
-// const nameRgx = /(?<name>.+)(\r|\n|\r\n)/;
 const attributesRgx =
-  /(?<attribute>[a-zA-z]{3})(\r\n|\r|\n)(?<base>\d+)\s+?\((?<mod>(\+|-)\d+)\)/g;
+  /(?<attribute>[a-zA-z]{3})(\r\n|\r|\n)(?<base>\d+)\s+?\((?<mod>(\+|-)\d+)\)/gi;
 const racialDetailsRgx =
-  /(?<name>.+)(\r|\n|\r\n)(?<size>(Tiny|Small|Medium|Large|Huge|Gargantuan))\s(?<type>.+)\s?(?<race>.+)?\s?,\s?(?<alignment>.+)(\r|\n|\r\n)/;
+  /(?<name>.+)(\r|\n|\r\n)(?<size>(Tiny|Small|Medium|Large|Huge|Gargantuan))\s(?<type>.+)\s?(?<race>.+)?\s?,\s?(?<alignment>.+)(\r|\n|\r\n)/gi;
+const armorRgx =
+  /(armor|armour) class\s?(?<armorClass>\d+)\s?(\((?<armorType>.+)\))?/gi;
+const healthRgx =
+  /(hit points|hp)\s?(?<hp>\d+)\s?(\(?(?<formular>\d+d\d+)?(\s?\+\s?(?<formularBonus>\d+))?)?/gi;
+const speedRgx =
+  /(?<type>(speed|climb|fly|burrow|swim))\s+?(?<value>\d+\s?[^,|\r|\n|\r\n]+)/gi;
+const savesRgx = /(?<ability>str|dex|con|int|wis|cha) (?<mod>(\+|\-)\d+)/gi;
+const skillsRgx =
+  /(?<skill>acrobatics|arcana|animal handling|athletics|deception|history|insight|intimidation|investigation|medicine|nature|perception|performance|persuasion|religion|sleight of hand|stealth|survival) (?<mod>(\+|\-)\d+)/gi;
+const dmgImmunitiesRgx =
+  /(damage immunities|damage immunity)\s?(?<immunities>.+)/gi;
+const sensesRgx =
+  /(?<sense>darkvision|blindsight|tremorsense|truesight|passive perception)\s?(?<mod>\d+)/gi;
 
 // const actionTitleRegex =
 //   /^(([A-Z]\w+[ \-]?)(\s(of|and|the|from|in|at|on|with|to|by)\s)?(\w+ ?){0,3}(\([\w –\-\/]+\))?)\./;
-// const racialDetailsRegex =
-//   /^(?<size>\bfine\b|\bdiminutive\b|\btiny\b|\bsmall\b|\bmedium\b|\blarge\b|\bhuge\b|\bgargantuan\b|\bcolossal\b)\s(?<type>\w+)([,|\s]+\((?<race>[\w|\s]+)\))?([,|\s]+(?<alignment>[\w|\s]+))?/i;
-// const armorRegex =
-//   /^((armor|armour) class) (?<ac>\d+)( \((?<armortype>.+)\))?/i;
-// const healthRegex =
-//   /^(hit points) (?<hp>\d+) \((?<formula>\d+d\d+( ?[\+|\-|−|–] ?\d+)?)\)/i;
-// const speedRegex = /(?<name>\w+) (?<value>\d+)/gi;
-// const abilityNamesRegex = /\bstr\b|\bdex\b|\bcon\b|\bint\b|\bwis\b|\bcha\b/gi;
-// const abilitySavesRegex =
-//   /(?<name>\bstr\b|\bdex\b|\bcon\b|\bint\b|\bwis\b|\bcha\b) (?<modifier>[\+|-]\d+)/gi;
-// const skillsRegex =
-//   /(?<name>\bacrobatics\b|\barcana\b|\banimal handling\b|\bathletics\b|\bdeception\b|\bhistory\b|\binsight\b|\bintimidation\b|\binvestigation\b|\bmedicine\b|\bnature\b|\bperception\b|\bperformance\b|\bpersuasion\b|\breligion\b|\bsleight of hand\b|\bstealth\b|\bsurvival\b) (?<modifier>[\+|-]\d+)/gi;
 // const damageTypesRegex =
 //   /\bbludgeoning\b|\bpiercing\b|\bslashing\b|\bacid\b|\bcold\b|\bfire\b |\blightning\b|\bnecrotic\b|\bpoison\b|\bpsychic\b|\bradiant\b|\bthunder\b|/gi;
 // const sensesRegex =
@@ -55,23 +55,82 @@ function createActorSheet(actorData) {
 
   // todo
 
-  // name
   const racialDetails = racialDetailsRgx.exec(actorData);
-  console.log("racialDetails", racialDetails);
+  console.log("racialDetails", racialDetails.groups);
+
+  const armor = armorRgx.exec(actorData);
+  console.log("armor", armor.groups);
+
+  const health = healthRgx.exec(actorData);
+  console.log("health", health.groups);
+
+  function gatherSpeed() {
+    const speed = [];
+    let match;
+    while ((match = speedRgx.exec(actorData)) != null) {
+      const m = match.groups;
+      const type = m.type.toLocaleLowerCase();
+      const value = m.value.toLocaleLowerCase();
+      speed.push({ type, value: value });
+    }
+    return speed;
+  }
+  const speed = gatherSpeed();
+  console.log("speed", speed);
 
   function gatherAttributes() {
     const attributes = {};
     let match;
     while ((match = attributesRgx.exec(actorData)) != null) {
-      attributes[match.groups.attribute.toLocaleLowerCase()] = {
-        base: match.groups.base,
-        mod: match.groups.mod,
+      const m = match.groups;
+      attributes[m.attribute.toLocaleLowerCase()] = {
+        base: m.base,
+        mod: m.mod,
       };
     }
     return attributes;
   }
   const attributes = gatherAttributes();
   console.log("attributes", attributes);
+
+  function gatherSaves() {
+    const saves = {};
+    let match;
+    while ((match = savesRgx.exec(actorData)) != null) {
+      const m = match.groups;
+      saves[m.ability.toLocaleLowerCase()] = m.mod;
+    }
+    return saves;
+  }
+  const saves = gatherSaves();
+  console.log("saves", saves);
+
+  function gatherSkills() {
+    const skills = {};
+    let match;
+    while ((match = skillsRgx.exec(actorData)) != null) {
+      const m = match.groups;
+      skills[m.skill] = m.mod;
+    }
+    return skills;
+  }
+  const skills = gatherSkills();
+  console.log("skills", skills);
+
+  const immunities = dmgImmunitiesRgx.exec(actorData);
+  console.log("immunities", immunities.groups);
+
+  function gatherSenses() {
+    const senses = [];
+    let match;
+    while ((match = sensesRgx.exec(actorData)) != null) {
+      const m = match.groups;
+      senses.push({ sense: m.sense.toLocaleLowerCase(), mod: m.mod });
+    }
+    return senses;
+  }
+  const senses = gatherSenses();
+  console.log("senses", senses);
 
   // todo
   // await Actor.create({
