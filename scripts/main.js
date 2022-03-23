@@ -22,6 +22,8 @@ const languagesRgx = /(languages|language)\s?(?<languages>.*)/gi;
 const challengeRgx = /(challenge|cr)\s?(?<cr>([\d/]+))\s?\((?<xp>[\d,]+)/gi;
 const proficiencyBonusRgx =
   /(proficiency bonus|prof bonus)\s?(?<profBonus>\+\d+)/gi;
+const legendaryResistancesRgx =
+  /legendary resistance\s?\(?(?<timesADay>\d+).day.?\.?(?<desc>.+)/gi;
 
 // const actionTitleRegex =
 //   /^(([A-Z]\w+[ \-]?)(\s(of|and|the|from|in|at|on|with|to|by)\s)?(\w+ ?){0,3}(\([\w –\-\/]+\))?)\./;
@@ -143,6 +145,13 @@ function createActorSheet(actorData) {
 
   const profBonus = proficiencyBonusRgx.exec(actorData);
   console.log("profBonus", profBonus.groups);
+
+  const legendaryResistances = legendaryResistancesRgx.exec(actorData);
+  console.log("legendaryResistances", legendaryResistances.groups);
+
+  // Actions
+  // legendary actions
+
   // todo
   // await Actor.create({
   //   name: "Test NPC",
