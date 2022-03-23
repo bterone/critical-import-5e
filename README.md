@@ -134,14 +134,39 @@ The following describes the core principle of the import algorithmic for actor's
 
 - Nimble Escape. The goblin can take the Disengage or Hide action as a bonus action on each of its turns.
 
-### Actions => ???
+### Actions => tamplate.json => action
+
+#### see code snip below
+
+```
+      "action": {
+        "ability": null,
+        "actionType": null,
+        "attackBonus": 0,
+        "chatFlavor": "",
+        "critical": {
+          "threshold": null,
+          "damage": ""
+        },
+        "damage": {
+          "parts": [],
+          "versatile": ""
+        },
+        "formula": "",
+        "save": {
+          "ability": "",
+          "dc": null,
+          "scaling": "spell"
+        }
+      },
+```
 
 - Scimitar. Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) slashing damage.
 - Shortbow. Ranged Weapon Attack: +4 to hit, range 80/320 ft., one target. Hit: 5 (1d6 + 2) piercing damage.
 
-### Import examples
+## Import examples
 
-#### Goblin
+### Goblin
 
 Goblin
 Small humanoid (goblinoid) , neutral evil
@@ -176,7 +201,7 @@ Scimitar. Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 +
 
 Shortbow. Ranged Weapon Attack: +4 to hit, range 80/320 ft., one target. Hit: 5 (1d6 + 2) piercing damage.
 
-#### Adult Red Dragon
+### Adult Red Dragon
 
 Adult Red Dragon
 Huge dragon , chaotic evil
@@ -230,7 +255,7 @@ Tail Attack. The dragon makes a tail attack.
 
 Wing Attack (Costs 2 Actions). The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a DC 22 Dexterity saving throw or take 15 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.
 
-#### Night Hag
+### Night Hag
 
 Night Hag
 Medium fiend , neutral evil
