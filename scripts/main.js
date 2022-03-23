@@ -18,6 +18,10 @@ const dmgImmunitiesRgx =
   /(damage immunities|damage immunity)\s?(?<immunities>.+)/gi;
 const sensesRgx =
   /(?<sense>darkvision|blindsight|tremorsense|truesight|passive perception)\s?(?<mod>\d+)/gi;
+const languagesRgx = /(languages|language)\s?(?<languages>.*)/gi;
+const challengeRgx = /(challenge|cr)\s?(?<cr>([\d/]+))\s?\((?<xp>[\d,]+)/gi;
+const proficiencyBonusRgx =
+  /(proficiency bonus|prof bonus)\s?(?<profBonus>\+\d+)/gi;
 
 // const actionTitleRegex =
 //   /^(([A-Z]\w+[ \-]?)(\s(of|and|the|from|in|at|on|with|to|by)\s)?(\w+ ?){0,3}(\([\w –\-\/]+\))?)\./;
@@ -25,7 +29,6 @@ const sensesRgx =
 //   /\bbludgeoning\b|\bpiercing\b|\bslashing\b|\bacid\b|\bcold\b|\bfire\b |\blightning\b|\bnecrotic\b|\bpoison\b|\bpsychic\b|\bradiant\b|\bthunder\b|/gi;
 // const sensesRegex =
 //   /(?<name>\bdarkvision\b|\bblindsight\b|\btremorsense\b|\btruesight\b) (?<modifier>\d+)/i;
-// const challengeRegex = /^challenge (?<cr>(½|[\d/]+)) \((?<xp>[\d,]+)/i;
 // const spellCastingRegex =
 //   /\((?<slots>\d+) slot|(?<perday>\d+)\/day|spellcasting ability is (?<ability>\w+)|spell save dc (?<savedc>\d+)/gi;
 // const spellLevelRegex = /(?<level>\d+)(.+)level spellcaster/i;
@@ -132,6 +135,14 @@ function createActorSheet(actorData) {
   const senses = gatherSenses();
   console.log("senses", senses);
 
+  const languages = languagesRgx.exec(actorData);
+  console.log("languages", languages.groups);
+
+  const challenge = challengeRgx.exec(actorData);
+  console.log("challenge", challenge.groups);
+
+  const profBonus = proficiencyBonusRgx.exec(actorData);
+  console.log("profBonus", profBonus.groups);
   // todo
   // await Actor.create({
   //   name: "Test NPC",
