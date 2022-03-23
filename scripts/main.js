@@ -1,30 +1,6 @@
 // For action titles, the first word has to start with a capital letter, followed by 0-3 other words, ignoring prepositions,
 // followed by a period. Support words with hyphens, non-capital first letter, and parentheses like '(Recharge 5-6)'.
 
-const attributesRgx =
-  /(?<attribute>[a-zA-z]{3})(\r\n|\r|\n)(?<base>\d+)\s+?\((?<mod>(\+|-)\d+)\)/gi;
-const racialDetailsRgx =
-  /(?<name>.+)(\r|\n|\r\n)(?<size>(Tiny|Small|Medium|Large|Huge|Gargantuan))\s(?<type>.+)\s?(?<race>.+)?\s?,\s?(?<alignment>.+)(\r|\n|\r\n)/gi;
-const armorRgx =
-  /(armor|armour) class\s?(?<armorClass>\d+)\s?(\((?<armorType>.+)\))?/gi;
-const healthRgx =
-  /(hit points|hp)\s?(?<hp>\d+)\s?(\(?(?<formular>\d+d\d+)?(\s?\+\s?(?<formularBonus>\d+))?)?/gi;
-const speedRgx =
-  /(?<type>(speed|climb|fly|burrow|swim))\s+?(?<value>\d+\s?[^,|\r|\n|\r\n]+)/gi;
-const savesRgx = /(?<ability>str|dex|con|int|wis|cha) (?<mod>(\+|\-)\d+)/gi;
-const skillsRgx =
-  /(?<skill>acrobatics|arcana|animal handling|athletics|deception|history|insight|intimidation|investigation|medicine|nature|perception|performance|persuasion|religion|sleight of hand|stealth|survival) (?<mod>(\+|\-)\d+)/gi;
-const dmgImmunitiesRgx =
-  /(damage immunities|damage immunity)\s?(?<immunities>.+)/gi;
-const sensesRgx =
-  /(?<sense>darkvision|blindsight|tremorsense|truesight|passive perception)\s?(?<mod>\d+)/gi;
-const languagesRgx = /(languages|language)\s?(?<languages>.*)/gi;
-const challengeRgx = /(challenge|cr)\s?(?<cr>([\d/]+))\s?\((?<xp>[\d,]+)/gi;
-const proficiencyBonusRgx =
-  /(proficiency bonus|prof bonus)\s?(?<profBonus>\+\d+)/gi;
-const legendaryResistancesRgx =
-  /legendary resistance\s?\(?(?<timesADay>\d+).day.?\.?(?<desc>.+)/gi;
-
 // const actionTitleRegex =
 //   /^(([A-Z]\w+[ \-]?)(\s(of|and|the|from|in|at|on|with|to|by)\s)?(\w+ ?){0,3}(\([\w –\-\/]+\))?)\./;
 // const damageTypesRegex =
@@ -46,6 +22,30 @@ const legendaryResistancesRgx =
 // "(?<={0})[\\s\\w\\d,]+\\((?<damageroll1>\\d+d\\d+)( \\+ (?<damagemod1>\\d+))?\\) (?<damagetype1>\\w+)(.+plus.+\\((?<damageroll2>\\d+d\\d+( \\+ (?<damagemod2>\\d+))?)\\) (?<damagetype2>\\w+))?";
 
 function createActorSheet(actorData) {
+  const attributesRgx =
+    /(?<attribute>[a-zA-z]{3})(\r\n|\r|\n)(?<base>\d+)\s+?\((?<mod>(\+|-)\d+)\)/gi;
+  const racialDetailsRgx =
+    /(?<name>.+)(\r|\n|\r\n)(?<size>(Tiny|Small|Medium|Large|Huge|Gargantuan))\s(?<type>.+)\s?(?<race>.+)?\s?,\s?(?<alignment>.+)(\r|\n|\r\n)/gi;
+  const armorRgx =
+    /(armor|armour) class\s?(?<armorClass>\d+)\s?(\((?<armorType>.+)\))?/gi;
+  const healthRgx =
+    /(hit points|hp)\s?(?<hp>\d+)\s?(\(?(?<formular>\d+d\d+)?(\s?\+\s?(?<formularBonus>\d+))?)?/gi;
+  const speedRgx =
+    /(?<type>(speed|climb|fly|burrow|swim))\s+?(?<value>\d+\s?[^,|\r|\n|\r\n]+)/gi;
+  const savesRgx = /(?<ability>str|dex|con|int|wis|cha) (?<mod>(\+|\-)\d+)/gi;
+  const skillsRgx =
+    /(?<skill>acrobatics|arcana|animal handling|athletics|deception|history|insight|intimidation|investigation|medicine|nature|perception|performance|persuasion|religion|sleight of hand|stealth|survival) (?<mod>(\+|\-)\d+)/gi;
+  const dmgImmunitiesRgx =
+    /(damage immunities|damage immunity)\s?(?<immunities>.+)/gi;
+  const sensesRgx =
+    /(?<sense>darkvision|blindsight|tremorsense|truesight|passive perception)\s?(?<mod>\d+)/gi;
+  const languagesRgx = /(languages|language)\s?(?<languages>.*)/gi;
+  const challengeRgx = /(challenge|cr)\s?(?<cr>([\d/]+))\s?\((?<xp>[\d,]+)/gi;
+  const proficiencyBonusRgx =
+    /(proficiency bonus|prof bonus)\s?(?<profBonus>\+\d+)/gi;
+  const legendaryResistancesRgx =
+    /legendary resistance\s?\(?(?<timesADay>\d+).day.?\.?(?<desc>.+)/gi;
+
   const sections = {
     coreData: [],
     coreAttributes: [],
@@ -149,6 +149,7 @@ function createActorSheet(actorData) {
   const legendaryResistances = legendaryResistancesRgx.exec(actorData);
   console.log("legendaryResistances", legendaryResistances.groups);
 
+  // Features (see night hag)
   // Actions
   // legendary actions
 
