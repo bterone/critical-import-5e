@@ -4,7 +4,11 @@
   "author": "PragmaticBeaver",
   "license": "MIT",
   "type": "module",
+  "scripts": {
+    "build": "node ./build/build.js"
+  },
   "devDependencies": {
+    "esbuild": "^0.14.27",
     "eslint": "^8.8.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1"
