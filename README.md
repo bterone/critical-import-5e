@@ -12,6 +12,12 @@ For a simple development environment add a symlink for the root directory of thi
 ln -s ~/src/critical-import-5e/ /Users/Beaver/Library/Application\ Support/FoundryVTT/Data/modules
 ```
 
+To build the project run the following command
+
+```
+yarn run build
+```
+
 ## Import algorithmic
 
 ### Actor import

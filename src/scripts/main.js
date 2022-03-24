@@ -7,7 +7,6 @@ import { importActor } from "./import-actor.js";
 
 Hooks.on("ready", () => {
   console.log("critical-import-5e | starting ...");
-  console.log("TEST2");
 });
 
 const DIALOG_ID = "importDialog";
