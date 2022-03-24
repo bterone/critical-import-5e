@@ -24,13 +24,19 @@ function createActorSheet(actorData) {
     /legendary resistance\s?\(?(?<timesADay>\d+).day.?\.?(?<desc>.+)/gi;
 
   const racialDetails = racialDetailsRgx.exec(actorData);
-  console.log("racialDetails", racialDetails.groups);
+  if (racialDetails) {
+    console.log("racialDetails", racialDetails.groups);
+  }
 
   const armor = armorRgx.exec(actorData);
-  console.log("armor", armor.groups);
+  if (armor) {
+    console.log("armor", armor.groups);
+  }
 
   const health = healthRgx.exec(actorData);
-  console.log("health", health.groups);
+  if (health) {
+    console.log("health", health.groups);
+  }
 
   function gatherSpeed() {
     const speed = [];
@@ -86,7 +92,9 @@ function createActorSheet(actorData) {
   console.log("skills", skills);
 
   const immunities = dmgImmunitiesRgx.exec(actorData);
-  console.log("immunities", immunities.groups);
+  if (immunities) {
+    console.log("immunities", immunities.groups);
+  }
 
   function gatherSenses() {
     const senses = [];
@@ -101,16 +109,24 @@ function createActorSheet(actorData) {
   console.log("senses", senses);
 
   const languages = languagesRgx.exec(actorData);
-  console.log("languages", languages.groups);
+  if (languages) {
+    console.log("languages", languages.groups);
+  }
 
   const challenge = challengeRgx.exec(actorData);
-  console.log("challenge", challenge.groups);
+  if (challenge) {
+    console.log("challenge", challenge.groups);
+  }
 
   const profBonus = proficiencyBonusRgx.exec(actorData);
-  console.log("profBonus", profBonus.groups);
+  if (profBonus) {
+    console.log("profBonus", profBonus.groups);
+  }
 
   const legendaryResistances = legendaryResistancesRgx.exec(actorData);
-  console.log("legendaryResistances", legendaryResistances.groups);
+  if (legendaryResistances) {
+    console.log("legendaryResistances", legendaryResistances.groups);
+  }
 
   function gatherSections() {
     const sectionHeaders = [
@@ -140,7 +156,7 @@ function createActorSheet(actorData) {
   console.log("sections", sections);
 
   // Actions
-  function gatherActions(sections) {
+  function gatherActions(rawActions) {
     // const spellCastingRegex =
     //   /\((?<slots>\d+) slot|(?<perday>\d+)\/day|spellcasting ability is (?<ability>\w+)|spell save dc (?<savedc>\d+)/gi;
     // const spellLevelRegex = /(?<level>\d+)(.+)level spellcaster/i;
@@ -159,10 +175,9 @@ function createActorSheet(actorData) {
     const actionSavingThrowRgx =
       /dc\s?(?<dc>\d+)\s?(?<ability>\w+)\s?saving throw/i;
 
-    const acts = sections.actions;
     const actions = [];
 
-    for (const a of acts) {
+    for (const a of rawActions) {
       const action = {};
 
       const actionBasics = actionBasicsRgx.exec(a);
@@ -226,36 +241,53 @@ function createActorSheet(actorData) {
 
       actions.push(action);
     }
-    // todo actor action (from D&D 5e template.json)
-    // "action": {
-    //   "ability": null,
-    //   "actionType": null,
-    //   "attackBonus": 0,
-    //   "chatFlavor": "",
-    //   "critical": {
-    //     "threshold": null,
-    //     "damage": ""
-    //   },
-    //   "damage": {
-    //     "parts": [],
-    //     "versatile": ""
-    //   },
-    //   "formula": "",
-    //   "save": {
-    //     "ability": "",
-    //     "dc": null,
-    //     "scaling": "spell"
-    //   }
-    // },
+
     return actions;
   }
-  const actions = gatherActions(sections);
-  console.log("actions", actions);
-  // Bonus actions
+  // Actions
+  const act = sections.actions;
+  if (act) {
+    const actions = gatherActions(act);
+    console.log("actions", actions);
+  }
+
+  // bonus actions
+  const bActions = sections["bonus actions"];
+  if (bActions) {
+    const bonusActions = gatherActions(bActions);
+    console.log("bonus actions", bonusActions);
+  }
   // Reactions
+  const rActions = sections.reactions;
+  if (rActions) {
+    const reactions = gatherActions(rActions);
+    console.log("reactions", reactions);
+  }
+
   // Legendary Actions
+  const lActions = sections["legendary actions"];
+  if (lActions) {
+    // first section is legendary actions description
+    const desc = lActions.splice(0, 1);
+    console.log("legendary actions desc", desc); //todo handle desc as feature ?
+    const legendaryActions = gatherActions(lActions);
+    console.log("legendary actions", legendaryActions);
+  }
+
   // Lair actions
+  const layActions = sections["lair actions"];
+  if (layActions) {
+    const lairActions = gatherActions(layActions);
+    console.log("lair actions", lairActions);
+  }
+
   // regional effects
+  const rEffect = sections["regional effects"];
+  if (rEffect) {
+    const regionalEffects = gatherActions(rEffect);
+    console.log("regional effects", regionalEffects);
+  }
+
   // Spells
   // Features (see night hag)
 
