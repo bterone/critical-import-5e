@@ -1,13 +1,14 @@
-export function gatherFeatures(actorData) {
-  const KNOWN_SECTION_HEADERS = [
-    "actions",
-    "bonus actions",
-    "reactions",
-    "legendary actions",
-    "lair actions",
-    "regional effects",
-  ];
+const KNOWN_SECTION_HEADERS = [
+  "actions",
+  "bonus actions",
+  "reactions",
+  "legendary actions",
+  "lair actions",
+  "regional effects",
+];
+const SPELLCASTING_RGX = /(\bat will\b|\d\/\bday\b.+)\:.+/i;
 
+export function gatherFeatures(actorData) {
   const lines = actorData.trim().split(/\n/g);
 
   // remove actions to reduce error possibilities
@@ -15,68 +16,62 @@ export function gatherFeatures(actorData) {
     const l = lines[idx];
     const line = l.trim().toLocaleLowerCase();
     if (KNOWN_SECTION_HEADERS.includes(line)) {
-      const removed = lines.splice(idx);
-      console.log("removed", removed);
-      console.log("lines", lines);
+      lines.splice(idx);
       break;
     }
   }
 
-  // todo remove spellcasting from lines
-  const KNOWN_SPELLCASTING_IDENTIFIER = ["spellcasting", "innate spellcasting"];
-  const spellcastingRgx = /(\bat will\b|\d\/\bday\b.+)\:.+/i;
-
-  function getSpellcastingIdx() {
-    for (const idx in lines) {
-      const l = lines[idx];
-      if (typeof l !== "string") {
-        continue;
-      }
-
-      const line = l.trim().toLocaleLowerCase();
-      for (const identifier of KNOWN_SPELLCASTING_IDENTIFIER) {
-        if (line.includes(identifier)) {
-          return idx;
-        }
-      }
-    }
-    return undefined;
-  }
-  const idx = getSpellcastingIdx();
-
-  function gatherSpellcasting(lines) {
-    const spellcasting = [];
-    if (idx) {
-      const featDesc = lines.splice(idx, 1);
-      spellcasting.push(featDesc);
-
-      // spells as lines
-      for (let i = idx; i < lines.length; i++) {
-        const line = lines[i];
-        if (!spellcastingRgx.exec(line)) {
-          continue;
-        }
-        const ln = lines.splice(i, 1);
-        spellcasting.push(ln);
-      }
-    }
-    return spellcasting;
-  }
-  const spellcasting = gatherSpellcasting(lines);
+  const idx = getSpellcastingIdx(lines);
+  const spellcasting = gatherSpellcasting(lines, idx);
   console.log("spellcasting", spellcasting);
 
-  function gatherFeatures(actorData) {
-    const featureRgx = /.*(\r|\n|\r\n){2}(?<name>[a-zA-Z\s]+)\.(?<desc>.+)/gi;
-    const features = [];
-    let match;
-    while ((match = featureRgx.exec(actorData)) != null) {
-      const m = match.groups;
-      if (m) {
-        features.push(m);
+  const featureRgx = /.*(\r|\n|\r\n){2}(?<name>[a-zA-Z\s]+)\.(?<desc>.+)/gi;
+  const shortActorData = lines.join(`\n`);
+  const features = [];
+  let match;
+  while ((match = featureRgx.exec(shortActorData)) != null) {
+    const m = match.groups;
+    if (m) {
+      features.push(m);
+    }
+  }
+  console.log("features", features);
+}
+
+function getSpellcastingIdx(lines) {
+  const KNOWN_SPELLCASTING_IDENTIFIER = ["spellcasting", "innate spellcasting"];
+
+  for (const idx in lines) {
+    const l = lines[idx];
+    if (typeof l !== "string") {
+      continue;
+    }
+
+    const line = l.trim().toLocaleLowerCase();
+    for (const identifier of KNOWN_SPELLCASTING_IDENTIFIER) {
+      if (line.includes(identifier)) {
+        return idx;
       }
     }
-    return features;
   }
-  const features = gatherFeatures(lines.join(`\n`));
-  console.log("features", features);
+  return undefined;
+}
+
+function gatherSpellcasting(lines, startIdx) {
+  const spellcasting = [];
+  if (startIdx) {
+    const featDesc = lines.splice(startIdx, 1);
+    spellcasting.push(featDesc);
+
+    // spells as lines
+    for (let i = startIdx; i < lines.length; i++) {
+      const line = lines[i];
+      if (!SPELLCASTING_RGX.exec(line)) {
+        continue;
+      }
+      const ln = lines.splice(i, 1);
+      spellcasting.push(ln);
+    }
+  }
+  return spellcasting;
 }
