@@ -244,13 +244,123 @@ function gatherActorData(importedActorData) {
 async function createActor(actorData) {
   // todo
   // Spells
-  await Actor.create({
-    name: actorData.racialDetails.name,
+  const actor = await Actor.create({
+    name: actorData.race.name,
     type: "npc",
   });
+
+  const racialInfo = createRacialInfo(actorData);
+  await actor.update(racialInfo);
+
+  const armor = createArmor(actorData);
+  await actor.update(armor);
+
+  const cr = createChallenge(actorData);
+  await actor.update(cr);
+
+  const health = createHealth(actorData);
+  await actor.update(health);
+}
+
+function createRacialInfo(actorData) {
+  let size;
+  const sizeData = actorData.race.size.trim().toLocaleLowerCase();
+  switch (sizeData) {
+    // case "tiny":
+    //   break;
+    case "small":
+      size = "sm";
+      break;
+    case "medium":
+      size = "med";
+      break;
+    case "large":
+      size = "lg";
+      break;
+    // case "huge":
+    //   break;
+    case "gargantuan":
+      size = "grg";
+      break;
+    default:
+      size = sizeData;
+      break;
+  }
+
+  const racialData = {
+    data: {
+      details: {
+        alignment: actorData.race.alignment?.trim(),
+        race: actorData.race.race?.trim(),
+        type: actorData.race.type?.trim(),
+      },
+      traits: {
+        size: size,
+      },
+    },
+  };
+  logConsole("racialData", racialData);
+  return racialData;
+}
+
+function createArmor(actorData) {
+  let armorType;
+  const type = actorData.armor.armorType.trim().toLocaleLowerCase();
+  if (type.includes("natural armor")) {
+    armorType = "natural";
+  } else {
+    // todo handle armor items
+    armorType = type;
+  }
+
+  const armor = {
+    data: {
+      attributes: {
+        ac: {
+          calc: armorType,
+          flat: actorData.armor.armorClass?.trim(),
+        },
+      },
+    },
+  };
+  logConsole("armor", armor);
+  return armor;
+}
+
+function createChallenge(actorData) {
+  //todo
+  // data.details.cr
+  // data.details.xp.value
+  const challenge = {
+    data: {
+      details: {
+        cr: actorData.challenge.cr,
+        xp: { value: actorData.challenge.xp },
+      },
+    },
+  };
+  logConsole("challenge", challenge);
+  return challenge;
+}
+
+function createHealth(actorData) {
+  const health = {
+    data: {
+      attributes: {
+        hp: {
+          value: actorData.health.hp,
+          max: actorData.health.hp,
+          formula: `${actorData.health.formular} + ${actorData.health.formularBonus}`,
+        },
+      },
+    },
+  };
+  logConsole("health", health);
+  return health;
 }
 
 function createAction(actionData) {
   // todo
   const action = {};
+  return action;
 }
