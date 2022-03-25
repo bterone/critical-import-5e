@@ -4,7 +4,7 @@ export function gatherActions(rawActions) {
   // const spellLevelRegex = /(?<level>\d+)(.+)level spellcaster/i;
 
   const actionBasicsRgx =
-    /(?<name>[a-zA-Z\s\d()/]+(\.\([a-zA-Z\s\d()/]+\))?)(.|\s|(\r|\n|\r\n))(?<desc>.+)/i; // todo check against night hag; there is a bug!
+    /(?<name>[a-zA-Z\s\d()/]+(\.\([a-zA-Z\s\d()/]+\))?)(.|\s|(\r|\n|\r\n))(?<desc>.+)/i;
   const dmgRgx =
     /(?<flatDmg>\d+)\s?\((?<formula>\d+d\d+\s?(\+?\s?\d+)?).+?(?<type>\bbludgeoning\b|\bpiercing\b|\bslashing\b|\bacid\b|\bcold\b|\bfire\b|\blightning\b|\bnecrotic\b|\bpoison\b|\bpsychic\b|\bradiant\b|\bthunder\b)\s?damage/gi;
   const actionVersatileRgx =
