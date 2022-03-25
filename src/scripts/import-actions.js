@@ -3,7 +3,8 @@ export function gatherActions(rawActions) {
   //   /\((?<slots>\d+) slot|(?<perday>\d+)\/day|spellcasting ability is (?<ability>\w+)|spell save dc (?<savedc>\d+)/gi;
   // const spellLevelRegex = /(?<level>\d+)(.+)level spellcaster/i;
 
-  const actionBasicsRgx = /(?<name>[a-zA-Z]+)(.|\s|(\r|\n|\r\n))(?<desc>.+)/i;
+  const actionBasicsRgx =
+    /(?<name>[a-zA-Z\s\d()/]+(\.\([a-zA-Z\s\d()/]+\))?)(.|\s|(\r|\n|\r\n))(?<desc>.+)/i; // todo check against night hag; there is a bug!
   const dmgRgx =
     /(?<flatDmg>\d+)\s?\((?<formula>\d+d\d+\s?(\+?\s?\d+)?).+?(?<type>\bbludgeoning\b|\bpiercing\b|\bslashing\b|\bacid\b|\bcold\b|\bfire\b|\blightning\b|\bnecrotic\b|\bpoison\b|\bpsychic\b|\bradiant\b|\bthunder\b)\s?damage/gi;
   const actionVersatileRgx =
