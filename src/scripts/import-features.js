@@ -9,6 +9,7 @@ const KNOWN_SECTION_HEADERS = [
 const SPELLCASTING_RGX = /(\bat will\b|\d\/\bday\b.+)\:.+/i;
 
 export function gatherFeatures(actorData) {
+  const features = {};
   const lines = actorData.trim().split(/\n/g);
 
   // remove actions to reduce error possibilities
@@ -23,19 +24,20 @@ export function gatherFeatures(actorData) {
 
   const idx = getSpellcastingIdx(lines);
   const spellcasting = gatherSpellcasting(lines, idx);
-  console.log("spellcasting", spellcasting);
+  features.spellcasting = spellcasting;
 
-  const featureRgx = /.*(\r|\n|\r\n){2}(?<name>[a-zA-Z\s]+)\.(?<desc>.+)/gi;
+  const featureRgx = /.*(\r|\n|\r\n)+(?<name>[a-zA-Z\s]+)\.(?<desc>.+)/gi;
   const shortActorData = lines.join(`\n`);
-  const features = [];
+  const feats = [];
   let match;
   while ((match = featureRgx.exec(shortActorData)) != null) {
     const m = match.groups;
     if (m) {
-      features.push(m);
+      feats.push(m);
     }
   }
-  console.log("features", features);
+  features.features = feats;
+  return features;
 }
 
 function getSpellcastingIdx(lines) {

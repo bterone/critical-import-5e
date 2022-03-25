@@ -204,14 +204,8 @@ export function importActor(actorData) {
     console.log("regional effects", regionalEffects);
   }
 
-  // Features (see night hag)
-  // const featureRgx =
-  //   /.*(\r|\n|\r\n){2}(?<features>(.*(\r|\n|\r\n){2})*)(\bactions\b|\blegendary actions\b|\breactions\b|\bbonus actions\b|\blair actions\b|\bregional effects\b)(\r|\n|\r\n)/gi;
-  // const features = featureRgx.exec(actorData);
-  // if (features) {
-  //   console.log("features", features.groups);
-  // }
-  gatherFeatures(actorData); // todo
+  const features = gatherFeatures(actorData);
+  console.log("features", features);
 
   // Spells
 
