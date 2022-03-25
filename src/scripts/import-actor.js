@@ -1,7 +1,14 @@
 import { gatherActions } from "./import-actions.js";
 import { gatherFeatures } from "./import-features.js";
 
-export function importActor(actorData) {
+export async function importActor(importedActorData) {
+  const actorData = gatherActorData(importedActorData);
+  console.log("actorData", actorData);
+  await createActor(actorData);
+}
+
+// todo combine data
+function gatherActorData(importedActorData) {
   const attributesRgx =
     /(?<attribute>[a-zA-z]{3})(\r\n|\r|\n)(?<base>\d+)\s+?\((?<mod>(\+|-)\d+)\)/gi;
   const racialDetailsRgx =
@@ -28,19 +35,24 @@ export function importActor(actorData) {
   const legendaryResistancesRgx =
     /legendary resistance\s?\(?(?<timesADay>\d+).day.?\.?(?<desc>.+)/gi;
 
-  const racialDetails = racialDetailsRgx.exec(actorData);
+  const actorData = {};
+
+  const racialDetails = racialDetailsRgx.exec(importedActorData);
   if (racialDetails) {
-    console.log("racialDetails", racialDetails.groups);
+    actorData.race = racialDetails.groups;
+    // console.log("racialDetails", racialDetails.groups);
   }
 
-  const armor = armorRgx.exec(actorData);
+  const armor = armorRgx.exec(importedActorData);
   if (armor) {
-    console.log("armor", armor.groups);
+    actorData.armor = armor.groups;
+    // console.log("armor", armor.groups);
   }
 
-  const health = healthRgx.exec(actorData);
+  const health = healthRgx.exec(importedActorData);
   if (health) {
-    console.log("health", health.groups);
+    actorData.health = health.groups;
+    // console.log("health", health.groups);
   }
 
   function gatherSpeed(actorData) {
@@ -54,8 +66,9 @@ export function importActor(actorData) {
     }
     return speed;
   }
-  const speed = gatherSpeed(actorData);
-  console.log("speed", speed);
+  const speed = gatherSpeed(importedActorData);
+  actorData.speed = speed;
+  // console.log("speed", speed);
 
   function gatherAttributes(actorData) {
     const attributes = {};
@@ -69,8 +82,9 @@ export function importActor(actorData) {
     }
     return attributes;
   }
-  const attributes = gatherAttributes(actorData);
-  console.log("attributes", attributes);
+  const attributes = gatherAttributes(importedActorData);
+  actorData.attributes = attributes;
+  // console.log("attributes", attributes);
 
   function gatherSaves(actorData) {
     const saves = {};
@@ -81,8 +95,9 @@ export function importActor(actorData) {
     }
     return saves;
   }
-  const saves = gatherSaves(actorData);
-  console.log("saves", saves);
+  const saves = gatherSaves(importedActorData);
+  actorData.saves = saves;
+  // console.log("saves", saves);
 
   function gatherSkills(actorData) {
     const skills = {};
@@ -93,10 +108,11 @@ export function importActor(actorData) {
     }
     return skills;
   }
-  const skills = gatherSkills(actorData);
-  console.log("skills", skills);
+  const skills = gatherSkills(importedActorData);
+  actorData.skills = skills;
+  // console.log("skills", skills);
 
-  const immunities = dmgImmunitiesRgx.exec(actorData);
+  const immunities = dmgImmunitiesRgx.exec(importedActorData);
   if (immunities) {
     console.log("immunities", immunities.groups);
   }
@@ -110,27 +126,32 @@ export function importActor(actorData) {
     }
     return senses;
   }
-  const senses = gatherSenses(actorData);
-  console.log("senses", senses);
+  const senses = gatherSenses(importedActorData);
+  actorData.senses = senses;
+  // console.log("senses", senses);
 
-  const languages = languagesRgx.exec(actorData);
+  const languages = languagesRgx.exec(importedActorData);
   if (languages) {
-    console.log("languages", languages.groups);
+    actorData.languages = languages.groups;
+    // console.log("languages", languages.groups);
   }
 
-  const challenge = challengeRgx.exec(actorData);
+  const challenge = challengeRgx.exec(importedActorData);
   if (challenge) {
-    console.log("challenge", challenge.groups);
+    actorData.challenge = challenge.groups;
+    // console.log("challenge", challenge.groups);
   }
 
-  const profBonus = proficiencyBonusRgx.exec(actorData);
+  const profBonus = proficiencyBonusRgx.exec(importedActorData);
   if (profBonus) {
-    console.log("profBonus", profBonus.groups);
+    actorData.proficiencyBonus = profBonus.groups;
+    // console.log("profBonus", profBonus.groups);
   }
 
-  const legendaryResistances = legendaryResistancesRgx.exec(actorData);
+  const legendaryResistances = legendaryResistancesRgx.exec(importedActorData);
   if (legendaryResistances) {
-    console.log("legendaryResistances", legendaryResistances.groups);
+    actorData.legendaryResistances = legendaryResistances.groups;
+    // console.log("legendaryResistances", legendaryResistances.groups);
   }
 
   function gatherSections(actorData) {
@@ -157,27 +178,30 @@ export function importActor(actorData) {
     }
     return sections;
   }
-  const sections = gatherSections(actorData);
+  const sections = gatherSections(importedActorData);
   console.log("sections", sections);
 
   // Actions
   const act = sections.actions;
   if (act) {
     const actions = gatherActions(act);
-    console.log("actions", actions);
+    actorData.actions = actions;
+    // console.log("actions", actions);
   }
 
   // bonus actions
   const bActions = sections["bonus actions"];
   if (bActions) {
     const bonusActions = gatherActions(bActions);
-    console.log("bonus actions", bonusActions);
+    actorData.bonusActions = bonusActions;
+    // console.log("bonus actions", bonusActions);
   }
   // Reactions
   const rActions = sections.reactions;
   if (rActions) {
     const reactions = gatherActions(rActions);
-    console.log("reactions", reactions);
+    actorData.reactions = reactions;
+    // console.log("reactions", reactions);
   }
 
   // Legendary Actions
@@ -185,31 +209,40 @@ export function importActor(actorData) {
   if (lActions) {
     // first section is legendary actions description
     const desc = lActions.splice(0, 1);
-    console.log("legendary actions desc", desc); //todo handle desc as feature ?
+    actorData.legendaryActions = {};
+    actorData.legendaryActions.desc = desc;
+    // console.log("legendary actions desc", desc); //todo handle desc as feature ?
     const legendaryActions = gatherActions(lActions);
-    console.log("legendary actions", legendaryActions);
+    actorData.legendaryActions.actions = legendaryActions;
+    // console.log("legendary actions", legendaryActions);
   }
 
   // Lair actions
   const layActions = sections["lair actions"];
   if (layActions) {
     const lairActions = gatherActions(layActions);
-    console.log("lair actions", lairActions);
+    actorData.lairActions = lairActions;
+    // console.log("lair actions", lairActions);
   }
 
   // regional effects
   const rEffect = sections["regional effects"];
   if (rEffect) {
     const regionalEffects = gatherActions(rEffect);
-    console.log("regional effects", regionalEffects);
+    actorData.regionalEffects = regionalEffects;
+    // console.log("regional effects", regionalEffects);
   }
 
-  const features = gatherFeatures(actorData);
-  console.log("features", features);
+  const features = gatherFeatures(importedActorData);
+  actorData.features = features;
+  // console.log("features", features);
 
-  // Spells
+  return actorData;
+}
 
+async function createActor(actorData) {
   // todo
+  // Spells
   // await Actor.create({
   //   name: "Test NPC",
   //   type: "npc",
