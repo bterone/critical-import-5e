@@ -1,3 +1,5 @@
+import { logConsole } from "./log.js";
+
 export function openImportDialog(title, callback) {
   /**
    * HTMLElement.outerHTML does't work for input.value!
@@ -28,9 +30,9 @@ export function openImportDialog(title, callback) {
     },
     default: "close",
     render: (html) =>
-      console.log("onRender - Register interactivity in the rendered dialog"),
+      logConsole("onRender - Register interactivity in the rendered dialog"),
     close: (html) => {
-      console.log("closed Import " + title + " dialog");
+      logConsole("closed Import " + title + " dialog");
     },
   });
   d.render(true);

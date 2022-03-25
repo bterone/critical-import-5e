@@ -1,13 +1,13 @@
+import { logConsole } from "./log.js";
 import { gatherActions } from "./import-actions.js";
 import { gatherFeatures } from "./import-features.js";
 
 export async function importActor(importedActorData) {
   const actorData = gatherActorData(importedActorData);
-  console.log("actorData", actorData);
+  logConsole("actorData", actorData);
   await createActor(actorData);
 }
 
-// todo combine data
 function gatherActorData(importedActorData) {
   const attributesRgx =
     /(?<attribute>[a-zA-z]{3})(\r\n|\r|\n)(?<base>\d+)\s+?\((?<mod>(\+|-)\d+)\)/gi;
@@ -40,19 +40,19 @@ function gatherActorData(importedActorData) {
   const racialDetails = racialDetailsRgx.exec(importedActorData);
   if (racialDetails) {
     actorData.race = racialDetails.groups;
-    // console.log("racialDetails", racialDetails.groups);
+    logConsole("racialDetails", racialDetails.groups);
   }
 
   const armor = armorRgx.exec(importedActorData);
   if (armor) {
     actorData.armor = armor.groups;
-    // console.log("armor", armor.groups);
+    logConsole("armor", armor.groups);
   }
 
   const health = healthRgx.exec(importedActorData);
   if (health) {
     actorData.health = health.groups;
-    // console.log("health", health.groups);
+    logConsole("health", health.groups);
   }
 
   function gatherSpeed(actorData) {
@@ -68,7 +68,7 @@ function gatherActorData(importedActorData) {
   }
   const speed = gatherSpeed(importedActorData);
   actorData.speed = speed;
-  // console.log("speed", speed);
+  logConsole("speed", speed);
 
   function gatherAttributes(actorData) {
     const attributes = {};
@@ -84,7 +84,7 @@ function gatherActorData(importedActorData) {
   }
   const attributes = gatherAttributes(importedActorData);
   actorData.attributes = attributes;
-  // console.log("attributes", attributes);
+  logConsole("attributes", attributes);
 
   function gatherSaves(actorData) {
     const saves = {};
@@ -97,7 +97,7 @@ function gatherActorData(importedActorData) {
   }
   const saves = gatherSaves(importedActorData);
   actorData.saves = saves;
-  // console.log("saves", saves);
+  logConsole("saves", saves);
 
   function gatherSkills(actorData) {
     const skills = {};
@@ -110,11 +110,11 @@ function gatherActorData(importedActorData) {
   }
   const skills = gatherSkills(importedActorData);
   actorData.skills = skills;
-  // console.log("skills", skills);
+  logConsole("skills", skills);
 
   const immunities = dmgImmunitiesRgx.exec(importedActorData);
   if (immunities) {
-    console.log("immunities", immunities.groups);
+    logConsole("immunities", immunities.groups);
   }
 
   function gatherSenses(actorData) {
@@ -128,30 +128,30 @@ function gatherActorData(importedActorData) {
   }
   const senses = gatherSenses(importedActorData);
   actorData.senses = senses;
-  // console.log("senses", senses);
+  logConsole("senses", senses);
 
   const languages = languagesRgx.exec(importedActorData);
   if (languages) {
     actorData.languages = languages.groups;
-    // console.log("languages", languages.groups);
+    logConsole("languages", languages.groups);
   }
 
   const challenge = challengeRgx.exec(importedActorData);
   if (challenge) {
     actorData.challenge = challenge.groups;
-    // console.log("challenge", challenge.groups);
+    logConsole("challenge", challenge.groups);
   }
 
   const profBonus = proficiencyBonusRgx.exec(importedActorData);
   if (profBonus) {
     actorData.proficiencyBonus = profBonus.groups;
-    // console.log("profBonus", profBonus.groups);
+    logConsole("profBonus", profBonus.groups);
   }
 
   const legendaryResistances = legendaryResistancesRgx.exec(importedActorData);
   if (legendaryResistances) {
     actorData.legendaryResistances = legendaryResistances.groups;
-    // console.log("legendaryResistances", legendaryResistances.groups);
+    logConsole("legendaryResistances", legendaryResistances.groups);
   }
 
   function gatherSections(actorData) {
@@ -179,14 +179,14 @@ function gatherActorData(importedActorData) {
     return sections;
   }
   const sections = gatherSections(importedActorData);
-  console.log("sections", sections);
+  logConsole("sections", sections);
 
   // Actions
   const act = sections.actions;
   if (act) {
     const actions = gatherActions(act);
     actorData.actions = actions;
-    // console.log("actions", actions);
+    logConsole("actions", actions);
   }
 
   // bonus actions
@@ -194,14 +194,14 @@ function gatherActorData(importedActorData) {
   if (bActions) {
     const bonusActions = gatherActions(bActions);
     actorData.bonusActions = bonusActions;
-    // console.log("bonus actions", bonusActions);
+    logConsole("bonus actions", bonusActions);
   }
   // Reactions
   const rActions = sections.reactions;
   if (rActions) {
     const reactions = gatherActions(rActions);
     actorData.reactions = reactions;
-    // console.log("reactions", reactions);
+    logConsole("reactions", reactions);
   }
 
   // Legendary Actions
@@ -211,10 +211,10 @@ function gatherActorData(importedActorData) {
     const desc = lActions.splice(0, 1);
     actorData.legendaryActions = {};
     actorData.legendaryActions.desc = desc;
-    // console.log("legendary actions desc", desc); //todo handle desc as feature ?
+    logConsole("legendary actions desc", desc); //todo handle desc as feature ?
     const legendaryActions = gatherActions(lActions);
     actorData.legendaryActions.actions = legendaryActions;
-    // console.log("legendary actions", legendaryActions);
+    logConsole("legendary actions", legendaryActions);
   }
 
   // Lair actions
@@ -222,7 +222,7 @@ function gatherActorData(importedActorData) {
   if (layActions) {
     const lairActions = gatherActions(layActions);
     actorData.lairActions = lairActions;
-    // console.log("lair actions", lairActions);
+    logConsole("lair actions", lairActions);
   }
 
   // regional effects
@@ -230,12 +230,12 @@ function gatherActorData(importedActorData) {
   if (rEffect) {
     const regionalEffects = gatherActions(rEffect);
     actorData.regionalEffects = regionalEffects;
-    // console.log("regional effects", regionalEffects);
+    logConsole("regional effects", regionalEffects);
   }
 
   const features = gatherFeatures(importedActorData);
   actorData.features = features;
-  // console.log("features", features);
+  logConsole("features", features);
 
   return actorData;
 }

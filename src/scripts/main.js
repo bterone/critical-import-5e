@@ -1,12 +1,13 @@
 import { openImportDialog, createImportButton } from "./dialog.js";
 import { importActor } from "./import-actor.js";
+import { logConsole } from "./log.js";
 
 // function getDialogId(label) {
 //   return "importDialog-" + label + "-input";
 // }
 
 Hooks.on("ready", () => {
-  console.log("critical-import-5e | starting ...");
+  logConsole("critical-import-5e | starting ...");
 });
 
 const DIALOG_ID = "importDialog";
@@ -31,7 +32,7 @@ Hooks.on("renderItemDirectory", (args) => {
   footer.appendChild(
     createImportButton("Import " + labelItem, () => {
       openImportDialog(labelItem, () => {
-        console.log(labelItem);
+        logConsole(labelItem);
       });
     })
   );
@@ -40,7 +41,7 @@ Hooks.on("renderItemDirectory", (args) => {
   footer.appendChild(
     createImportButton("Import " + labelSpell, () => {
       openImportDialog(labelSpell, () => {
-        console.log(labelSpell);
+        logConsole(labelSpell);
       });
     })
   );
@@ -49,7 +50,7 @@ Hooks.on("renderItemDirectory", (args) => {
   footer.appendChild(
     createImportButton("Import " + labelClass, () => {
       openImportDialog(labelClass, () => {
-        console.log(labelClass);
+        logConsole(labelClass);
       });
     })
   );
@@ -58,7 +59,7 @@ Hooks.on("renderItemDirectory", (args) => {
   footer.appendChild(
     createImportButton("Import " + labelFeature, () => {
       openImportDialog(labelFeature, () => {
-        console.log(labelFeature);
+        logConsole(labelFeature);
       });
     })
   );
