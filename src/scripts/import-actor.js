@@ -35,6 +35,7 @@ function gatherActorData(importedActorData) {
   const legendaryResistancesRgx =
     /legendary resistance\s?\(?(?<timesADay>\d+).day.?\.?(?<desc>.+)/gi;
 
+  logConsole("gathering actor data ...");
   const actorData = {};
 
   const racialDetails = racialDetailsRgx.exec(importedActorData);
@@ -243,8 +244,13 @@ function gatherActorData(importedActorData) {
 async function createActor(actorData) {
   // todo
   // Spells
-  // await Actor.create({
-  //   name: "Test NPC",
-  //   type: "npc",
-  // });
+  await Actor.create({
+    name: actorData.racialDetails.name,
+    type: "npc",
+  });
+}
+
+function createAction(actionData) {
+  // todo
+  const action = {};
 }
