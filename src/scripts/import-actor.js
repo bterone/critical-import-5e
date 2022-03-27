@@ -260,6 +260,9 @@ async function createActor(actorData) {
 
   const health = createHealth(actorData);
   await actor.update(health);
+
+  const speed = createSpeed(actorData);
+  await actor.update(speed);
 }
 
 function createRacialInfo(actorData) {
@@ -357,6 +360,33 @@ function createHealth(actorData) {
   };
   logConsole("health", health);
   return health;
+}
+
+function createSpeed(actorData) {
+  const speeds = {};
+  actorData.speed.forEach((s) => {
+    speeds[s.type] = s.value;
+  });
+
+  const speed = {
+    data: {
+      attributes: {
+        speed: {
+          value: parseInt(speeds.speed),
+        },
+        movement: {
+          walk: parseInt(speeds.speed),
+          burrow: parseInt(speeds.burrow),
+          climb: parseInt(speeds.climb),
+          fly: parseInt(speeds.fly),
+          swim: parseInt(speeds.swim),
+          hover: parseInt(speeds.hover),
+        },
+      },
+    },
+  };
+  logConsole("speed", speed);
+  return speed;
 }
 
 function createAction(actionData) {
