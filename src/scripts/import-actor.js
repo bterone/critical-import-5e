@@ -26,6 +26,7 @@ function gatherActorData(importedActorData) {
     /(damage immunities|damage immunity)\s?(?<immunities>.+)/gi;
   const dmgVulnerbilitiesRgx = / /; // todo
   const dmgResistancesRgx = / /; // todo
+  const conditionImmunitesRgx = / /; // todo
   const sensesRgx =
     /(?<sense>darkvision|blindsight|tremorsense|truesight|passive perception)\s?(?<mod>\d+)/gi;
   const languagesRgx = /(languages|language)\s?(?<languages>.*)/gi;
@@ -115,8 +116,12 @@ function gatherActorData(importedActorData) {
 
   const immunities = dmgImmunitiesRgx.exec(importedActorData);
   if (immunities) {
+    actorData.dmgImmunities = immunities.groups;
     logConsole("immunities", immunities.groups);
   }
+
+  // todo resistances
+  // todo vulnerability
 
   function gatherSenses(actorData) {
     const senses = [];
@@ -299,6 +304,12 @@ async function createActor(actorData) {
     "data.traits.size": formatSize(actorData),
     // proficiency bonus
     "data.data.attributes.prof": parseInt(actorData.proficiencyBonus.profBonus),
+    // damage resistances todo
+    // "data.traits.dr.value": 0,
+    // damage immunities todo
+    // "data.traits.di.value": 0,
+    // damage vulnerability todo
+    // languages todo
   };
   await actor.update(updateData);
 
