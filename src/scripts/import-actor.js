@@ -306,24 +306,24 @@ async function createActor(actorData) {
   // has to be done after basic information has been set
   const skills = createSkills(actorData, actor);
   const skillsUpdate = {
-    "data.data.skills.acr.value": skills.acr,
-    "data.data.skills.ani.value": skills.ani,
-    "data.data.skills.arc.value": skills.arc,
-    "data.data.skills.ath.value": skills.ath,
-    "data.data.skills.dec.value": skills.dec,
-    "data.data.skills.his.value": skills.his,
-    "data.data.skills.ins.value": skills.ins,
-    "data.data.skills.itm.value": skills.itm,
-    "data.data.skills.inv.value": skills.inv,
-    "data.data.skills.med.value": skills.med,
-    "data.data.skills.nat.value": skills.nat,
-    "data.data.skills.prf.value": skills.prf,
-    "data.data.skills.prc.value": skills.prc,
-    "data.data.skills.per.value": skills.per,
-    "data.data.skills.rel.value": skills.rel,
-    "data.data.skills.slt.value": skills.slt,
-    "data.data.skills.ste.value": skills.ste,
-    "data.data.skills.sur.value": skills.sur,
+    "data.skills.acr.value": skills.acr,
+    "data.skills.ani.value": skills.ani,
+    "data.skills.arc.value": skills.arc,
+    "data.skills.ath.value": skills.ath,
+    "data.skills.dec.value": skills.dec,
+    "data.skills.his.value": skills.his,
+    "data.skills.ins.value": skills.ins,
+    "data.skills.itm.value": skills.itm,
+    "data.skills.inv.value": skills.inv,
+    "data.skills.med.value": skills.med,
+    "data.skills.nat.value": skills.nat,
+    "data.skills.prf.value": skills.prf,
+    "data.skills.prc.value": skills.prc,
+    "data.skills.per.value": skills.per,
+    "data.skills.rel.value": skills.rel,
+    "data.skills.slt.value": skills.slt,
+    "data.skills.ste.value": skills.ste,
+    "data.skills.sur.value": skills.sur,
   };
   await actor.update(skillsUpdate);
 
@@ -378,12 +378,12 @@ function formatSize(actorData) {
 }
 
 function createSkills(actionData, actor) {
-  // function calcSkillVal(actor, key, val) {
-  //   const attribute = actor.data.data.skills[key].ability;
-  //   const attributeMod = actor.data.data.abilities[attribute].mod;
-  //   const proficiencyBonus = actor.data.data.attributes.prof;
-  //   return (val - attributeMod) / proficiencyBonus;
-  // }
+  function calcSkillVal(actor, key, val) {
+    const attribute = actor.data.data.skills[key].ability;
+    const attributeMod = actor.data.data.abilities[attribute].mod;
+    const proficiencyBonus = actor.data.data.attributes.prof;
+    return (val - attributeMod) / proficiencyBonus;
+  }
 
   const skills = {};
   for (const s in actionData.skills) {
@@ -448,12 +448,12 @@ function createSkills(actionData, actor) {
         break;
     }
   }
-  // logConsole("skills", skills);
+  logConsole("skills", skills);
 
-  // for (const skill in skills) {
-  //   const val = skills[skill];
-  //   skills[skill] = calcSkillVal(actor, skill, val);
-  // }
+  for (const skill in skills) {
+    const val = skills[skill];
+    skills[skill] = calcSkillVal(actor, skill, val);
+  }
 
   logConsole("skills", skills);
   return skills;
