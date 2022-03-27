@@ -24,9 +24,9 @@ function gatherActorData(importedActorData) {
     /(?<skill>acrobatics|arcana|animal handling|athletics|deception|history|insight|intimidation|investigation|medicine|nature|perception|performance|persuasion|religion|sleight of hand|stealth|survival) (?<mod>(\+|\-)\d+)/gi;
   const dmgImmunitiesRgx =
     /(damage immunities|damage immunity)\s?(?<immunities>.+)/gi;
-  const dmgVulnerbilitiesRgx = / /; // todo
-  const dmgResistancesRgx =
-    /\bdamage\sresistances\b\s(?<resistances>[a-zA-Z\,\s]+)(\;\s?(?<conditional>.+))?/gi;
+  const dmgVulnerabilitiesRgx =
+    /\bdamage\svulnerabilities\b\s(?<vulnerabilities>.+)/gi; // todo
+  const dmgResistancesRgx = /\bdamage\sresistances\b\s(?<resistances>.+)/gi;
   const conditionImmunitesRgx = / /; // todo
   const sensesRgx =
     /(?<sense>darkvision|blindsight|tremorsense|truesight|passive perception)\s?(?<mod>\d+)/gi;
@@ -124,9 +124,14 @@ function gatherActorData(importedActorData) {
   const resistances = dmgResistancesRgx.exec(importedActorData);
   if (resistances) {
     actorData.dmgResistances = resistances.groups;
-    console.log("resistances", resistances.groups);
+    logConsole("resistances", resistances.groups);
   }
-  // todo vulnerability
+
+  const vulnerabilities = dmgVulnerabilitiesRgx.exec(importedActorData);
+  if (vulnerabilities) {
+    actorData.dmgVulnerabilities = vulnerabilities.groups;
+    logConsole("vulnerabilities", vulnerabilities.groups);
+  }
 
   function gatherSenses(actorData) {
     const senses = [];
