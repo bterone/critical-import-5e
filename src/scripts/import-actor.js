@@ -25,7 +25,8 @@ function gatherActorData(importedActorData) {
   const dmgImmunitiesRgx =
     /(damage immunities|damage immunity)\s?(?<immunities>.+)/gi;
   const dmgVulnerbilitiesRgx = / /; // todo
-  const dmgResistancesRgx = / /; // todo
+  const dmgResistancesRgx =
+    /\bdamage\sresistances\b\s(?<resistances>[a-zA-Z\,\s]+)(\;\s?(?<conditional>.+))?/gi;
   const conditionImmunitesRgx = / /; // todo
   const sensesRgx =
     /(?<sense>darkvision|blindsight|tremorsense|truesight|passive perception)\s?(?<mod>\d+)/gi;
@@ -120,7 +121,11 @@ function gatherActorData(importedActorData) {
     logConsole("immunities", immunities.groups);
   }
 
-  // todo resistances
+  const resistances = dmgResistancesRgx.exec(importedActorData);
+  if (resistances) {
+    actorData.dmgResistances = resistances.groups;
+    console.log("resistances", resistances.groups);
+  }
   // todo vulnerability
 
   function gatherSenses(actorData) {
