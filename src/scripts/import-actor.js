@@ -1,4 +1,4 @@
-import { logConsole } from "./log.js";
+import { logConsole, logWarn } from "./log.js";
 import { gatherActions } from "./import-actions.js";
 import { gatherFeatures } from "./import-features.js";
 
@@ -297,8 +297,36 @@ async function createActor(actorData) {
     "data.details.race": actorData.race.race?.trim(),
     "data.details.type": actorData.race.type?.trim(),
     "data.traits.size": formatSize(actorData),
+    // proficiency bonus
+    "data.data.attributes.prof": parseInt(actorData.proficiencyBonus.profBonus),
   };
   await actor.update(updateData);
+
+  // skills
+  // has to be done after basic information has been set
+  const skills = createSkills(actorData, actor);
+  const skillsUpdate = {
+    "data.data.skills.acr.value": skills.acr,
+    "data.data.skills.ani.value": skills.ani,
+    "data.data.skills.arc.value": skills.arc,
+    "data.data.skills.ath.value": skills.ath,
+    "data.data.skills.dec.value": skills.dec,
+    "data.data.skills.his.value": skills.his,
+    "data.data.skills.ins.value": skills.ins,
+    "data.data.skills.itm.value": skills.itm,
+    "data.data.skills.inv.value": skills.inv,
+    "data.data.skills.med.value": skills.med,
+    "data.data.skills.nat.value": skills.nat,
+    "data.data.skills.prf.value": skills.prf,
+    "data.data.skills.prc.value": skills.prc,
+    "data.data.skills.per.value": skills.per,
+    "data.data.skills.rel.value": skills.rel,
+    "data.data.skills.slt.value": skills.slt,
+    "data.data.skills.ste.value": skills.ste,
+    "data.data.skills.sur.value": skills.sur,
+  };
+  await actor.update(skillsUpdate);
+
   logConsole("actor", actor);
 }
 
@@ -347,6 +375,88 @@ function formatSize(actorData) {
       break;
   }
   return size;
+}
+
+function createSkills(actionData, actor) {
+  // function calcSkillVal(actor, key, val) {
+  //   const attribute = actor.data.data.skills[key].ability;
+  //   const attributeMod = actor.data.data.abilities[attribute].mod;
+  //   const proficiencyBonus = actor.data.data.attributes.prof;
+  //   return (val - attributeMod) / proficiencyBonus;
+  // }
+
+  const skills = {};
+  for (const s in actionData.skills) {
+    const skillVal = actionData.skills[s];
+    switch (s.trim().toLocaleLowerCase()) {
+      case "acrobatics":
+        skills.acr = parseInt(skillVal);
+        break;
+      case "animal handling":
+        skills.ani = parseInt(skillVal);
+        break;
+      case "arcana":
+        skills.arc = parseInt(skillVal);
+        break;
+      case "athletics":
+        skills.ath = parseInt(skillVal);
+        break;
+      case "deception":
+        skills.dec = parseInt(skillVal);
+        break;
+      case "history":
+        skills.his = parseInt(skillVal);
+        break;
+      case "insight":
+        skills.ins = parseInt(skillVal);
+        break;
+      case "intimidation":
+        skills.itm = parseInt(skillVal);
+        break;
+      case "investigation":
+        skills.inv = parseInt(skillVal);
+        break;
+      case "medicine":
+        skills.med = parseInt(skillVal);
+        break;
+      case "nature":
+        skills.nat = parseInt(skillVal);
+        break;
+      case "performance":
+        skills.prf = parseInt(skillVal);
+        break;
+      case "perception":
+        skills.prc = parseInt(skillVal);
+        break;
+      case "persuasion":
+        skills.per = parseInt(skillVal);
+        break;
+      case "religion":
+        skills.rel = parseInt(skillVal);
+        break;
+      case "sleight of hand":
+        skills.slt = parseInt(skillVal);
+        break;
+      case "stealth":
+        skills.ste = parseInt(skillVal);
+        break;
+      case "survival":
+        skills.sur = parseInt(skillVal);
+        break;
+      default:
+        logWarn("unkown skill", s);
+        break;
+    }
+  }
+  // logConsole("skills", skills);
+
+  // for (const skill in skills) {
+  //   const val = skills[skill];
+  //   skills[skill] = calcSkillVal(actor, skill, val);
+  // }
+
+  logConsole("skills", skills);
+  return skills;
 }
 
 function createAction(actionData) {
