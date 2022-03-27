@@ -249,31 +249,80 @@ async function createActor(actorData) {
     type: "npc",
   });
 
-  const racialInfo = createRacialInfo(actorData);
-  await actor.update(racialInfo);
+  const speeds = formatSpeeds(actorData);
 
-  const armor = createArmor(actorData);
-  await actor.update(armor);
-
-  const cr = createChallenge(actorData);
-  await actor.update(cr);
-
-  const health = createHealth(actorData);
-  await actor.update(health);
-
-  const speed = createSpeed(actorData);
-  await actor.update(speed);
-
-  const init = createInitiative(actorData);
-  await actor.update(init);
-
-  const attributes = createAttributes(actorData);
-  await actor.update(attributes);
-
+  // a single object because multiple "update"-function calls slow the app down
+  const updateData = {
+    // attributes; saves === "proficient"
+    "data.abilities.cha.value": actorData.attributes.cha.base,
+    "data.abilities.cha.mod": actorData.attributes.cha.mod,
+    "data.abilities.cha.proficient": actorData.saves.cha ? 1 : 0,
+    "data.abilities.con.value": actorData.attributes.con.base,
+    "data.abilities.con.mod": actorData.attributes.con.mod,
+    "data.abilities.con.proficient": actorData.saves.con ? 1 : 0,
+    "data.abilities.dex.value": actorData.attributes.dex.base,
+    "data.abilities.dex.mod": actorData.attributes.dex.mod,
+    "data.abilities.dex.proficient": actorData.saves.dex ? 1 : 0,
+    "data.abilities.int.value": actorData.attributes.int.base,
+    "data.abilities.int.mod": actorData.attributes.int.mod,
+    "data.abilities.int.proficient": actorData.saves.int ? 1 : 0,
+    "data.abilities.str.value": actorData.attributes.str.base,
+    "data.abilities.str.mod": actorData.attributes.str.mod,
+    "data.abilities.str.proficient": actorData.saves.str ? 1 : 0,
+    "data.abilities.wis.value": actorData.attributes.wis.base,
+    "data.abilities.wis.mod": actorData.attributes.wis.mod,
+    "data.abilities.wis.proficient": actorData.saves.wis ? 1 : 0,
+    // init
+    "data.attributes.init.bonus": actorData.attributes?.dex?.mod,
+    // speed
+    "data.attributes.speed.value": parseInt(speeds.speed),
+    "data.attributes.movement.walk": parseInt(speeds.speed),
+    "data.attributes.movement.burrow": parseInt(speeds.burrow),
+    "data.attributes.movement.climb": parseInt(speeds.climb),
+    "data.attributes.movement.fly": parseInt(speeds.fly),
+    "data.attributes.movement.swim": parseInt(speeds.swim),
+    "data.attributes.movement.hover": parseInt(speeds.hover),
+    // health
+    "data.attributes.hp.value": actorData.health.hp,
+    "data.attributes.hp.max": actorData.health.hp,
+    "data.attributes.hp.formula": `${actorData.health.formular} + ${actorData.health.formularBonus}`,
+    // challenge
+    "data.details.cr": actorData.challenge.cr,
+    "data.details.xp.value": actorData.challenge.xp,
+    // armor
+    "data.attributes.ac.calc": formatArmor(actorData),
+    "data.attributes.ac.flat": actorData.armor.armorClass?.trim(),
+    // racialData
+    "data.details.alignment": actorData.race.alignment?.trim(),
+    "data.details.race": actorData.race.race?.trim(),
+    "data.details.type": actorData.race.type?.trim(),
+    "data.traits.size": formatSize(actorData),
+  };
+  await actor.update(updateData);
   logConsole("actor", actor);
 }
 
-function createRacialInfo(actorData) {
+function formatSpeeds(actorData) {
+  const speeds = {};
+  actorData.speed.forEach((s) => {
+    speeds[s.type] = s.value;
+  });
+  return speeds;
+}
+
+function formatArmor(actorData) {
+  let armorType;
+  const type = actorData.armor.armorType.trim().toLocaleLowerCase();
+  if (type.includes("natural armor")) {
+    armorType = "natural";
+  } else {
+    // todo handle armor items
+    armorType = type;
+  }
+  return armorType;
+}
+
+function formatSize(actorData) {
   let size;
   const sizeData = actorData.race.size.trim().toLocaleLowerCase();
   switch (sizeData) {
@@ -297,111 +346,7 @@ function createRacialInfo(actorData) {
       size = sizeData;
       break;
   }
-
-  const racialData = {
-    data: {
-      details: {
-        alignment: actorData.race.alignment?.trim(),
-        race: actorData.race.race?.trim(),
-        type: actorData.race.type?.trim(),
-      },
-      traits: {
-        size: size,
-      },
-    },
-  };
-  logConsole("racialData", racialData);
-  return racialData;
-}
-
-function createArmor(actorData) {
-  let armorType;
-  const type = actorData.armor.armorType.trim().toLocaleLowerCase();
-  if (type.includes("natural armor")) {
-    armorType = "natural";
-  } else {
-    // todo handle armor items
-    armorType = type;
-  }
-
-  const armor = {
-    "data.attributes.ac.calc": armorType,
-    "data.attributes.ac.flat": actorData.armor.armorClass?.trim(),
-  };
-  logConsole("armor", armor);
-  return armor;
-}
-
-function createChallenge(actorData) {
-  const challenge = {
-    "data.details.cr": actorData.challenge.cr,
-    "data.details.xp.value": actorData.challenge.xp,
-  };
-  logConsole("challenge", challenge);
-  return challenge;
-}
-
-function createHealth(actorData) {
-  const health = {
-    "data.attributes.hp.value": actorData.health.hp,
-    "data.attributes.hp.max": actorData.health.hp,
-    "data.attributes.hp.formula": `${actorData.health.formular} + ${actorData.health.formularBonus}`,
-  };
-  logConsole("health", health);
-  return health;
-}
-
-function createSpeed(actorData) {
-  const speeds = {};
-  actorData.speed.forEach((s) => {
-    speeds[s.type] = s.value;
-  });
-
-  const speed = {
-    "data.attributes.speed.value": parseInt(speeds.speed),
-    "data.attributes.movement.walk": parseInt(speeds.speed),
-    "data.attributes.movement.burrow": parseInt(speeds.burrow),
-    "data.attributes.movement.climb": parseInt(speeds.climb),
-    "data.attributes.movement.fly": parseInt(speeds.fly),
-    "data.attributes.movement.swim": parseInt(speeds.swim),
-    "data.attributes.movement.hover": parseInt(speeds.hover),
-  };
-  logConsole("speed", speed);
-  return speed;
-}
-
-function createInitiative(actorData) {
-  const init = {
-    "data.attributes.init.bonus": actorData.attributes?.dex?.mod,
-  };
-  logConsole("init", init);
-  return init;
-}
-
-function createAttributes(actorData) {
-  // saves === "proficient"
-  const attributes = {
-    "data.abilities.cha.value": actorData.attributes.cha.base,
-    "data.abilities.cha.mod": actorData.attributes.cha.mod,
-    "data.abilities.cha.proficient": actorData.saves.cha ? 1 : 0,
-    "data.abilities.con.value": actorData.attributes.con.base,
-    "data.abilities.con.mod": actorData.attributes.con.mod,
-    "data.abilities.con.proficient": actorData.saves.con ? 1 : 0,
-    "data.abilities.dex.value": actorData.attributes.dex.base,
-    "data.abilities.dex.mod": actorData.attributes.dex.mod,
-    "data.abilities.dex.proficient": actorData.saves.dex ? 1 : 0,
-    "data.abilities.int.value": actorData.attributes.int.base,
-    "data.abilities.int.mod": actorData.attributes.int.mod,
-    "data.abilities.int.proficient": actorData.saves.int ? 1 : 0,
-    "data.abilities.str.value": actorData.attributes.str.base,
-    "data.abilities.str.mod": actorData.attributes.str.mod,
-    "data.abilities.str.proficient": actorData.saves.str ? 1 : 0,
-    "data.abilities.wis.value": actorData.attributes.wis.base,
-    "data.abilities.wis.mod": actorData.attributes.wis.mod,
-    "data.abilities.wis.proficient": actorData.saves.wis ? 1 : 0,
-  };
-  logConsole(attributes);
-  return attributes;
+  return size;
 }
 
 function createAction(actionData) {
