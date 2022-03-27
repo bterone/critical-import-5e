@@ -325,14 +325,8 @@ function createArmor(actorData) {
   }
 
   const armor = {
-    data: {
-      attributes: {
-        ac: {
-          calc: armorType,
-          flat: actorData.armor.armorClass?.trim(),
-        },
-      },
-    },
+    "data.attributes.ac.calc": armorType,
+    "data.attributes.ac.flat": actorData.armor.armorClass?.trim(),
   };
   logConsole("armor", armor);
   return armor;
@@ -340,12 +334,8 @@ function createArmor(actorData) {
 
 function createChallenge(actorData) {
   const challenge = {
-    data: {
-      details: {
-        cr: actorData.challenge.cr,
-        xp: { value: actorData.challenge.xp },
-      },
-    },
+    "data.details.cr": actorData.challenge.cr,
+    "data.details.xp.value": actorData.challenge.xp,
   };
   logConsole("challenge", challenge);
   return challenge;
@@ -353,15 +343,9 @@ function createChallenge(actorData) {
 
 function createHealth(actorData) {
   const health = {
-    data: {
-      attributes: {
-        hp: {
-          value: actorData.health.hp,
-          max: actorData.health.hp,
-          formula: `${actorData.health.formular} + ${actorData.health.formularBonus}`,
-        },
-      },
-    },
+    "data.attributes.hp.value": actorData.health.hp,
+    "data.attributes.hp.max": actorData.health.hp,
+    "data.attributes.hp.formula": `${actorData.health.formular} + ${actorData.health.formularBonus}`,
   };
   logConsole("health", health);
   return health;
@@ -374,21 +358,13 @@ function createSpeed(actorData) {
   });
 
   const speed = {
-    data: {
-      attributes: {
-        speed: {
-          value: parseInt(speeds.speed),
-        },
-        movement: {
-          walk: parseInt(speeds.speed),
-          burrow: parseInt(speeds.burrow),
-          climb: parseInt(speeds.climb),
-          fly: parseInt(speeds.fly),
-          swim: parseInt(speeds.swim),
-          hover: parseInt(speeds.hover),
-        },
-      },
-    },
+    "data.attributes.speed.value": parseInt(speeds.speed),
+    "data.attributes.movement.walk": parseInt(speeds.speed),
+    "data.attributes.movement.burrow": parseInt(speeds.burrow),
+    "data.attributes.movement.climb": parseInt(speeds.climb),
+    "data.attributes.movement.fly": parseInt(speeds.fly),
+    "data.attributes.movement.swim": parseInt(speeds.swim),
+    "data.attributes.movement.hover": parseInt(speeds.hover),
   };
   logConsole("speed", speed);
   return speed;
