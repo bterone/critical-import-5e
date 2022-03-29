@@ -11,7 +11,7 @@ export async function createActor(actorData) {
   const speeds = formatSpeeds(actorData);
 
   // a single object because multiple "update"-function calls slow the app down
-  const updateData = {
+  let updateData = {
     // source
     "data.details.source": "Critical Import 5e",
     // attributes; saves === "proficient"
@@ -76,6 +76,14 @@ export async function createActor(actorData) {
     "data.traits.languages.value": actorData.languages?.langs,
     "data.traits.languages.custom": actorData.languages?.custom,
   };
+  function setSenses(updateData, actorData) {
+    for (const s of actorData.senses) {
+      logConsole("s", s);
+      updateData[`data.attributes.senses.${s.sense.replace(" ", "")}`] = s.mod;
+    }
+    return updateData;
+  }
+  updateData = setSenses(updateData, actorData);
   await actor.update(updateData);
 
   // skills

@@ -294,25 +294,37 @@ function gatherSections(actorData) {
   return sections;
 }
 
-function extractCsvDict(damageTypes, propName) {
-  if (!damageTypes) {
+function extractCsvDict(csvDict, propName) {
+  if (!csvDict) {
     return;
   }
 
-  logConsole("damageTypes", damageTypes);
+  logConsole("damageTypes", csvDict);
 
-  const types = damageTypes.groups?.[propName].trim().toLocaleLowerCase();
-  logConsole("types", types);
-  if (types.includes(";")) {
+  const values = csvDict.groups?.[propName].trim().toLocaleLowerCase();
+  logConsole("types", values);
+  if (values.includes(";")) {
     // list with custom conditions
-    const sections = types.split(";");
-    const ts = sections[0].replace(" ", "").split(",");
+    const sections = values.split(";");
+    const vs = sections[0].replace(" ", "").split(",");
+    const vals = [];
+    for (const v of vs) {
+      vals.push(v.trim());
+    }
     const custom = sections[1];
-    return { types: ts, custom };
-  } else if (types.includes("from")) {
+    return { types: vals, custom };
+  } else if (values.includes("from")) {
     // custom condition only
-    return { types: undefined, custom: types };
+    return { types: undefined, custom: values };
   } else {
-    return { types: types.replace(" ", "").split(","), custom: undefined };
+    // types only
+    const vals = [];
+    for (const v of values.replace(" ", "").split(",")) {
+      vals.push(v.trim());
+    }
+    return {
+      types: vals,
+      custom: undefined,
+    };
   }
 }
