@@ -79,7 +79,7 @@ export async function createActor(actorData) {
   function setSenses(updateData, actorData) {
     for (const s of actorData.senses) {
       logConsole("s", s);
-      updateData[`data.attributes.senses.${s.sense.replace(" ", "")}`] = s.mod;
+      updateData[`data.attributes.senses.${s.sense}`] = s.mod;
     }
     return updateData;
   }

@@ -264,7 +264,10 @@ function gatherSenses(actorData) {
   let match;
   while ((match = sensesRgx.exec(actorData)) != null) {
     const m = match.groups;
-    senses.push({ sense: m.sense.toLocaleLowerCase(), mod: m.mod });
+    senses.push({
+      sense: m.sense.toLocaleLowerCase().trim().replace(" ", ""),
+      mod: m.mod,
+    });
   }
   return senses;
 }
