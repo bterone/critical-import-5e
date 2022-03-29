@@ -1,5 +1,5 @@
 import { openImportDialog, createImportButton } from "./dialog.js";
-import { importActor } from "./import-actor.js";
+import { importActor } from "./import-actor/import-actor.js";
 import { logConsole } from "./log.js";
 
 // function getDialogId(label) {
