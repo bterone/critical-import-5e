@@ -3,19 +3,13 @@ import { gatherActions } from "../import-actions.js";
 import { gatherFeatures } from "../import-features.js";
 
 export function gatherActorData(importedActorData) {
-  const attributesRgx =
-    /(?<attribute>[a-zA-z]{3})(\r\n|\r|\n)(?<base>\d+)\s+?\((?<mod>(\+|-)\d+)\)/gi;
+  // Regex needs to be calculated each time a actor is imported. If not, the regex will fail!
   const racialDetailsRgx =
     /(?<name>.+)(\r|\n|\r\n)(?<size>(Tiny|Small|Medium|Large|Huge|Gargantuan))\s(?<type>.+)\s?(?<race>.+)?\s?,\s?(?<alignment>.+)(\r|\n|\r\n)/gi;
   const armorRgx =
     /(armor|armour) class\s?(?<armorClass>\d+)\s?(\((?<armorType>.+)\))?/gi;
   const healthRgx =
     /(hit points|hp)\s?(?<hp>\d+)\s?(\(?(?<formular>\d+d\d+)?(\s?\+\s?(?<formularBonus>\d+))?)?/gi;
-  const speedRgx =
-    /(?<type>(speed|climb|fly|burrow|swim))\s+?(?<value>\d+\s?[^,|\r|\n|\r\n]+)/gi;
-  const savesRgx = /(?<ability>str|dex|con|int|wis|cha) (?<mod>(\+|\-)\d+)/gi;
-  const skillsRgx =
-    /(?<skill>acrobatics|arcana|animal handling|athletics|deception|history|insight|intimidation|investigation|medicine|nature|perception|performance|persuasion|religion|sleight of hand|stealth|survival) (?<mod>(\+|\-)\d+)/gi;
   const dmgImmunitiesRgx =
     /(damage immunities|damage immunity)\s?(?<immunities>.+)/gi;
   const dmgVulnerabilitiesRgx =
@@ -23,8 +17,6 @@ export function gatherActorData(importedActorData) {
   const dmgResistancesRgx = /\bdamage\sresistances\b\s(?<resistances>.+)/gi;
   const conditionImmunitesRgx =
     /\bcondition\simmunities\b\s(?<immunities>.+)/gi;
-  const sensesRgx =
-    /(?<sense>darkvision|blindsight|tremorsense|truesight|passive perception)\s?(?<mod>\d+)/gi;
   const languagesRgx = /(languages|language)\s?(?<languages>.*)/gi;
   const challengeRgx = /(challenge|cr)\s?(?<cr>([\d/]+))\s?\((?<xp>[\d,]+)/gi;
   const proficiencyBonusRgx =
@@ -53,59 +45,18 @@ export function gatherActorData(importedActorData) {
     logConsole("health", health.groups);
   }
 
-  function gatherSpeed(actorData) {
-    const speed = [];
-    let match;
-    while ((match = speedRgx.exec(actorData)) != null) {
-      const m = match.groups;
-      const type = m.type.toLocaleLowerCase();
-      const value = m.value.toLocaleLowerCase();
-      speed.push({ type, value: value });
-    }
-    return speed;
-  }
   const speed = gatherSpeed(importedActorData);
   actorData.speed = speed;
   logConsole("speed", speed);
 
-  function gatherAttributes(actorData) {
-    const attributes = {};
-    let match;
-    while ((match = attributesRgx.exec(actorData)) != null) {
-      const m = match.groups;
-      attributes[m.attribute.toLocaleLowerCase()] = {
-        base: m.base,
-        mod: m.mod,
-      };
-    }
-    return attributes;
-  }
   const attributes = gatherAttributes(importedActorData);
   actorData.attributes = attributes;
   logConsole("attributes", attributes);
 
-  function gatherSaves(actorData) {
-    const saves = {};
-    let match;
-    while ((match = savesRgx.exec(actorData)) != null) {
-      const m = match.groups;
-      saves[m.ability.toLocaleLowerCase()] = m.mod;
-    }
-    return saves;
-  }
   const saves = gatherSaves(importedActorData);
   actorData.saves = saves;
   logConsole("saves", saves);
 
-  function gatherSkills(actorData) {
-    const skills = {};
-    let match;
-    while ((match = skillsRgx.exec(actorData)) != null) {
-      const m = match.groups;
-      skills[m.skill] = m.mod;
-    }
-    return skills;
-  }
   const skills = gatherSkills(importedActorData);
   actorData.skills = skills;
   logConsole("skills", skills);
@@ -137,53 +88,22 @@ export function gatherActorData(importedActorData) {
     "vulnerabilities"
   );
   if (dmgVul) {
+    logConsole("dmgVul", dmgVul);
     actorData.dmgVulnerabilities = {};
     actorData.dmgVulnerabilities.vulnerabilities = dmgVul.types;
     actorData.dmgVulnerabilities.custom = dmgVul.custom;
   }
 
-  function extractDamageTypes(damageTypes, propName) {
-    if (!damageTypes) {
-      return;
-    }
-
-    const types = damageTypes.groups?.[propName].trim().toLocaleLowerCase();
-    logConsole("types", types);
-    if (types.includes(";")) {
-      // list with custom conditions
-      const sections = types.split(";");
-      const ts = sections[0].replace(" ", "").split(",");
-      const custom = sections[1];
-      return { types: ts, custom };
-    } else if (types.includes("from")) {
-      // custom condition only
-      return { types: undefined, custom: types };
-    } else {
-      return { types: types.replace(" ", "").split(","), custom: undefined };
-    }
+  const conditionImmun = extractDamageTypes(
+    conditionImmunitesRgx.exec(importedActorData),
+    "immunities"
+  );
+  if (conditionImmun) {
+    actorData.conditionImmunities = {};
+    actorData.conditionImmunities.immunities = conditionImmun.types;
+    actorData.conditionImmunities.custom = conditionImmun.custom;
   }
 
-  const vulnerabilities = dmgVulnerabilitiesRgx.exec(importedActorData);
-  if (vulnerabilities) {
-    actorData.dmgVulnerabilities = vulnerabilities.groups;
-    logConsole("vulnerabilities", vulnerabilities.groups);
-  }
-
-  const conditionImmunites = conditionImmunitesRgx.exec(importedActorData);
-  if (conditionImmunites) {
-    actorData.conditionImmunites = conditionImmunites.groups;
-    logConsole("conditionImmunites", conditionImmunites.groups);
-  }
-
-  function gatherSenses(actorData) {
-    const senses = [];
-    let match;
-    while ((match = sensesRgx.exec(actorData)) != null) {
-      const m = match.groups;
-      senses.push({ sense: m.sense.toLocaleLowerCase(), mod: m.mod });
-    }
-    return senses;
-  }
   const senses = gatherSenses(importedActorData);
   actorData.senses = senses;
   logConsole("senses", senses);
@@ -212,30 +132,6 @@ export function gatherActorData(importedActorData) {
     logConsole("legendaryResistances", legendaryResistances.groups);
   }
 
-  function gatherSections(actorData) {
-    const sectionHeaders = [
-      "actions",
-      "bonus actions",
-      "reactions",
-      "legendary actions",
-      "lair actions",
-      "regional effects",
-    ];
-    const sections = {};
-    let header = "";
-    for (const line of actorData.trim().split(/\n/g)) {
-      const l = line.toLocaleLowerCase();
-      if (!l) {
-        continue;
-      } else if (sectionHeaders.includes(l)) {
-        header = l;
-        sections[header] = [];
-      } else if (sections[header]) {
-        sections[header].push(line);
-      }
-    }
-    return sections;
-  }
   const sections = gatherSections(importedActorData);
   logConsole("sections", sections);
 
@@ -296,4 +192,121 @@ export function gatherActorData(importedActorData) {
   logConsole("features", features);
 
   return actorData;
+}
+
+function gatherSpeed(actorData) {
+  const speedRgx =
+    /(?<type>(speed|climb|fly|burrow|swim))\s+?(?<value>\d+\s?[^,|\r|\n|\r\n]+)/gi;
+
+  const speed = [];
+  let match;
+  while ((match = speedRgx.exec(actorData)) != null) {
+    const m = match.groups;
+    const type = m.type.toLocaleLowerCase();
+    const value = m.value.toLocaleLowerCase();
+    speed.push({ type, value: value });
+  }
+  return speed;
+}
+
+function gatherAttributes(actorData) {
+  const attributesRgx =
+    /(?<attribute>[a-zA-z]{3})(\r\n|\r|\n)(?<base>\d+)\s+?\((?<mod>(\+|-)\d+)\)/gi;
+
+  const attributes = {};
+  let match;
+  while ((match = attributesRgx.exec(actorData)) != null) {
+    const m = match.groups;
+    attributes[m.attribute.toLocaleLowerCase()] = {
+      base: m.base,
+      mod: m.mod,
+    };
+  }
+  return attributes;
+}
+
+function gatherSaves(actorData) {
+  const savesRgx = /(?<ability>str|dex|con|int|wis|cha) (?<mod>(\+|\-)\d+)/gi;
+
+  const saves = {};
+  let match;
+  while ((match = savesRgx.exec(actorData)) != null) {
+    const m = match.groups;
+    saves[m.ability.toLocaleLowerCase()] = m.mod;
+  }
+  return saves;
+}
+
+function gatherSkills(actorData) {
+  const skillsRgx =
+    /(?<skill>acrobatics|arcana|animal handling|athletics|deception|history|insight|intimidation|investigation|medicine|nature|perception|performance|persuasion|religion|sleight of hand|stealth|survival) (?<mod>(\+|\-)\d+)/gi;
+
+  const skills = {};
+  let match;
+  while ((match = skillsRgx.exec(actorData)) != null) {
+    const m = match.groups;
+    skills[m.skill] = m.mod;
+  }
+  return skills;
+}
+
+function gatherSenses(actorData) {
+  const sensesRgx =
+    /(?<sense>darkvision|blindsight|tremorsense|truesight|passive perception)\s?(?<mod>\d+)/gi;
+
+  const senses = [];
+  let match;
+  while ((match = sensesRgx.exec(actorData)) != null) {
+    const m = match.groups;
+    senses.push({ sense: m.sense.toLocaleLowerCase(), mod: m.mod });
+  }
+  return senses;
+}
+
+function gatherSections(actorData) {
+  const sectionHeaders = [
+    "actions",
+    "bonus actions",
+    "reactions",
+    "legendary actions",
+    "lair actions",
+    "regional effects",
+  ];
+  const sections = {};
+  let header = "";
+  for (const line of actorData.trim().split(/\n/g)) {
+    const l = line.toLocaleLowerCase();
+    if (!l) {
+      continue;
+    } else if (sectionHeaders.includes(l)) {
+      header = l;
+      sections[header] = [];
+    } else if (sections[header]) {
+      sections[header].push(line);
+    }
+  }
+  return sections;
+}
+
+function extractDamageTypes(damageTypes, propName) {
+  if (!damageTypes) {
+    return;
+  }
+
+  logConsole("damageTypes", damageTypes);
+
+  const types = damageTypes.groups?.[propName].trim().toLocaleLowerCase();
+  logConsole("types", types);
+  if (types.includes(";")) {
+    // list with custom conditions
+    const sections = types.split(";");
+    const ts = sections[0].replace(" ", "").split(",");
+    const custom = sections[1];
+    return { types: ts, custom };
+  } else if (types.includes("from")) {
+    // custom condition only
+    return { types: undefined, custom: types };
+  } else {
+    return { types: types.replace(" ", "").split(","), custom: undefined };
+  }
 }

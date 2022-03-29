@@ -12,6 +12,8 @@ export async function createActor(actorData) {
 
   // a single object because multiple "update"-function calls slow the app down
   const updateData = {
+    // source
+    "data.details.source": "Critical Import 5e",
     // attributes; saves === "proficient"
     "data.abilities.cha.value": actorData.attributes.cha.base,
     "data.abilities.cha.mod": actorData.attributes.cha.mod,
@@ -67,8 +69,9 @@ export async function createActor(actorData) {
     // damage vulnerability
     "data.traits.dv.value": actorData.dmgVulnerabilities?.vulnerabilities,
     "data.traits.dv.custom": actorData.dmgVulnerabilities?.custom,
-    // todo
     // conditional immunities
+    "data.traits.ci.value": actorData.conditionImmunities?.immunities,
+    "data.traits.ci.custom": actorData.conditionImmunities?.custom,
     // todo
     // languages todo
   };
