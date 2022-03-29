@@ -116,51 +116,56 @@ function gatherActorData(importedActorData) {
   actorData.skills = skills;
   logConsole("skills", skills);
 
-  const dmgImmunities = dmgImmunitiesRgx.exec(importedActorData);
-  if (dmgImmunities) {
-    const i = dmgImmunities.groups?.immunities.trim().toLocaleLowerCase();
+  const dmgImmu = extractDamageTypes(
+    dmgImmunitiesRgx.exec(importedActorData),
+    "immunities"
+  );
+  if (dmgImmu) {
+    logConsole("dmgImmu", dmgImmu);
     actorData.dmgImmunities = {};
-
-    if (i.includes(";")) {
-      const immunitiesSections = i.split(";");
-      const immu = immunitiesSections[0].replace(" ", "").split(",");
-      const custom = immunitiesSections[1];
-      actorData.dmgImmunities.immunities = immu;
-      actorData.dmgImmunities.custom = custom;
-      logConsole("immunities", immu);
-      logConsole("custom", custom);
-    } else {
-      const i = dmgImmunities.groups?.immunities
-        .trim()
-        .toLocaleLowerCase()
-        .replace(" ", "")
-        .split(",");
-      actorData.dmgImmunities.immunities = i;
-      logConsole("immunities", i);
-    }
+    actorData.dmgImmunities.immunities = dmgImmu.types;
+    actorData.dmgImmunities.custom = dmgImmu.custom;
   }
 
-  const dmgResistances = dmgResistancesRgx.exec(importedActorData);
-  if (dmgResistances) {
-    const r = dmgResistances.groups?.resistances.trim().toLocaleLowerCase();
+  const dmgRes = extractDamageTypes(
+    dmgResistancesRgx.exec(importedActorData),
+    "resistances"
+  );
+  if (dmgRes) {
+    logConsole("dmgRes", dmgRes);
     actorData.dmgResistances = {};
+    actorData.dmgResistances.resistances = dmgRes.types;
+    actorData.dmgResistances.custom = dmgRes.custom;
+  }
 
-    if (r.includes(";")) {
-      const resistanceSections = r.split(";");
-      const res = resistanceSections[0].replace(" ", "").split(",");
-      const custom = resistanceSections[1];
-      actorData.dmgResistances.resistances = res;
-      actorData.dmgResistances.custom = custom;
-      logConsole("resistances", res);
-      logConsole("custom", custom);
+  const dmgVul = extractDamageTypes(
+    dmgVulnerabilitiesRgx.exec(importedActorData),
+    "vulnerabilities"
+  );
+  if (dmgVul) {
+    actorData.dmgVulnerabilities = {};
+    actorData.dmgVulnerabilities.vulnerabilities = dmgVul.types;
+    actorData.dmgVulnerabilities.custom = dmgVul.custom;
+  }
+
+  function extractDamageTypes(damageTypes, propName) {
+    if (!damageTypes) {
+      return;
+    }
+
+    const types = damageTypes.groups?.[propName].trim().toLocaleLowerCase();
+    logConsole("types", types);
+    if (types.includes(";")) {
+      // list with custom conditions
+      const sections = types.split(";");
+      const ts = sections[0].replace(" ", "").split(",");
+      const custom = sections[1];
+      return { types: ts, custom };
+    } else if (types.includes("from")) {
+      // custom condition only
+      return { types: undefined, custom: types };
     } else {
-      const r = dmgResistances.groups?.resistances
-        .trim()
-        .toLocaleLowerCase()
-        .replace(" ", "")
-        .split(",");
-      actorData.dmgResistances.resistances = r;
-      logConsole("resistances", r);
+      return { types: types.replace(" ", "").split(","), custom: undefined };
     }
   }
 
@@ -364,6 +369,8 @@ async function createActor(actorData) {
     "data.traits.di.value": actorData.dmgImmunities?.immunities,
     "data.traits.di.custom": actorData.dmgImmunities?.custom,
     // damage vulnerability
+    "data.traits.dv.value": actorData.dmgVulnerabilities?.vulnerabilities,
+    "data.traits.dv.custom": actorData.dmgVulnerabilities?.custom,
     // todo
     // conditional immunities
     // todo
