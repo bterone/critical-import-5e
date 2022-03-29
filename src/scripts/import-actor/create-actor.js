@@ -72,8 +72,9 @@ export async function createActor(actorData) {
     // conditional immunities
     "data.traits.ci.value": actorData.conditionImmunities?.immunities,
     "data.traits.ci.custom": actorData.conditionImmunities?.custom,
-    // todo
-    // languages todo
+    // languages
+    "data.traits.languages.value": actorData.languages?.langs,
+    "data.traits.languages.custom": actorData.languages?.custom,
   };
   await actor.update(updateData);
 

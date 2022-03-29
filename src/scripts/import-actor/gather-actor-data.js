@@ -61,7 +61,7 @@ export function gatherActorData(importedActorData) {
   actorData.skills = skills;
   logConsole("skills", skills);
 
-  const dmgImmu = extractDamageTypes(
+  const dmgImmu = extractCsvDict(
     dmgImmunitiesRgx.exec(importedActorData),
     "immunities"
   );
@@ -72,7 +72,7 @@ export function gatherActorData(importedActorData) {
     actorData.dmgImmunities.custom = dmgImmu.custom;
   }
 
-  const dmgRes = extractDamageTypes(
+  const dmgRes = extractCsvDict(
     dmgResistancesRgx.exec(importedActorData),
     "resistances"
   );
@@ -83,7 +83,7 @@ export function gatherActorData(importedActorData) {
     actorData.dmgResistances.custom = dmgRes.custom;
   }
 
-  const dmgVul = extractDamageTypes(
+  const dmgVul = extractCsvDict(
     dmgVulnerabilitiesRgx.exec(importedActorData),
     "vulnerabilities"
   );
@@ -94,11 +94,12 @@ export function gatherActorData(importedActorData) {
     actorData.dmgVulnerabilities.custom = dmgVul.custom;
   }
 
-  const conditionImmun = extractDamageTypes(
+  const conditionImmun = extractCsvDict(
     conditionImmunitesRgx.exec(importedActorData),
     "immunities"
   );
   if (conditionImmun) {
+    logConsole("conditionImmun", conditionImmun);
     actorData.conditionImmunities = {};
     actorData.conditionImmunities.immunities = conditionImmun.types;
     actorData.conditionImmunities.custom = conditionImmun.custom;
@@ -108,10 +109,15 @@ export function gatherActorData(importedActorData) {
   actorData.senses = senses;
   logConsole("senses", senses);
 
-  const languages = languagesRgx.exec(importedActorData);
-  if (languages) {
-    actorData.languages = languages.groups;
-    logConsole("languages", languages.groups);
+  const langs = extractCsvDict(
+    languagesRgx.exec(importedActorData),
+    "languages"
+  );
+  if (langs) {
+    logConsole("langs", langs);
+    actorData.languages = {};
+    actorData.languages.langs = langs.types;
+    actorData.languages.custom = langs.custom;
   }
 
   const challenge = challengeRgx.exec(importedActorData);
@@ -288,7 +294,7 @@ function gatherSections(actorData) {
   return sections;
 }
 
-function extractDamageTypes(damageTypes, propName) {
+function extractCsvDict(damageTypes, propName) {
   if (!damageTypes) {
     return;
   }
