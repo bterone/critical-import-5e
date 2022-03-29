@@ -116,16 +116,52 @@ function gatherActorData(importedActorData) {
   actorData.skills = skills;
   logConsole("skills", skills);
 
-  const immunities = dmgImmunitiesRgx.exec(importedActorData);
-  if (immunities) {
-    actorData.dmgImmunities = immunities.groups;
-    logConsole("immunities", immunities.groups);
+  const dmgImmunities = dmgImmunitiesRgx.exec(importedActorData);
+  if (dmgImmunities) {
+    const i = dmgImmunities.groups?.immunities.trim().toLocaleLowerCase();
+    actorData.dmgImmunities = {};
+
+    if (i.includes(";")) {
+      const immunitiesSections = i.split(";");
+      const immu = immunitiesSections[0].replace(" ", "").split(",");
+      const custom = immunitiesSections[1];
+      actorData.dmgImmunities.immunities = immu;
+      actorData.dmgImmunities.custom = custom;
+      logConsole("immunities", immu);
+      logConsole("custom", custom);
+    } else {
+      const i = dmgImmunities.groups?.immunities
+        .trim()
+        .toLocaleLowerCase()
+        .replace(" ", "")
+        .split(",");
+      actorData.dmgImmunities.immunities = i;
+      logConsole("immunities", i);
+    }
   }
 
-  const resistances = dmgResistancesRgx.exec(importedActorData);
-  if (resistances) {
-    actorData.dmgResistances = resistances.groups;
-    logConsole("resistances", resistances.groups);
+  const dmgResistances = dmgResistancesRgx.exec(importedActorData);
+  if (dmgResistances) {
+    const r = dmgResistances.groups?.resistances.trim().toLocaleLowerCase();
+    actorData.dmgResistances = {};
+
+    if (r.includes(";")) {
+      const resistanceSections = r.split(";");
+      const res = resistanceSections[0].replace(" ", "").split(",");
+      const custom = resistanceSections[1];
+      actorData.dmgResistances.resistances = res;
+      actorData.dmgResistances.custom = custom;
+      logConsole("resistances", res);
+      logConsole("custom", custom);
+    } else {
+      const r = dmgResistances.groups?.resistances
+        .trim()
+        .toLocaleLowerCase()
+        .replace(" ", "")
+        .split(",");
+      actorData.dmgResistances.resistances = r;
+      logConsole("resistances", r);
+    }
   }
 
   const vulnerabilities = dmgVulnerabilitiesRgx.exec(importedActorData);
@@ -321,11 +357,16 @@ async function createActor(actorData) {
     "data.traits.size": formatSize(actorData),
     // proficiency bonus
     "data.data.attributes.prof": parseInt(actorData.proficiencyBonus.profBonus),
-    // damage resistances todo
-    // "data.traits.dr.value": 0,
-    // damage immunities todo
-    // "data.traits.di.value": 0,
-    // damage vulnerability todo
+    // damage resistances
+    "data.traits.dr.value": actorData.dmgResistances?.resistances,
+    "data.traits.dr.custom": actorData.dmgResistances?.custom,
+    // damage immunities
+    "data.traits.di.value": actorData.dmgImmunities?.immunities,
+    "data.traits.di.custom": actorData.dmgImmunities?.custom,
+    // damage vulnerability
+    // todo
+    // conditional immunities
+    // todo
     // languages todo
   };
   await actor.update(updateData);
