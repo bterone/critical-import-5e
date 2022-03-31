@@ -1,3 +1,6 @@
+import { logConsole } from "./log";
+import { trimElements } from "./common";
+
 const KNOWN_SECTION_HEADERS = [
   "actions",
   "bonus actions",
@@ -6,7 +9,10 @@ const KNOWN_SECTION_HEADERS = [
   "lair actions",
   "regional effects",
 ];
-const SPELLCASTING_RGX = /(\bat will\b|\d\/\bday\b.+)\:.+/i;
+// const SPELLCASTING_AT_WILL_RGX = /(\bat will\b|\d\/\bday\b.+)\:.+/i;
+const CANTRIP_RGX = /\bcantrips\b.+\:\s?(?<cantrips>.+)/i;
+const SPELLS_BY_LEVEL_RGX =
+  /(?<level>\d+)\w+\s\blevel\b.+(?<slots>\d+)\s?\bslot.?\b\)\:\s?(?<spells>.+)/i;
 
 export function gatherFeatures(actorData) {
   const features = {};
@@ -24,6 +30,7 @@ export function gatherFeatures(actorData) {
 
   const idx = getSpellcastingIdx(lines);
   const spellcasting = gatherSpellcasting(lines, idx);
+  logConsole("spellcasting", spellcasting);
   features.spellcasting = spellcasting;
 
   const featureRgx = /.*(\r|\n|\r\n)+(?<name>[a-zA-Z\s]+)\.(?<desc>.+)/gi;
@@ -36,7 +43,7 @@ export function gatherFeatures(actorData) {
       feats.push(m);
     }
   }
-  features.features = feats;
+  features.feats = feats;
   return features;
 }
 
@@ -60,20 +67,57 @@ function getSpellcastingIdx(lines) {
 }
 
 function gatherSpellcasting(lines, startIdx) {
-  const spellcasting = [];
-  if (startIdx) {
-    const featDesc = lines.splice(startIdx, 1);
-    spellcasting.push(featDesc);
+  if (!startIdx) {
+    return;
+  }
 
-    // spells as lines
-    for (let i = startIdx; i < lines.length; i++) {
-      const line = lines[i];
-      if (!SPELLCASTING_RGX.exec(line)) {
-        continue;
-      }
-      const ln = lines.splice(i, 1);
-      spellcasting.push(ln);
+  const spellcastingBasicsRgx =
+    /((?<innate>\binnate spellcasting\b)\.|(?<casting>\bspellcasting\b)\.).+\bability is\b\s(?<ability>[a-zA-Z]+).+\bsave dc\b\s(?<dc>\d+)\,?\s?(?<hitBonus>(\+|\-)\d)/gi;
+
+  const spellcasting = {};
+  const spellCastingText = lines.splice(startIdx, 1)[0];
+  spellcasting.desc = spellCastingText;
+  const castingBasics = spellcastingBasicsRgx.exec(spellCastingText);
+  spellcasting.basics = castingBasics.groups;
+
+  const castingLines = lines.splice(startIdx).filter((element) => {
+    return element != "";
+  });
+
+  if (spellcasting.basics.innate) {
+    // Innate Spellcasting
+    spellcasting.spells = gatherInnateSpells(castingLines);
+  } else if (spellcasting.basics.casting) {
+    // Spellcasting
+    spellcasting.spells = gatherSpells(castingLines);
+  }
+
+  return spellcasting;
+}
+
+function gatherInnateSpells(castingLines) {
+  // todo
+}
+
+function gatherSpells(castingLines) {
+  const spellList = [];
+  let cantrips;
+
+  for (const line of castingLines) {
+    const cantripMatch = CANTRIP_RGX.exec(line);
+    const spellMatch = SPELLS_BY_LEVEL_RGX.exec(line);
+    if (cantripMatch) {
+      const m = cantripMatch.groups;
+      cantrips = trimElements(m.cantrips, ",");
+    } else if (spellMatch) {
+      const m = spellMatch.groups;
+      spellList.push({
+        level: m.level,
+        slots: m.slots,
+        spells: trimElements(m.spells, ","),
+      });
     }
   }
-  return spellcasting;
+
+  return { cantrips, spellList };
 }

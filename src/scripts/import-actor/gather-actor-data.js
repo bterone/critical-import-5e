@@ -194,10 +194,56 @@ export function gatherActorData(importedActorData) {
   }
 
   const features = gatherFeatures(importedActorData);
-  actorData.features = features;
+  actorData.features = features.features;
+  // todo spells
+  // const spellcasting = gatherSpells(features.spellcasting);
+  // actorData.spellcasting = spellcasting;
+
   logConsole("features", features);
 
   return actorData;
+}
+function gatherSpells(spellcastingData) {
+  // todo - spellcasting basics
+  // spellcasting ability
+  // data.attributes.spellcasting
+  //
+  // todo - single spell
+  // casting using spell slots
+  // spell level
+  //
+  // casting using innate spell castring
+  // uses per day
+  //
+  // if not castring and not innate => atWill
+  // spells
+  // "name": spellName.replace(/\(.*\)/, "").trim(),
+  // "type": spellType, // could also be "innate"
+  // "count": spellCount
+  //
+  // set spells
+  // if (spell) {
+  //   if (spellData.type == "slots") {
+  //       // Update the actor's number of slots per level.
+  //       let spellObject = {};
+  //       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.value`, spellData.count);
+  //       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.max`, spellData.count);
+  //       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.override`, spellData.count);
+  //       await actor.update(spellObject);
+  //   } else if (spellData.type = "innate") {
+  //       // Separate the 'per day' spells from the 'at will' spells.
+  //       if (spellData.count) {
+  //           sbiUtils.assignToObject(spell, `data.uses.value`, spellData.count);
+  //           sbiUtils.assignToObject(spell, `data.uses.max`, spellData.count);
+  //           sbiUtils.assignToObject(spell, `data.uses.per`, "day");
+  //           sbiUtils.assignToObject(spell, `data.preparation.mode`, "innate");
+  //       } else {
+  //           sbiUtils.assignToObject(spell, `data.preparation.mode`, "atwill");
+  //       }
+  //       sbiUtils.assignToObject(spell, `data.preparation.prepared`, true);
+  //   }
+  //   // Add the spell to the character sheet.
+  //   await actor.createEmbeddedDocuments("Item", [spell]);
 }
 
 function gatherSpeed(actorData) {

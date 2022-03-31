@@ -75,6 +75,30 @@ export async function createActor(actorData) {
     // languages
     "data.traits.languages.value": actorData.languages?.langs,
     "data.traits.languages.custom": actorData.languages?.custom,
+    // todo spells
+    // set spells
+    // if (spell) {
+    //   if (spellData.type == "slots") {
+    //       // Update the actor's number of slots per level.
+    //       let spellObject = {};
+    //       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.value`, spellData.count);
+    //       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.max`, spellData.count);
+    //       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.override`, spellData.count);
+    //       await actor.update(spellObject);
+    //   } else if (spellData.type = "innate") {
+    //       // Separate the 'per day' spells from the 'at will' spells.
+    //       if (spellData.count) {
+    //           sbiUtils.assignToObject(spell, `data.uses.value`, spellData.count);
+    //           sbiUtils.assignToObject(spell, `data.uses.max`, spellData.count);
+    //           sbiUtils.assignToObject(spell, `data.uses.per`, "day");
+    //           sbiUtils.assignToObject(spell, `data.preparation.mode`, "innate");
+    //       } else {
+    //           sbiUtils.assignToObject(spell, `data.preparation.mode`, "atwill");
+    //       }
+    //       sbiUtils.assignToObject(spell, `data.preparation.prepared`, true);
+    //   }
+    //   // Add the spell to the character sheet.
+    //   await actor.createEmbeddedDocuments("Item", [spell]);
   };
   function setSenses(updateData, actorData) {
     for (const s of actorData.senses) {
