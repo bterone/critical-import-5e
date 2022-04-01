@@ -76,7 +76,6 @@ export async function createActor(actorData) {
     "data.traits.languages.value": actorData.languages?.langs,
     "data.traits.languages.custom": actorData.languages?.custom,
     // todo spells
-    // set spells
     // if (spell) {
     //   if (spellData.type == "slots") {
     //       // Update the actor's number of slots per level.

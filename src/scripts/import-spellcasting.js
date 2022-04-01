@@ -8,47 +8,6 @@ const SPELLCASTING_AT_WILL_RGX = /\bat will\b\:\s?(?<atWill>.+)/i;
 const INNATE_CASTING_PER_DAY_RGX =
   /(?<timesADay>\d+)\/\bday\b\s?.+\:\s?(?<spells>.+)/i;
 
-// todo - spellcasting basics
-// spellcasting ability
-// data.attributes.spellcasting
-//
-// todo - single spell
-// casting using spell slots
-// spell level
-//
-// casting using innate spell castring
-// uses per day
-//
-// if not castring and not innate => atWill
-// spells
-// "name": spellName.replace(/\(.*\)/, "").trim(),
-// "type": spellType, // could also be "innate"
-// "count": spellCount
-//
-// set spells
-// if (spell) {
-//   if (spellData.type == "slots") {
-//       // Update the actor's number of slots per level.
-//       let spellObject = {};
-//       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.value`, spellData.count);
-//       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.max`, spellData.count);
-//       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.override`, spellData.count);
-//       await actor.update(spellObject);
-//   } else if (spellData.type = "innate") {
-//       // Separate the 'per day' spells from the 'at will' spells.
-//       if (spellData.count) {
-//           sbiUtils.assignToObject(spell, `data.uses.value`, spellData.count);
-//           sbiUtils.assignToObject(spell, `data.uses.max`, spellData.count);
-//           sbiUtils.assignToObject(spell, `data.uses.per`, "day");
-//           sbiUtils.assignToObject(spell, `data.preparation.mode`, "innate");
-//       } else {
-//           sbiUtils.assignToObject(spell, `data.preparation.mode`, "atwill");
-//       }
-//       sbiUtils.assignToObject(spell, `data.preparation.prepared`, true);
-//   }
-//   // Add the spell to the character sheet.
-//   await actor.createEmbeddedDocuments("Item", [spell]);
-
 export function gatherSpellcasting(actorDataWithoutActions) {
   const idx = getSpellcastingIdx(actorDataWithoutActions);
   const spellcasting = gatherSpellcastingProps(actorDataWithoutActions, idx);
@@ -98,8 +57,6 @@ function gatherSpellcastingProps(lines, startIdx) {
   } else if (spellcasting.basics.casting) {
     spellcasting.spells = gatherSpells(castingLines);
   }
-
-  // todo gather data of each spell
 
   return spellcasting;
 }
