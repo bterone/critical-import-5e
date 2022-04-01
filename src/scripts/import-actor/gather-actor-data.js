@@ -198,7 +198,7 @@ export function gatherActorData(importedActorData) {
 
   // features
   const features = gatherFeatures(reducedActorData);
-  actorData.features = features.features;
+  actorData.features = features;
   logConsole("features", features);
 
   // spellcasting
@@ -331,7 +331,6 @@ function gatherSections(actorData) {
 export function gatherFeatures(actorDataWithoutActions) {
   const featureRgx = /.*(\r|\n|\r\n)+(?<name>[a-zA-Z\s]+)\.(?<desc>.+)/gi;
 
-  const features = {};
   const shortActorData = actorDataWithoutActions.join(`\n`);
   const feats = [];
   let match;
@@ -341,8 +340,7 @@ export function gatherFeatures(actorDataWithoutActions) {
       feats.push(m);
     }
   }
-  features.feats = feats;
-  return features;
+  return feats;
 }
 
 function extractCsvDict(csvDict, propName) {

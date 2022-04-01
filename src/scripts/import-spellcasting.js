@@ -4,7 +4,9 @@ import { trimElements } from "./common";
 const CANTRIP_RGX = /\bcantrips\b.+\:\s?(?<cantrips>.+)/i;
 const SPELLS_BY_LEVEL_RGX =
   /(?<level>\d+)\w+\s\blevel\b.+(?<slots>\d+)\s?\bslot.?\b\)\:\s?(?<spells>.+)/i;
-// const SPELLCASTING_AT_WILL_RGX = /(\bat will\b|\d\/\bday\b.+)\:.+/i;
+const SPELLCASTING_AT_WILL_RGX = /\bat will\b\:\s?(?<atWill>.+)/i;
+const INNATE_CASTING_PER_DAY_RGX =
+  /(?<timesADay>\d+)\/\bday\b\s?.+\:\s?(?<spells>.+)/i;
 
 // todo - spellcasting basics
 // spellcasting ability
@@ -92,18 +94,36 @@ function gatherSpellcastingProps(lines, startIdx) {
   });
 
   if (spellcasting.basics.innate) {
-    // Innate Spellcasting
     spellcasting.spells = gatherInnateSpells(castingLines);
   } else if (spellcasting.basics.casting) {
-    // Spellcasting
     spellcasting.spells = gatherSpells(castingLines);
   }
+
+  // todo gather data of each spell
 
   return spellcasting;
 }
 
 function gatherInnateSpells(castingLines) {
-  // todo
+  const spellList = [];
+  let atWill;
+
+  for (const line of castingLines) {
+    const atWillMatch = SPELLCASTING_AT_WILL_RGX.exec(line);
+    const innateMatch = INNATE_CASTING_PER_DAY_RGX.exec(line);
+    if (atWillMatch) {
+      const m = atWillMatch.groups;
+      atWill = trimElements(m.atWill, ",");
+    } else if (innateMatch) {
+      const m = innateMatch.groups;
+      spellList.push({
+        timesPerDay: m.timesADay,
+        spells: trimElements(m.spells, ","),
+      });
+    }
+  }
+
+  return { atWill, spellList };
 }
 
 function gatherSpells(castingLines) {
