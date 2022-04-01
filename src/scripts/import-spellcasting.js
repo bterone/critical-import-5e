@@ -1,50 +1,57 @@
 import { logConsole } from "./log";
 import { trimElements } from "./common";
 
-const KNOWN_SECTION_HEADERS = [
-  "actions",
-  "bonus actions",
-  "reactions",
-  "legendary actions",
-  "lair actions",
-  "regional effects",
-];
-// const SPELLCASTING_AT_WILL_RGX = /(\bat will\b|\d\/\bday\b.+)\:.+/i;
 const CANTRIP_RGX = /\bcantrips\b.+\:\s?(?<cantrips>.+)/i;
 const SPELLS_BY_LEVEL_RGX =
   /(?<level>\d+)\w+\s\blevel\b.+(?<slots>\d+)\s?\bslot.?\b\)\:\s?(?<spells>.+)/i;
+// const SPELLCASTING_AT_WILL_RGX = /(\bat will\b|\d\/\bday\b.+)\:.+/i;
 
-export function gatherFeatures(actorData) {
-  const features = {};
-  const lines = actorData.trim().split(/\n/g);
+// todo - spellcasting basics
+// spellcasting ability
+// data.attributes.spellcasting
+//
+// todo - single spell
+// casting using spell slots
+// spell level
+//
+// casting using innate spell castring
+// uses per day
+//
+// if not castring and not innate => atWill
+// spells
+// "name": spellName.replace(/\(.*\)/, "").trim(),
+// "type": spellType, // could also be "innate"
+// "count": spellCount
+//
+// set spells
+// if (spell) {
+//   if (spellData.type == "slots") {
+//       // Update the actor's number of slots per level.
+//       let spellObject = {};
+//       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.value`, spellData.count);
+//       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.max`, spellData.count);
+//       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.override`, spellData.count);
+//       await actor.update(spellObject);
+//   } else if (spellData.type = "innate") {
+//       // Separate the 'per day' spells from the 'at will' spells.
+//       if (spellData.count) {
+//           sbiUtils.assignToObject(spell, `data.uses.value`, spellData.count);
+//           sbiUtils.assignToObject(spell, `data.uses.max`, spellData.count);
+//           sbiUtils.assignToObject(spell, `data.uses.per`, "day");
+//           sbiUtils.assignToObject(spell, `data.preparation.mode`, "innate");
+//       } else {
+//           sbiUtils.assignToObject(spell, `data.preparation.mode`, "atwill");
+//       }
+//       sbiUtils.assignToObject(spell, `data.preparation.prepared`, true);
+//   }
+//   // Add the spell to the character sheet.
+//   await actor.createEmbeddedDocuments("Item", [spell]);
 
-  // remove actions to reduce error possibilities
-  for (const idx in lines) {
-    const l = lines[idx];
-    const line = l.trim().toLocaleLowerCase();
-    if (KNOWN_SECTION_HEADERS.includes(line)) {
-      lines.splice(idx);
-      break;
-    }
-  }
-
-  const idx = getSpellcastingIdx(lines);
-  const spellcasting = gatherSpellcasting(lines, idx);
+export function gatherSpellcasting(actorDataWithoutActions) {
+  const idx = getSpellcastingIdx(actorDataWithoutActions);
+  const spellcasting = gatherSpellcastingProps(actorDataWithoutActions, idx);
   logConsole("spellcasting", spellcasting);
-  features.spellcasting = spellcasting;
-
-  const featureRgx = /.*(\r|\n|\r\n)+(?<name>[a-zA-Z\s]+)\.(?<desc>.+)/gi;
-  const shortActorData = lines.join(`\n`);
-  const feats = [];
-  let match;
-  while ((match = featureRgx.exec(shortActorData)) != null) {
-    const m = match.groups;
-    if (m) {
-      feats.push(m);
-    }
-  }
-  features.feats = feats;
-  return features;
+  return spellcasting;
 }
 
 function getSpellcastingIdx(lines) {
@@ -66,7 +73,7 @@ function getSpellcastingIdx(lines) {
   return undefined;
 }
 
-function gatherSpellcasting(lines, startIdx) {
+function gatherSpellcastingProps(lines, startIdx) {
   if (!startIdx) {
     return;
   }

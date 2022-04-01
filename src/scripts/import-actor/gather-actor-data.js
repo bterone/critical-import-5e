@@ -1,6 +1,6 @@
 import { logConsole } from "../log.js";
 import { gatherActions } from "../import-actions.js";
-import { gatherFeatures } from "../import-features.js";
+import { gatherSpellcasting } from "../import-spellcasting.js";
 
 export function gatherActorData(importedActorData) {
   // Regex needs to be calculated each time a actor is imported. If not, the regex will fail!
@@ -193,57 +193,42 @@ export function gatherActorData(importedActorData) {
     logConsole("regional effects", regionalEffects);
   }
 
-  const features = gatherFeatures(importedActorData);
-  actorData.features = features.features;
-  // todo spells
-  // const spellcasting = gatherSpells(features.spellcasting);
-  // actorData.spellcasting = spellcasting;
+  // remove actions for error prevention
+  const reducedActorData = removeActions(importedActorData);
 
+  // features
+  const features = gatherFeatures(reducedActorData);
+  actorData.features = features.features;
   logConsole("features", features);
+
+  // spellcasting
+  const spellcasting = gatherSpellcasting(reducedActorData);
+  actorData.spellcasting = spellcasting;
+  logConsole("spellcasting", spellcasting);
 
   return actorData;
 }
-function gatherSpells(spellcastingData) {
-  // todo - spellcasting basics
-  // spellcasting ability
-  // data.attributes.spellcasting
-  //
-  // todo - single spell
-  // casting using spell slots
-  // spell level
-  //
-  // casting using innate spell castring
-  // uses per day
-  //
-  // if not castring and not innate => atWill
-  // spells
-  // "name": spellName.replace(/\(.*\)/, "").trim(),
-  // "type": spellType, // could also be "innate"
-  // "count": spellCount
-  //
-  // set spells
-  // if (spell) {
-  //   if (spellData.type == "slots") {
-  //       // Update the actor's number of slots per level.
-  //       let spellObject = {};
-  //       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.value`, spellData.count);
-  //       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.max`, spellData.count);
-  //       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.override`, spellData.count);
-  //       await actor.update(spellObject);
-  //   } else if (spellData.type = "innate") {
-  //       // Separate the 'per day' spells from the 'at will' spells.
-  //       if (spellData.count) {
-  //           sbiUtils.assignToObject(spell, `data.uses.value`, spellData.count);
-  //           sbiUtils.assignToObject(spell, `data.uses.max`, spellData.count);
-  //           sbiUtils.assignToObject(spell, `data.uses.per`, "day");
-  //           sbiUtils.assignToObject(spell, `data.preparation.mode`, "innate");
-  //       } else {
-  //           sbiUtils.assignToObject(spell, `data.preparation.mode`, "atwill");
-  //       }
-  //       sbiUtils.assignToObject(spell, `data.preparation.prepared`, true);
-  //   }
-  //   // Add the spell to the character sheet.
-  //   await actor.createEmbeddedDocuments("Item", [spell]);
+
+function removeActions(actorData) {
+  const KNOWN_SECTION_HEADERS = [
+    "actions",
+    "bonus actions",
+    "reactions",
+    "legendary actions",
+    "lair actions",
+    "regional effects",
+  ];
+  const reducedActorData = actorData.trim().split(/\n/g);
+  // remove actions to reduce error possibilities
+  for (const idx in reducedActorData) {
+    const l = reducedActorData[idx];
+    const line = l.trim().toLocaleLowerCase();
+    if (KNOWN_SECTION_HEADERS.includes(line)) {
+      reducedActorData.splice(idx);
+      break;
+    }
+  }
+  return reducedActorData;
 }
 
 function gatherSpeed(actorData) {
@@ -341,6 +326,23 @@ function gatherSections(actorData) {
     }
   }
   return sections;
+}
+
+export function gatherFeatures(actorDataWithoutActions) {
+  const featureRgx = /.*(\r|\n|\r\n)+(?<name>[a-zA-Z\s]+)\.(?<desc>.+)/gi;
+
+  const features = {};
+  const shortActorData = actorDataWithoutActions.join(`\n`);
+  const feats = [];
+  let match;
+  while ((match = featureRgx.exec(shortActorData)) != null) {
+    const m = match.groups;
+    if (m) {
+      feats.push(m);
+    }
+  }
+  features.feats = feats;
+  return features;
 }
 
 function extractCsvDict(csvDict, propName) {
