@@ -1,4 +1,5 @@
 import { logConsole, logWarn } from "../log.js";
+import { retrieveFromPack } from "./../common.js";
 
 export async function createActor(actorData) {
   // todo
@@ -75,37 +76,12 @@ export async function createActor(actorData) {
     // languages
     "data.traits.languages.value": actorData.languages?.langs,
     "data.traits.languages.custom": actorData.languages?.custom,
-    // todo spells
-    // if (spell) {
-    //   if (spellData.type == "slots") {
-    //       // Update the actor's number of slots per level.
-    //       let spellObject = {};
-    //       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.value`, spellData.count);
-    //       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.max`, spellData.count);
-    //       sbiUtils.assignToObject(spellObject, `data.spells.spell${spell.data.level}.override`, spellData.count);
-    //       await actor.update(spellObject);
-    //   } else if (spellData.type = "innate") {
-    //       // Separate the 'per day' spells from the 'at will' spells.
-    //       if (spellData.count) {
-    //           sbiUtils.assignToObject(spell, `data.uses.value`, spellData.count);
-    //           sbiUtils.assignToObject(spell, `data.uses.max`, spellData.count);
-    //           sbiUtils.assignToObject(spell, `data.uses.per`, "day");
-    //           sbiUtils.assignToObject(spell, `data.preparation.mode`, "innate");
-    //       } else {
-    //           sbiUtils.assignToObject(spell, `data.preparation.mode`, "atwill");
-    //       }
-    //       sbiUtils.assignToObject(spell, `data.preparation.prepared`, true);
-    //   }
-    //   // Add the spell to the character sheet.
-    //   await actor.createEmbeddedDocuments("Item", [spell]);
+    // spellcasting
+    "data.attributes.spellcasting": actorData.spellcasting.basics.ability,
+    // todo spell safe DC ?
   };
-  function setSenses(updateData, actorData) {
-    for (const s of actorData.senses) {
-      logConsole("s", s);
-      updateData[`data.attributes.senses.${s.sense}`] = s.mod;
-    }
-    return updateData;
-  }
+
+  // senses
   updateData = setSenses(updateData, actorData);
   await actor.update(updateData);
 
@@ -132,9 +108,72 @@ export async function createActor(actorData) {
     "data.skills.ste.value": skills.ste,
     "data.skills.sur.value": skills.sur,
   };
-  await actor.update(skillsUpdate);
 
+  // spells
+  await createSpells(actor, actorData);
+
+  await actor.update(skillsUpdate);
   logConsole("actor", actor);
+}
+
+async function createSpells(actor, actorData) {
+  // spells
+  const spellPack = "dnd5e.spells";
+
+  if (actorData.spellcasting.basics.innate) {
+    // at will
+    const spellsAtWill = actorData.spellcasting.spells.atWill;
+    const atWillSpellDocs = await retrieveFromPack(spellPack, spellsAtWill);
+    for (const doc of atWillSpellDocs) {
+      doc["data.preparation.mode"] = "atwill";
+      doc["data.preparation.prepared"] = true;
+      await actor.createEmbeddedDocuments("Item", [doc]);
+    }
+    // per day
+    const spells = actorData.spellcasting.spells.spellList.spells;
+    const spellDocs = await retrieveFromPack(spellPack, spells);
+    for (const doc of spellDocs) {
+      const usesPerDay = spells.timesPerDay;
+      doc["data.uses.value"] = usesPerDay;
+      doc["data.uses.max"] = usesPerDay;
+      doc["data.uses.per"] = "day";
+      doc["data.preparation.mode"] = "innate";
+      doc["data.preparation.prepared"] = true;
+      await actor.createEmbeddedDocuments("Item", [doc]);
+    }
+  } else if (actorData.spellcasting.basics.casting) {
+    // cantrips
+    const cantrips = actorData.spellcasting.spells.cantrips;
+    const cantripDocs = await retrieveFromPack(spellPack, cantrips);
+    for (const doc of cantripDocs) {
+      await actor.createEmbeddedDocuments("Item", [doc]);
+    }
+    // spells
+    const spellList = actorData.spellcasting.spells.spellList;
+    for (const spellLevel of spellList) {
+      const level = spellLevel.level;
+      const slots = spellLevel.slots;
+      const update = {};
+      update[`data.spells.spell${level}.value`] = slots;
+      update[`data.spells.spell${level}.max`] = slots;
+      update[`data.spells.spell${level}.override`] = slots;
+      await actor.update(update);
+
+      const spells = spellLevel.spells;
+      const spellDocs = await retrieveFromPack(spellPack, spells);
+      for (const doc of spellDocs) {
+        await actor.createEmbeddedDocuments("Item", [doc]);
+      }
+    }
+  }
+}
+
+function setSenses(updateData, actorData) {
+  for (const s of actorData.senses) {
+    logConsole("s", s);
+    updateData[`data.attributes.senses.${s.sense}`] = s.mod;
+  }
+  return updateData;
 }
 
 function formatSpeeds(actorData) {
