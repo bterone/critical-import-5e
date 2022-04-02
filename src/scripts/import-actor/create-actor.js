@@ -1,15 +1,16 @@
 import { logConsole, logWarn } from "../log.js";
-import { retrieveFromPack } from "./../common.js";
+import { retrieveFromPack, shortenAbility } from "./../common.js";
+
+// todo actorgets random fly speed! why?
 
 export async function createActor(actorData) {
-  // todo
-  // Spells
   const actor = await Actor.create({
     name: actorData.race.name,
     type: "npc",
   });
 
   const speeds = formatSpeeds(actorData);
+  logConsole("speeds", speeds);
 
   // a single object because multiple "update"-function calls slow the app down
   let updateData = {
@@ -47,7 +48,9 @@ export async function createActor(actorData) {
     // health
     "data.attributes.hp.value": actorData.health.hp,
     "data.attributes.hp.max": actorData.health.hp,
-    "data.attributes.hp.formula": `${actorData.health.formular} + ${actorData.health.formularBonus}`,
+    "data.attributes.hp.formula": actorData.health.formularBonus
+      ? `${actorData.health.formular} + ${actorData.health.formularBonus}`
+      : actorData.health.formular,
     // challenge
     "data.details.cr": actorData.challenge.cr,
     "data.details.xp.value": actorData.challenge.xp,
@@ -77,7 +80,9 @@ export async function createActor(actorData) {
     "data.traits.languages.value": actorData.languages?.langs,
     "data.traits.languages.custom": actorData.languages?.custom,
     // spellcasting
-    "data.attributes.spellcasting": actorData.spellcasting.basics.ability,
+    "data.attributes.spellcasting": shortenAbility(
+      actorData.spellcasting.basics.ability
+    ),
     // todo spell safe DC ?
   };
 

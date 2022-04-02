@@ -233,7 +233,7 @@ function removeActions(actorData) {
 
 function gatherSpeed(actorData) {
   const speedRgx =
-    /(?<type>(speed|climb|fly|burrow|swim))\s+?(?<value>\d+\s?[^,|\r|\n|\r\n]+)/gi;
+    /(?<type>(speed|climb|fly|burrow|swim))\s+?(?<value>\d+\s?[^,|\r|\n|\r\n]+)\s\bft\b/gi;
 
   const speed = [];
   let match;
