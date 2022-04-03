@@ -8,11 +8,6 @@ const SPELLCASTING_AT_WILL_RGX = /\bat will\b\:\s?(?<atWill>.+)/i;
 const INNATE_CASTING_PER_DAY_RGX =
   /(?<timesADay>\d+)\/\bday\b\s?.+\:\s?(?<spells>.+)/i;
 
-// todo
-// Some spell casting description hide spells in the description, like the Mehpits creature.
-// Quote: "The mephit can innately cast fog cloud, requiring no material components."
-// => search description for spells
-
 export function gatherSpellcasting(actorDataWithoutActions) {
   const idx = getSpellcastingIdx(actorDataWithoutActions);
   const spellcasting = gatherSpellcastingProps(actorDataWithoutActions, idx);

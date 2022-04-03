@@ -1,8 +1,6 @@
 import { logConsole, logWarn } from "../log.js";
 import { retrieveFromPack, shortenAbility } from "./../common.js";
 
-// todo actorgets random fly speed! why?
-
 export async function createActor(actorData) {
   const actor = await Actor.create({
     name: actorData.race.name,
