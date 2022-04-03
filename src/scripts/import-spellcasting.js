@@ -46,11 +46,28 @@ function gatherSpellcastingProps(lines, startIdx) {
 
   const spellcastingBasicsRgx =
     /((?<innate>\binnate spellcasting\b)\.|(?<casting>\bspellcasting\b)\.).+\bability is\b\s(?<ability>[a-zA-Z]+).+\bsave dc\b\s(?<dc>\d+)\,?\s?(?<hitBonus>(\+|\-)\d)/gi;
+  const hiddenSpellcastingRgx =
+    /\binnate spellcasting\b\s?\((?<usesPerDay>\d+).\bday\b.+\binnately cast\b.(?<spells>.+)\,.+\bability is\b\s?(?<ability>[a-z]+)/gi;
 
   const spellcasting = {};
   const spellCastingText = lines.splice(startIdx, 1)[0];
   spellcasting.desc = spellCastingText;
   const castingBasics = spellcastingBasicsRgx.exec(spellCastingText);
+  if (spellCastingText && !castingBasics) {
+    // has hidden spells
+    const hidden = hiddenSpellcastingRgx.exec(spellCastingText);
+    const hiddenSpellcasting = hidden.groups;
+    spellcasting.spells = {
+      atWill: trimElements(hiddenSpellcasting.spells, ","),
+    };
+    spellcasting.basics = {
+      ability: hiddenSpellcasting.ability,
+      innate: "innate",
+      // dc: undefined,
+      // hitBonus: undefined
+    };
+    return spellcasting;
+  }
   spellcasting.basics = castingBasics.groups;
 
   const castingLines = lines.splice(startIdx).filter((element) => {
