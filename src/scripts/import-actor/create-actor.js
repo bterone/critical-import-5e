@@ -200,6 +200,10 @@ function formatSpeeds(actorData) {
 }
 
 function formatArmor(actorData) {
+  if (!actorData.armor.armorType) {
+    return "";
+  }
+
   let armorType;
   const type = actorData.armor.armorType.trim().toLocaleLowerCase();
   if (type.includes("natural armor")) {
