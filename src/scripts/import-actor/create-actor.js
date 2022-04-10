@@ -1,7 +1,7 @@
 import { logConsole, logWarn } from "../log.js";
 import {
   retrieveFromPackMany,
-  retrieveItemImgFromPack,
+  retrieveFromPackItemImg,
   shortenAbility,
 } from "./../common.js";
 
@@ -197,7 +197,7 @@ async function createFeats(actor, actorData) {
     const featData = {
       name: feat.name,
       type: "feat",
-      img: await retrieveItemImgFromPack(feat.name),
+      img: await retrieveFromPackItemImg(feat.name),
       data: {
         description: {
           value: feat.desc,

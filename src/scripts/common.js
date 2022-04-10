@@ -36,7 +36,7 @@ export async function retrieveFromPackMany(packName, itemNames) {
   return items;
 }
 
-export async function retrieveItemImgFromPack(itemName) {
+export async function retrieveFromPackItemImg(itemName) {
   const name = itemName.toLowerCase();
 
   const item = await retrieveFromPack("dnd5e.items", name);
