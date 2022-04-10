@@ -81,7 +81,6 @@ export async function createActor(actorData) {
     "data.attributes.spellcasting": actorData.spellcasting?.basics
       ? shortenAbility(actorData.spellcasting.basics.ability)
       : "",
-    // todo spell safe DC ?
   };
 
   // senses
@@ -111,13 +110,18 @@ export async function createActor(actorData) {
     "data.skills.ste.value": skills.ste,
     "data.skills.sur.value": skills.sur,
   };
+  await actor.update(skillsUpdate);
 
   // spells
   if (actorData.spellcasting) {
     await createSpells(actor, actorData);
   }
 
-  await actor.update(skillsUpdate);
+  // feats
+  if (actorData.features) {
+    await createFeats(actor, actorData);
+  }
+
   logConsole("actor", actor);
 }
 
@@ -178,6 +182,25 @@ async function createSpells(actor, actorData) {
         }
       }
     }
+  }
+}
+
+async function createFeats(actor, actorData) {
+  for (const feat of actorData.features) {
+    const featData = {
+      name: feat.name,
+      type: "feat",
+      img: undefined,
+      data: {
+        description: {
+          value: feat.desc,
+        },
+      },
+      // effects: undefined // effects of embeded-documents are currently not supported by FoundryVTT => maybe create feats as seperate document and link with actor?
+    };
+    logConsole("featData", featData);
+    const item = new Item(featData);
+    await actor.createEmbeddedDocuments("Item", [item.toObject()]);
   }
 }
 
