@@ -1,5 +1,9 @@
 import { logConsole, logWarn } from "../log.js";
-import { retrieveFromPack, shortenAbility } from "./../common.js";
+import {
+  retrieveFromPackMany,
+  retrieveItemImgFromPack,
+  shortenAbility,
+} from "./../common.js";
 
 export async function createActor(actorData) {
   const actor = await Actor.create({
@@ -133,7 +137,10 @@ async function createSpells(actor, actorData) {
     // at will
     const spellsAtWill = actorData.spellcasting.spells?.atWill;
     if (spellsAtWill) {
-      const atWillSpellDocs = await retrieveFromPack(spellPack, spellsAtWill);
+      const atWillSpellDocs = await retrieveFromPackMany(
+        spellPack,
+        spellsAtWill
+      );
       for (const doc of atWillSpellDocs) {
         doc["data.preparation.mode"] = "atwill";
         doc["data.preparation.prepared"] = true;
@@ -143,7 +150,7 @@ async function createSpells(actor, actorData) {
     // per day
     const spells = actorData.spellcasting.spells?.spellList?.spells;
     if (spells) {
-      const spellDocs = await retrieveFromPack(spellPack, spells);
+      const spellDocs = await retrieveFromPackMany(spellPack, spells);
       for (const doc of spellDocs) {
         const usesPerDay = spells.timesPerDay;
         doc["data.uses.value"] = usesPerDay;
@@ -158,7 +165,7 @@ async function createSpells(actor, actorData) {
     // cantrips
     const cantrips = actorData.spellcasting.spells?.cantrips;
     if (cantrips) {
-      const cantripDocs = await retrieveFromPack(spellPack, cantrips);
+      const cantripDocs = await retrieveFromPackMany(spellPack, cantrips);
       for (const doc of cantripDocs) {
         await actor.createEmbeddedDocuments("Item", [doc]);
       }
@@ -176,7 +183,7 @@ async function createSpells(actor, actorData) {
         await actor.update(update);
 
         const spells = spellLevel.spells;
-        const spellDocs = await retrieveFromPack(spellPack, spells);
+        const spellDocs = await retrieveFromPackMany(spellPack, spells);
         for (const doc of spellDocs) {
           await actor.createEmbeddedDocuments("Item", [doc]);
         }
@@ -190,7 +197,7 @@ async function createFeats(actor, actorData) {
     const featData = {
       name: feat.name,
       type: "feat",
-      img: undefined,
+      img: await retrieveItemImgFromPack(feat.name),
       data: {
         description: {
           value: feat.desc,
