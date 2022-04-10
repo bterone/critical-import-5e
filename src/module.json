@@ -16,7 +16,7 @@
   "manifest": "https://github.com/PragmaticBeaver/critical-import-5e/releases/latest/download/module.json",
   "version": "1.0.0",
   "minimumCoreVersion": "0.9.0",
-  "compatibleCoreVersion": "0.9.249",
+  "compatibleCoreVersion": "9",
   "systems": ["dnd5e"],
   "dependencies": [
     {
