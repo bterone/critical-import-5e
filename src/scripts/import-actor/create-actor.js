@@ -121,15 +121,18 @@ export async function createActor(actorData) {
 
   // spells
   if (actorData.spellcasting) {
-    await createSpells(actor, actorData);
+    await updateSpells(actor, actorData);
   }
 
   // feats
   if (actorData.features) {
-    await createFeats(actor, actorData);
+    await updateFeats(actor, actorData);
   }
 
   // actions
+  if (actorData.actions) {
+    await updateActions(actor, actorData);
+  }
 
   // legendary actions
 
@@ -140,7 +143,7 @@ export async function createActor(actorData) {
   logger.logConsole("actor", actor);
 }
 
-async function createSpells(actor, actorData) {
+async function updateSpells(actor, actorData) {
   // spells
   const spellPack = "dnd5e.spells";
 
@@ -203,7 +206,7 @@ async function createSpells(actor, actorData) {
   }
 }
 
-async function createFeats(actor, actorData) {
+async function updateFeats(actor, actorData) {
   for (const feat of actorData.features) {
     const featData = {
       name: feat.name,
@@ -219,6 +222,104 @@ async function createFeats(actor, actorData) {
     logger.logConsole("featData", featData);
     const item = new Item(featData);
     await actor.createEmbeddedDocuments("Item", [item.toObject()]);
+  }
+}
+
+async function updateActions(actor, actorData) {
+  function updateAttack() {
+    // const match = this.#attackRegex.exec(text);
+    // if (match !== null) {
+    //     itemData.type = "weapon";
+    //     sbiUtils.assignToObject(itemData, "data.weaponType", "natural");
+    //     sbiUtils.assignToObject(itemData, "data.ability", actor.data.data.abilities.str.mod > actor.data.data.abilities.dex.mod ? "str" : "dex");
+    //     this.setDamageRolls(text, itemData, "hit:");
+    // }
+  }
+  function updateSaves() {
+    // const match = this.#savingThrowRegex.exec(text);
+    // if (match !== null) {
+    //     const dc = match.groups.savedc;
+    //     const ability = match.groups.saveability;
+    //     sbiUtils.assignToObject(itemData, "data.actionType", "save");
+    //     sbiUtils.assignToObject(itemData, "data.save.ability", this.convertToShortAbility(ability));
+    //     sbiUtils.assignToObject(itemData, "data.save.dc", parseInt(dc));
+    //     sbiUtils.assignToObject(itemData, "data.save.scaling", "flat");
+    //     this.setDamageRolls(text, itemData, "saving throw");
+    // }
+  }
+  function updateRecharge() {
+    // const match = this.#rechargeRegex.exec(text);
+    // if (match !== null) {
+    //     sbiUtils.assignToObject(itemData, "data.recharge.value", parseInt(match.groups.recharge));
+    //     sbiUtils.assignToObject(itemData, "data.recharge.charged", true);
+    // }
+  }
+  function updateTarget() {
+    // const match = this.#targetRegex.exec(text);
+    // if (match !== null) {
+    //     sbiUtils.assignToObject(itemData, "data.target.value", match.groups.range);
+    //     sbiUtils.assignToObject(itemData, "data.target.type", match.groups.shape);
+    //     sbiUtils.assignToObject(itemData, "data.target.units", "ft");
+    // }
+  }
+  function updateReach() {
+    // const match = this.#reachRegex.exec(text);
+    // if (match !== null) {
+    //     const reach = parseInt(match.groups.reach);
+    //     sbiUtils.assignToObject(itemData, "data.range.value", reach);
+    //     sbiUtils.assignToObject(itemData, "data.range.units", "ft");
+    //     sbiUtils.assignToObject(itemData, "data.actionType", "mwak");
+    // }
+  }
+  function updateRange() {
+    // const match = this.#rangeRegex.exec(text);
+    // if (match !== null) {
+    //     const nearRange = parseInt(match.groups.near);
+    //     const farRange = parseInt(match.groups.far);
+    //     sbiUtils.assignToObject(itemData, "data.range.value", nearRange);
+    //     sbiUtils.assignToObject(itemData, "data.range.long", farRange);
+    //     sbiUtils.assignToObject(itemData, "data.range.units", "ft");
+    //     sbiUtils.assignToObject(itemData, "data.actionType", "rwak");
+    //     sbiUtils.assignToObject(itemData, "data.ability", "dex");
+    // }
+  }
+  for (const action of actorData.actions) {
+    const name = action.name;
+
+    const itemUpdate = {
+      name,
+      type: "feat",
+      img: await retrieveFromPackItemImg(name),
+      data: {
+        description: {
+          value: action.desc,
+        },
+        activation: {
+          type: "action",
+          cost: 1,
+        },
+      },
+    };
+
+    const lowerName = name.toLocaleLowerCase();
+    if (lowerName !== "multiattack") {
+      itemUpdate.data.identified = true;
+      itemUpdate.data.equipped = true;
+      itemUpdate.data.proficient = true;
+      itemUpdate.data.quantity = 1;
+
+      if (lowerName !== "spellcasting") {
+        updateAttack();
+        updateSaves();
+        updateRecharge();
+        updateTarget();
+        updateReach();
+        updateRange();
+      }
+    }
+
+    const doc = new Item(itemData).toObject();
+    await actor.createEmbeddedDocuments("Item", [doc]);
   }
 }
 
