@@ -1,6 +1,9 @@
-import { logConsole } from "../log.js";
+import { Logger } from "../log.js";
 import { gatherActions } from "../import-actions.js";
 import { gatherSpellcasting } from "../import-spellcasting.js";
+
+const logger = new Logger("gather-actor-data.js");
+logger.disable();
 
 export function gatherActorData(importedActorData) {
   // Regex needs to be calculated each time a actor is imported. If not, the regex will fail!
@@ -24,49 +27,49 @@ export function gatherActorData(importedActorData) {
   const legendaryResistancesRgx =
     /legendary resistance\s?\(?(?<timesADay>\d+).day.?\.?(?<desc>.+)/gi;
 
-  logConsole("gathering actor data ...");
+  logger.logConsole("gathering actor data ...");
   const actorData = {};
 
   const racialDetails = racialDetailsRgx.exec(importedActorData);
   if (racialDetails) {
     actorData.race = racialDetails.groups;
-    logConsole("racialDetails", racialDetails.groups);
+    logger.logConsole("racialDetails", racialDetails.groups);
   }
 
   const armor = armorRgx.exec(importedActorData);
   if (armor) {
     actorData.armor = armor.groups;
-    logConsole("armor", armor.groups);
+    logger.logConsole("armor", armor.groups);
   }
 
   const health = healthRgx.exec(importedActorData);
   if (health) {
     actorData.health = health.groups;
-    logConsole("health", health.groups);
+    logger.logConsole("health", health.groups);
   }
 
   const speed = gatherSpeed(importedActorData);
   actorData.speed = speed;
-  logConsole("speed", speed);
+  logger.logConsole("speed", speed);
 
   const attributes = gatherAttributes(importedActorData);
   actorData.attributes = attributes;
-  logConsole("attributes", attributes);
+  logger.logConsole("attributes", attributes);
 
   const saves = gatherSaves(importedActorData);
   actorData.saves = saves;
-  logConsole("saves", saves);
+  logger.logConsole("saves", saves);
 
   const skills = gatherSkills(importedActorData);
   actorData.skills = skills;
-  logConsole("skills", skills);
+  logger.logConsole("skills", skills);
 
   const dmgImmu = extractCsvDict(
     dmgImmunitiesRgx.exec(importedActorData),
     "immunities"
   );
   if (dmgImmu) {
-    logConsole("dmgImmu", dmgImmu);
+    logger.logConsole("dmgImmu", dmgImmu);
     actorData.dmgImmunities = {};
     actorData.dmgImmunities.immunities = dmgImmu.types;
     actorData.dmgImmunities.custom = dmgImmu.custom;
@@ -77,7 +80,7 @@ export function gatherActorData(importedActorData) {
     "resistances"
   );
   if (dmgRes) {
-    logConsole("dmgRes", dmgRes);
+    logger.logConsole("dmgRes", dmgRes);
     actorData.dmgResistances = {};
     actorData.dmgResistances.resistances = dmgRes.types;
     actorData.dmgResistances.custom = dmgRes.custom;
@@ -88,7 +91,7 @@ export function gatherActorData(importedActorData) {
     "vulnerabilities"
   );
   if (dmgVul) {
-    logConsole("dmgVul", dmgVul);
+    logger.logConsole("dmgVul", dmgVul);
     actorData.dmgVulnerabilities = {};
     actorData.dmgVulnerabilities.vulnerabilities = dmgVul.types;
     actorData.dmgVulnerabilities.custom = dmgVul.custom;
@@ -99,7 +102,7 @@ export function gatherActorData(importedActorData) {
     "immunities"
   );
   if (conditionImmun) {
-    logConsole("conditionImmun", conditionImmun);
+    logger.logConsole("conditionImmun", conditionImmun);
     actorData.conditionImmunities = {};
     actorData.conditionImmunities.immunities = conditionImmun.types;
     actorData.conditionImmunities.custom = conditionImmun.custom;
@@ -107,14 +110,14 @@ export function gatherActorData(importedActorData) {
 
   const senses = gatherSenses(importedActorData);
   actorData.senses = senses;
-  logConsole("senses", senses);
+  logger.logConsole("senses", senses);
 
   const langs = extractCsvDict(
     languagesRgx.exec(importedActorData),
     "languages"
   );
   if (langs) {
-    logConsole("langs", langs);
+    logger.logConsole("langs", langs);
     actorData.languages = {};
     actorData.languages.langs = langs.types;
     actorData.languages.custom = langs.custom;
@@ -123,30 +126,30 @@ export function gatherActorData(importedActorData) {
   const challenge = challengeRgx.exec(importedActorData);
   if (challenge) {
     actorData.challenge = challenge.groups;
-    logConsole("challenge", challenge.groups);
+    logger.logConsole("challenge", challenge.groups);
   }
 
   const profBonus = proficiencyBonusRgx.exec(importedActorData);
   if (profBonus) {
     actorData.proficiencyBonus = profBonus.groups;
-    logConsole("profBonus", profBonus.groups);
+    logger.logConsole("profBonus", profBonus.groups);
   }
 
   const legendaryResistances = legendaryResistancesRgx.exec(importedActorData);
   if (legendaryResistances) {
     actorData.legendaryResistances = legendaryResistances.groups;
-    logConsole("legendaryResistances", legendaryResistances.groups);
+    logger.logConsole("legendaryResistances", legendaryResistances.groups);
   }
 
   const sections = gatherSections(importedActorData);
-  logConsole("sections", sections);
+  logger.logConsole("sections", sections);
 
   // Actions
   const act = sections.actions;
   if (act) {
     const actions = gatherActions(act);
     actorData.actions = actions;
-    logConsole("actions", actions);
+    logger.logConsole("actions", actions);
   }
 
   // bonus actions
@@ -154,14 +157,14 @@ export function gatherActorData(importedActorData) {
   if (bActions) {
     const bonusActions = gatherActions(bActions);
     actorData.bonusActions = bonusActions;
-    logConsole("bonus actions", bonusActions);
+    logger.logConsole("bonus actions", bonusActions);
   }
   // Reactions
   const rActions = sections.reactions;
   if (rActions) {
     const reactions = gatherActions(rActions);
     actorData.reactions = reactions;
-    logConsole("reactions", reactions);
+    logger.logConsole("reactions", reactions);
   }
 
   // Legendary Actions
@@ -171,10 +174,10 @@ export function gatherActorData(importedActorData) {
     const desc = lActions.splice(0, 1);
     actorData.legendaryActions = {};
     actorData.legendaryActions.desc = desc;
-    logConsole("legendary actions desc", desc);
+    logger.logConsole("legendary actions desc", desc);
     const legendaryActions = gatherActions(lActions);
     actorData.legendaryActions.actions = legendaryActions;
-    logConsole("legendary actions", legendaryActions);
+    logger.logConsole("legendary actions", legendaryActions);
   }
 
   // Lair actions
@@ -182,7 +185,7 @@ export function gatherActorData(importedActorData) {
   if (layActions) {
     const lairActions = gatherActions(layActions);
     actorData.lairActions = lairActions;
-    logConsole("lair actions", lairActions);
+    logger.logConsole("lair actions", lairActions);
   }
 
   // regional effects
@@ -190,7 +193,7 @@ export function gatherActorData(importedActorData) {
   if (rEffect) {
     const regionalEffects = gatherActions(rEffect);
     actorData.regionalEffects = regionalEffects;
-    logConsole("regional effects", regionalEffects);
+    logger.logConsole("regional effects", regionalEffects);
   }
 
   // remove actions for error prevention
@@ -199,12 +202,12 @@ export function gatherActorData(importedActorData) {
   // features
   const features = gatherFeatures(reducedActorData);
   actorData.features = features;
-  logConsole("features", features);
+  logger.logConsole("features", features);
 
   // spellcasting
   const spellcasting = gatherSpellcasting(reducedActorData);
   actorData.spellcasting = spellcasting;
-  logConsole("spellcasting", spellcasting);
+  logger.logConsole("spellcasting", spellcasting);
 
   return actorData;
 }
@@ -348,10 +351,10 @@ function extractCsvDict(csvDict, propName) {
     return;
   }
 
-  logConsole("damageTypes", csvDict);
+  logger.logConsole("damageTypes", csvDict);
 
   const values = csvDict.groups?.[propName].trim().toLocaleLowerCase();
-  logConsole("types", values);
+  logger.logConsole("types", values);
   if (values.includes(";")) {
     // list with custom conditions
     const sections = values.split(";");

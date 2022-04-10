@@ -1,5 +1,8 @@
-import { logConsole } from "./log";
+import { Logger } from "./log";
 import { trimElements } from "./common";
+
+const logger = new Logger("import-spellcasting.js");
+logger.disable();
 
 const CANTRIP_RGX = /\bcantrips\b.+\:\s?(?<cantrips>.+)/i;
 const SPELLS_BY_LEVEL_RGX =
@@ -11,7 +14,7 @@ const INNATE_CASTING_PER_DAY_RGX =
 export function gatherSpellcasting(actorDataWithoutActions) {
   const idx = getSpellcastingIdx(actorDataWithoutActions);
   const spellcasting = gatherSpellcastingProps(actorDataWithoutActions, idx);
-  logConsole("spellcasting", spellcasting);
+  logger.logConsole("spellcasting", spellcasting);
   return spellcasting;
 }
 

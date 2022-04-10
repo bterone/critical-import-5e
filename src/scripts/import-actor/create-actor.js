@@ -1,9 +1,12 @@
-import { logConsole, logWarn } from "../log.js";
+import { Logger } from "../log.js";
 import {
   retrieveFromPackMany,
   retrieveFromPackItemImg,
   shortenAbility,
 } from "./../common.js";
+
+const logger = new Logger("create-actor.js");
+logger.disable();
 
 export async function createActor(actorData) {
   const actor = await Actor.create({
@@ -12,7 +15,7 @@ export async function createActor(actorData) {
   });
 
   const speeds = formatSpeeds(actorData);
-  logConsole("speeds", speeds);
+  logger.logConsole("speeds", speeds);
 
   // a single object because multiple "update"-function calls slow the app down
   let updateData = {
@@ -126,7 +129,15 @@ export async function createActor(actorData) {
     await createFeats(actor, actorData);
   }
 
-  logConsole("actor", actor);
+  // actions
+
+  // legendary actions
+
+  // lair actions
+
+  // regional effects
+
+  logger.logConsole("actor", actor);
 }
 
 async function createSpells(actor, actorData) {
@@ -205,7 +216,7 @@ async function createFeats(actor, actorData) {
       },
       // effects: undefined // effects of embeded-documents are currently not supported by FoundryVTT => maybe create feats as seperate document and link with actor?
     };
-    logConsole("featData", featData);
+    logger.logConsole("featData", featData);
     const item = new Item(featData);
     await actor.createEmbeddedDocuments("Item", [item.toObject()]);
   }
@@ -213,7 +224,7 @@ async function createFeats(actor, actorData) {
 
 function setSenses(updateData, actorData) {
   for (const s of actorData.senses) {
-    logConsole("s", s);
+    logger.logConsole("s", s);
     updateData[`data.attributes.senses.${s.sense}`] = s.mod;
   }
   return updateData;
@@ -337,18 +348,18 @@ function createSkills(actionData, actor) {
         skills.sur = parseInt(skillVal);
         break;
       default:
-        logWarn("unkown skill", s);
+        logger.logWarn("unkown skill", s);
         break;
     }
   }
-  logConsole("skills", skills);
+  logger.logConsole("skills", skills);
 
   for (const skill in skills) {
     const val = skills[skill];
     skills[skill] = calcSkillVal(actor, skill, val);
   }
 
-  logConsole("skills", skills);
+  logger.logConsole("skills", skills);
   return skills;
 }
 

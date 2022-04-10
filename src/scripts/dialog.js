@@ -1,4 +1,7 @@
-import { logConsole } from "./log.js";
+import { Logger } from "./log.js";
+
+const logger = new Logger("dialog.js");
+logger.disable();
 
 export function openImportDialog(title, callback) {
   /**
@@ -30,9 +33,11 @@ export function openImportDialog(title, callback) {
     },
     default: "close",
     render: (html) =>
-      logConsole("onRender - Register interactivity in the rendered dialog"),
+      logger.logConsole(
+        "onRender - Register interactivity in the rendered dialog"
+      ),
     close: (html) => {
-      logConsole("closed Import " + title + " dialog");
+      logger.logConsole("closed Import " + title + " dialog");
     },
   });
   d.render(true);

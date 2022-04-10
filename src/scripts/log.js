@@ -1,17 +1,44 @@
-const IS_DEV_MODE = true;
-// const IS_DEV_MODE = false;
+export class Logger {
+  fileName = "";
+  isEnabled = true;
 
-export function logConsole(...args) {
-  if (!IS_DEV_MODE) {
-    return;
+  constructor(file) {
+    this.fileName = `${file} >>`;
   }
-  console.log(...args);
-}
 
-export function logWarn(...args) {
-  console.warn(...args);
-}
+  enable() {
+    this.isEnabled = true;
+  }
 
-export function logError(...args) {
-  console.error(...args);
+  disable() {
+    this.isEnabled = false;
+  }
+
+  logConsole(...args) {
+    if (!this.isEnabled) {
+      return;
+    }
+    console.log(this.fileName, ...args);
+  }
+
+  logWarn(...args) {
+    if (!this.isEnabled) {
+      return;
+    }
+    console.warn(this.fileName, ...args);
+  }
+
+  logError(...args) {
+    if (!this.isEnabled) {
+      return;
+    }
+    console.error(this.fileName, ...args);
+  }
+
+  logInfo(...args) {
+    if (!this.isEnabled) {
+      return;
+    }
+    console.info(this.fileName, ...args);
+  }
 }
