@@ -171,7 +171,7 @@ export function gatherActorData(importedActorData) {
     const desc = lActions.splice(0, 1);
     actorData.legendaryActions = {};
     actorData.legendaryActions.desc = desc;
-    logConsole("legendary actions desc", desc); //todo handle desc as feature ?
+    logConsole("legendary actions desc", desc);
     const legendaryActions = gatherActions(lActions);
     actorData.legendaryActions.actions = legendaryActions;
     logConsole("legendary actions", legendaryActions);
