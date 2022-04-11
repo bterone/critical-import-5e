@@ -286,6 +286,14 @@ function updateAction(itemUpdate, action, actorData) {
     itemUpdate.data.reach.value = reach;
     itemUpdate.data.reach.units = "ft";
     itemUpdate.data.actionType = "mwak";
+
+    // melee attack
+    if (isWeaponAttack) {
+      if (!itemUpdate.data.range) {
+        itemUpdate.data.range = {};
+      }
+      itemUpdate.data.range.value = `${reach} Feet`;
+    }
   }
 
   // range
