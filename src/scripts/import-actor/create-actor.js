@@ -228,8 +228,6 @@ async function updateFeats(actor, actorData) {
 }
 
 function updateAction(itemUpdate, action, actorData) {
-  // todo fix breath-weapon
-
   // attack
   const isWeaponAttack = action.hit;
   if (isWeaponAttack) {
@@ -297,7 +295,6 @@ function updateAction(itemUpdate, action, actorData) {
   }
 
   // range
-  // todo also set range to 5ft if weapon attack and no special range found
   if (!itemUpdate.data.range) {
     itemUpdate.data.range = {};
   }
