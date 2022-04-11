@@ -13,7 +13,7 @@ export function gatherActions(rawActions) {
   const actionReachRgx = /reach (?<reach>\d+) ?(ft|'|’)/i;
   const actionRangeRgx = /range\s?(?<normal>\d+)\/(?<far>\d+)\s??(ft|'|’)/i;
   const actionShapedTargetRgx =
-    /(?<range>\d+)?-(foot|ft?.|'|’)\s?(?<shape>\w+)/i;
+    /\W(?<range>\d+)?-(­-)?(foot|ft?.|'|’)\s?(?<shape>\w+)/i;
   const actionRechargeRgx = /recharge\s?(?<from>\d+)((\–|\-)(?<to>\d+))?/i;
   const actionSavingThrowRgx =
     /dc\s?(?<dc>\d+)\s?(?<ability>\w+)\s?saving throw/i;
@@ -43,7 +43,7 @@ export function gatherActions(rawActions) {
     const versatile = actionVersatileRgx.exec(a);
     const v = versatile?.groups;
     if (v) {
-      action.versatile = v; // todo
+      action.versatile = v; // todo does it work?
     }
 
     const hit = actionHitRgx.exec(a);
