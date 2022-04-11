@@ -519,9 +519,3 @@ function createSkills(actionData, actor) {
   logger.logConsole("skills", skills);
   return skills;
 }
-
-function createAction(actionData) {
-  // todo
-  const action = {};
-  return action;
-}
