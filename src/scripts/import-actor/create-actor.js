@@ -68,7 +68,9 @@ export async function createActor(actorData) {
     "data.details.type": actorData.race.type?.trim(),
     "data.traits.size": formatSize(actorData),
     // proficiency bonus
-    "data.data.attributes.prof": parseInt(actorData.proficiencyBonus.profBonus),
+    "data.data.attributes.prof": parseInt(
+      actorData.proficiencyBonus?.profBonus
+    ),
     // damage resistances
     "data.traits.dr.value": actorData.dmgResistances?.resistances,
     "data.traits.dr.custom": actorData.dmgResistances?.custom,
@@ -225,68 +227,121 @@ async function updateFeats(actor, actorData) {
   }
 }
 
+function updateAction(itemUpdate, action, actorData) {
+  // attack
+  const isAttack = action.dmg.length > 0;
+  if (isAttack) {
+    itemUpdate.type = "weapon";
+    itemUpdate.data.weaponType = "natural";
+    itemUpdate.data.ability =
+      parseInt(actorData.attributes.str.mod) +
+        parseInt(actorData.proficiencyBonus.profBonus) ===
+      parseInt(action.hit)
+        ? "str"
+        : "dex";
+
+    // damage
+    if (!itemUpdate.data.damage) {
+      itemUpdate.data.damage = {};
+    }
+    const parts = [];
+    for (const dmg of action.dmg) {
+      console.log("dmg", dmg);
+      if (!dmg.formula) {
+        continue;
+      }
+
+      const f = dmg.formula.trim();
+      const idx = f.indexOf(" ");
+      console.log("idx", idx);
+      let dmgVal;
+      if (idx != -1) {
+        dmgVal = `${f.substring(0, idx)} + @mod`;
+      } else {
+        dmgVal = f;
+      }
+      parts.push([dmgVal, dmg.type]);
+    }
+    itemUpdate.data.damage.parts = parts;
+    console.log("parts", parts);
+    console.log("itemUpdate", itemUpdate);
+
+    // versatile
+    const versatile = action.versatile;
+    if (versatile) {
+      itemUpdate.data.damage.versatile = versatile.dmgroll; // todo use formula + @mod ?
+      itemUpdate.data.properties.ver = true;
+    }
+  }
+
+  // reach
+  const reach = action.reach;
+  if (reach) {
+    if (!itemUpdate.data.reach) {
+      itemUpdate.data.reach = {};
+    }
+    itemUpdate.data.reach.value = reach;
+    itemUpdate.data.reach.units = "ft";
+    itemUpdate.data.actionType = "mwak";
+  }
+
+  // range
+  const range = action.range;
+  if (range) {
+    if (!itemUpdate.data.range) {
+      itemUpdate.data.range = {};
+    }
+    itemUpdate.data.range.value = range.normal;
+    itemUpdate.data.range.long = range.far;
+    itemUpdate.data.actionType = "rwak";
+    itemUpdate.data.ability = "dex"; // todo always dex?
+  }
+
+  // shape
+  // todo - bug: cant place shape Error: "You must provide an embedded Document instance as the input for a PlaceableObject"
+  const shape = action.shape;
+  if (shape) {
+    if (!itemUpdate.data.target) {
+      itemUpdate.data.target = {};
+    }
+    itemUpdate.data.target.value = parseInt(shape.range);
+    itemUpdate.data.target.type = shape.shape;
+    itemUpdate.data.target.units = "ft";
+  }
+
+  // saves
+  const save = action.savingThrow;
+  if (save) {
+    if (!itemUpdate.data.save) {
+      itemUpdate.data.save = {};
+    }
+    itemUpdate.data.actionType = "save";
+    itemUpdate.data.save.ability = shortenAbility(save.ability);
+    itemUpdate.data.save.dc = save.dc;
+    itemUpdate.data.save.scaling = "flat";
+  }
+
+  // recharge
+  const recharge = action.recharge;
+  if (recharge) {
+    if (!itemUpdate.data.recharge) {
+      itemUpdate.data.recharge = {};
+    }
+    itemUpdate.data.recharge.value = recharge.from;
+    itemUpdate.data.recharge.charged = true;
+  }
+
+  return itemUpdate;
+}
+
 async function updateActions(actor, actorData) {
-  function updateAttack() {
-    // const match = this.#attackRegex.exec(text);
-    // if (match !== null) {
-    //     itemData.type = "weapon";
-    //     sbiUtils.assignToObject(itemData, "data.weaponType", "natural");
-    //     sbiUtils.assignToObject(itemData, "data.ability", actor.data.data.abilities.str.mod > actor.data.data.abilities.dex.mod ? "str" : "dex");
-    //     this.setDamageRolls(text, itemData, "hit:");
-    // }
-  }
-  function updateSaves() {
-    // const match = this.#savingThrowRegex.exec(text);
-    // if (match !== null) {
-    //     const dc = match.groups.savedc;
-    //     const ability = match.groups.saveability;
-    //     sbiUtils.assignToObject(itemData, "data.actionType", "save");
-    //     sbiUtils.assignToObject(itemData, "data.save.ability", this.convertToShortAbility(ability));
-    //     sbiUtils.assignToObject(itemData, "data.save.dc", parseInt(dc));
-    //     sbiUtils.assignToObject(itemData, "data.save.scaling", "flat");
-    //     this.setDamageRolls(text, itemData, "saving throw");
-    // }
-  }
-  function updateRecharge() {
-    // const match = this.#rechargeRegex.exec(text);
-    // if (match !== null) {
-    //     sbiUtils.assignToObject(itemData, "data.recharge.value", parseInt(match.groups.recharge));
-    //     sbiUtils.assignToObject(itemData, "data.recharge.charged", true);
-    // }
-  }
-  function updateTarget() {
-    // const match = this.#targetRegex.exec(text);
-    // if (match !== null) {
-    //     sbiUtils.assignToObject(itemData, "data.target.value", match.groups.range);
-    //     sbiUtils.assignToObject(itemData, "data.target.type", match.groups.shape);
-    //     sbiUtils.assignToObject(itemData, "data.target.units", "ft");
-    // }
-  }
-  function updateReach() {
-    // const match = this.#reachRegex.exec(text);
-    // if (match !== null) {
-    //     const reach = parseInt(match.groups.reach);
-    //     sbiUtils.assignToObject(itemData, "data.range.value", reach);
-    //     sbiUtils.assignToObject(itemData, "data.range.units", "ft");
-    //     sbiUtils.assignToObject(itemData, "data.actionType", "mwak");
-    // }
-  }
-  function updateRange() {
-    // const match = this.#rangeRegex.exec(text);
-    // if (match !== null) {
-    //     const nearRange = parseInt(match.groups.near);
-    //     const farRange = parseInt(match.groups.far);
-    //     sbiUtils.assignToObject(itemData, "data.range.value", nearRange);
-    //     sbiUtils.assignToObject(itemData, "data.range.long", farRange);
-    //     sbiUtils.assignToObject(itemData, "data.range.units", "ft");
-    //     sbiUtils.assignToObject(itemData, "data.actionType", "rwak");
-    //     sbiUtils.assignToObject(itemData, "data.ability", "dex");
-    // }
-  }
   for (const action of actorData.actions) {
     const name = action.name;
+    if (!name) {
+      return;
+    }
 
-    const itemUpdate = {
+    let itemUpdate = {
       name,
       type: "feat",
       img: await retrieveFromPackItemImg(name),
@@ -309,16 +364,11 @@ async function updateActions(actor, actorData) {
       itemUpdate.data.quantity = 1;
 
       if (lowerName !== "spellcasting") {
-        updateAttack();
-        updateSaves();
-        updateRecharge();
-        updateTarget();
-        updateReach();
-        updateRange();
+        itemUpdate = updateAction(itemUpdate, action, actorData);
       }
     }
 
-    const doc = new Item(itemData).toObject();
+    const doc = new Item(itemUpdate).toObject();
     await actor.createEmbeddedDocuments("Item", [doc]);
   }
 }
