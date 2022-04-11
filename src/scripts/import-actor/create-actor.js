@@ -302,7 +302,6 @@ function updateAction(itemUpdate, action, actorData) {
   }
 
   // shape
-  // todo - bug: cant place shape Error: "You must provide an embedded Document instance as the input for a PlaceableObject"
   const shape = action.shape;
   if (shape) {
     if (!itemUpdate.data.target) {
