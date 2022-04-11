@@ -290,11 +290,11 @@ function updateAction(itemUpdate, action, actorData) {
 
   // range
   // todo also set range to 5ft if weapon attack and no special range found
+  if (!itemUpdate.data.range) {
+    itemUpdate.data.range = {};
+  }
   const range = action.range;
   if (range) {
-    if (!itemUpdate.data.range) {
-      itemUpdate.data.range = {};
-    }
     itemUpdate.data.range.value = range.normal;
     itemUpdate.data.range.long = range.far;
     itemUpdate.data.actionType = "rwak";
