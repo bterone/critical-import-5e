@@ -26,6 +26,8 @@ export function gatherActorData(importedActorData) {
     /(proficiency bonus|prof bonus)\s?(?<profBonus>\+\d+)/gi;
   const legendaryResistancesRgx =
     /legendary resistance\s?\(?(?<timesADay>\d+).day.?\.?(?<desc>.+)/gi;
+  const legendaryActionRgx = /\btake\b.+(?<uses>\d+).?\blegendary actions\b/i;
+  const legendaryActionCostsRgx = /\bcosts\b.?(?<cost>\d).?\bactions\b/i;
 
   logger.logConsole("gathering actor data ...");
   const actorData = {};
@@ -174,8 +176,15 @@ export function gatherActorData(importedActorData) {
     const desc = lActions.splice(0, 1);
     actorData.legendaryActions = {};
     actorData.legendaryActions.desc = desc;
+    actorData.legendaryActions.uses =
+      legendaryActionRgx.exec(desc)?.groups?.uses;
     logger.logConsole("legendary actions desc", desc);
     const legendaryActions = gatherActions(lActions);
+    for (const legAction of legendaryActions) {
+      const cost =
+        legendaryActionCostsRgx.exec(legAction.name)?.groups?.cost || 1;
+      legAction.cost = parseInt(cost);
+    }
     actorData.legendaryActions.actions = legendaryActions;
     logger.logConsole("legendary actions", legendaryActions);
   }
