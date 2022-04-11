@@ -241,6 +241,9 @@ function updateAction(itemUpdate, action, actorData) {
       parseInt(action.hit)
         ? "str"
         : "dex";
+    itemUpdate.data.identified = true;
+    itemUpdate.data.equipped = true;
+    itemUpdate.data.proficient = true;
   }
 
   // damage
@@ -360,9 +363,6 @@ async function updateActions(actor, actorData) {
     };
 
     if (lowerName !== "multiattack") {
-      itemUpdate.data.identified = true;
-      itemUpdate.data.equipped = true;
-      itemUpdate.data.proficient = true;
       itemUpdate.data.quantity = 1;
 
       if (lowerName !== "spellcasting") {
