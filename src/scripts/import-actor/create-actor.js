@@ -136,11 +136,17 @@ export async function createActor(actorData) {
     await updateActions(actor, actorData);
   }
 
-  // legendary actions
+  // bonus actions => monsters usualy dont get bonus actions
+  // reactions => monsters usualy dont get reactions (except the attack of opportunity)
 
-  // lair actions
+  // todo legendary actions
+  if (actorData.legendaryActions) {
+    await updateLegendaryActions(actor, actorData);
+  }
 
-  // regional effects
+  // todo lair actions
+
+  // todo regional effects
 
   logger.logConsole("actor", actor);
 }
@@ -250,14 +256,12 @@ function updateAction(itemUpdate, action, actorData) {
   }
   const parts = [];
   for (const dmg of action.dmg) {
-    console.log("dmg", dmg);
     if (!dmg.formula) {
       continue;
     }
 
     const f = dmg.formula.trim();
     const idx = f.indexOf(" ");
-    console.log("idx", idx);
     let dmgVal;
     if (idx != -1) {
       dmgVal = `${f.substring(0, idx)} + @mod`;
@@ -376,6 +380,75 @@ async function updateActions(actor, actorData) {
 
     const doc = new Item(itemUpdate).toObject();
     await actor.createEmbeddedDocuments("Item", [doc]);
+  }
+}
+
+async function updateLegendaryActions(actor, actorData) {
+  const uses = actorData.legendaryActions.uses;
+  const legendaryResourcesUpdate = {
+    "data.resources.legact.value": uses,
+    "data.resources.legact.max": uses,
+  };
+  await actor.update(legendaryResourcesUpdate);
+  console.log("updated resources");
+
+  // todo
+  // set "Legendary Actions"-feat
+  // const featDesc = actorData.legendaryActions.desc;
+  // const itemUpdate = {
+  //   name: "Legendary Actions",
+  //   type: "feat",
+  //   flags: {
+  //     dnd5e: {
+  //       itemInfo: {
+  //         type: "legendary",
+  //       },
+  //     },
+  //   },
+  //   data: {
+  //     description: {
+  //       value: featDesc,
+  //     },
+  //     equipped: true,
+  //     proficient: true,
+  //   },
+  // };
+  // const doc = new Item(itemUpdate).toObject();
+  // await actor.createEmbeddedDocuments("Item", [doc]);
+  console.log("updated Legendary Actions");
+
+  for (const legAction of actorData.legendaryActions.actions) {
+    const itemUpdate = {
+      name: legAction.name,
+      type: "feat",
+      flags: {
+        adnd5e: {
+          itemInfo: {
+            type: "legendary",
+          },
+        },
+      },
+      data: {
+        activation: {
+          type: "legendary",
+          cost: legAction.cost,
+        },
+        consume: {
+          type: "attribute",
+          target: "resources.legact.value",
+          amount: legAction.cost,
+        },
+        description: {
+          value: legAction.desc,
+        },
+        equipped: true,
+        proficient: true,
+      },
+    };
+
+    const doc = new Item(itemUpdate).toObject();
+    await actor.createEmbeddedDocuments("Item", [doc]);
+    console.log("updated doc", legAction.name);
   }
 }
 
