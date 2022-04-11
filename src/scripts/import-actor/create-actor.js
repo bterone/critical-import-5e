@@ -228,9 +228,11 @@ async function updateFeats(actor, actorData) {
 }
 
 function updateAction(itemUpdate, action, actorData) {
+  // todo fix breath-weapon
+
   // attack
-  const isAttack = action.dmg.length > 0;
-  if (isAttack) {
+  const isWeaponAttack = action.hit;
+  if (isWeaponAttack) {
     itemUpdate.type = "weapon";
     itemUpdate.data.weaponType = "natural";
     itemUpdate.data.ability =
@@ -239,39 +241,37 @@ function updateAction(itemUpdate, action, actorData) {
       parseInt(action.hit)
         ? "str"
         : "dex";
+  }
 
-    // damage
-    if (!itemUpdate.data.damage) {
-      itemUpdate.data.damage = {};
+  // damage
+  if (!itemUpdate.data.damage) {
+    itemUpdate.data.damage = {};
+  }
+  const parts = [];
+  for (const dmg of action.dmg) {
+    console.log("dmg", dmg);
+    if (!dmg.formula) {
+      continue;
     }
-    const parts = [];
-    for (const dmg of action.dmg) {
-      console.log("dmg", dmg);
-      if (!dmg.formula) {
-        continue;
-      }
 
-      const f = dmg.formula.trim();
-      const idx = f.indexOf(" ");
-      console.log("idx", idx);
-      let dmgVal;
-      if (idx != -1) {
-        dmgVal = `${f.substring(0, idx)} + @mod`;
-      } else {
-        dmgVal = f;
-      }
-      parts.push([dmgVal, dmg.type]);
+    const f = dmg.formula.trim();
+    const idx = f.indexOf(" ");
+    console.log("idx", idx);
+    let dmgVal;
+    if (idx != -1) {
+      dmgVal = `${f.substring(0, idx)} + @mod`;
+    } else {
+      dmgVal = f;
     }
-    itemUpdate.data.damage.parts = parts;
-    console.log("parts", parts);
-    console.log("itemUpdate", itemUpdate);
+    parts.push([dmgVal, dmg.type]);
+  }
+  itemUpdate.data.damage.parts = parts;
 
-    // versatile
-    const versatile = action.versatile;
-    if (versatile) {
-      itemUpdate.data.damage.versatile = versatile.dmgroll; // todo use formula + @mod ?
-      itemUpdate.data.properties.ver = true;
-    }
+  // versatile
+  const versatile = action.versatile;
+  if (versatile) {
+    itemUpdate.data.damage.versatile = versatile.dmgroll; // todo use formula + @mod ?
+    itemUpdate.data.properties.ver = true;
   }
 
   // reach
@@ -286,6 +286,7 @@ function updateAction(itemUpdate, action, actorData) {
   }
 
   // range
+  // todo also set range to 5ft if weapon attack and no special range found
   const range = action.range;
   if (range) {
     if (!itemUpdate.data.range) {
@@ -341,10 +342,12 @@ async function updateActions(actor, actorData) {
       return;
     }
 
+    const lowerName = name.toLocaleLowerCase();
+
     let itemUpdate = {
       name,
       type: "feat",
-      img: await retrieveFromPackItemImg(name),
+      img: await retrieveFromPackItemImg(lowerName),
       data: {
         description: {
           value: action.desc,
@@ -356,7 +359,6 @@ async function updateActions(actor, actorData) {
       },
     };
 
-    const lowerName = name.toLocaleLowerCase();
     if (lowerName !== "multiattack") {
       itemUpdate.data.identified = true;
       itemUpdate.data.equipped = true;
