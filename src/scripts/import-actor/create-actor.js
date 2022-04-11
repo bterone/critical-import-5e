@@ -14,7 +14,7 @@ export async function createActor(actorData) {
     type: "npc",
   });
 
-  const speeds = formatSpeeds(actorData);
+  const speeds = formatSpeeds(actorData.speed);
   logger.logConsole("speeds", speeds);
 
   // a single object because multiple "update"-function calls slow the app down
@@ -60,13 +60,13 @@ export async function createActor(actorData) {
     "data.details.cr": actorData.challenge.cr,
     "data.details.xp.value": actorData.challenge.xp,
     // armor
-    "data.attributes.ac.calc": formatArmor(actorData),
+    "data.attributes.ac.calc": formatArmor(actorData.armor),
     "data.attributes.ac.flat": actorData.armor.armorClass?.trim(),
     // racialData
     "data.details.alignment": actorData.race.alignment?.trim(),
     "data.details.race": actorData.race.race?.trim(),
     "data.details.type": actorData.race.type?.trim(),
-    "data.traits.size": formatSize(actorData),
+    "data.traits.size": formatSize(actorData.race),
     // proficiency bonus
     "data.data.attributes.prof": parseInt(
       actorData.proficiencyBonus?.profBonus
@@ -93,12 +93,12 @@ export async function createActor(actorData) {
   };
 
   // senses
-  updateData = setSenses(updateData, actorData);
+  updateData = setSenses(updateData, actorData.senses);
   await actor.update(updateData);
 
   // skills
   // has to be done after basic information has been set
-  const skills = createSkills(actorData, actor);
+  const skills = createSkills(actorData.skills, actor);
   const skillsUpdate = {
     "data.skills.acr.value": skills.acr,
     "data.skills.ani.value": skills.ani,
@@ -123,12 +123,12 @@ export async function createActor(actorData) {
 
   // spells
   if (actorData.spellcasting) {
-    await updateSpells(actor, actorData);
+    await updateSpells(actor, actorData.spellcasting);
   }
 
   // feats
   if (actorData.features) {
-    await updateFeats(actor, actorData);
+    await updateFeats(actor, actorData.features);
   }
 
   // actions
@@ -141,7 +141,7 @@ export async function createActor(actorData) {
 
   // todo legendary actions
   if (actorData.legendaryActions) {
-    await updateLegendaryActions(actor, actorData);
+    await updateLegendaryActions(actor, actorData.legendaryActions);
   }
 
   // todo lair actions
@@ -151,13 +151,13 @@ export async function createActor(actorData) {
   logger.logConsole("actor", actor);
 }
 
-async function updateSpells(actor, actorData) {
+async function updateSpells(actor, spellcasting) {
   // spells
   const spellPack = "dnd5e.spells";
 
-  if (actorData.spellcasting.basics.innate) {
+  if (spellcasting.basics.innate) {
     // at will
-    const spellsAtWill = actorData.spellcasting.spells?.atWill;
+    const spellsAtWill = spellcasting.spells?.atWill;
     if (spellsAtWill) {
       const atWillSpellDocs = await retrieveFromPackMany(
         spellPack,
@@ -170,7 +170,7 @@ async function updateSpells(actor, actorData) {
       }
     }
     // per day
-    const spells = actorData.spellcasting.spells?.spellList?.spells;
+    const spells = spellcasting.spells?.spellList?.spells;
     if (spells) {
       const spellDocs = await retrieveFromPackMany(spellPack, spells);
       for (const doc of spellDocs) {
@@ -183,9 +183,9 @@ async function updateSpells(actor, actorData) {
         await actor.createEmbeddedDocuments("Item", [doc]);
       }
     }
-  } else if (actorData.spellcasting.basics.casting) {
+  } else if (spellcasting.basics.casting) {
     // cantrips
-    const cantrips = actorData.spellcasting.spells?.cantrips;
+    const cantrips = spellcasting.spells?.cantrips;
     if (cantrips) {
       const cantripDocs = await retrieveFromPackMany(spellPack, cantrips);
       for (const doc of cantripDocs) {
@@ -193,7 +193,7 @@ async function updateSpells(actor, actorData) {
       }
     }
     // spells
-    const spellList = actorData.spellcasting.spells?.spellList;
+    const spellList = spellcasting.spells?.spellList;
     if (spellList) {
       for (const spellLevel of spellList) {
         const level = spellLevel.level;
@@ -214,8 +214,8 @@ async function updateSpells(actor, actorData) {
   }
 }
 
-async function updateFeats(actor, actorData) {
-  for (const feat of actorData.features) {
+async function updateFeats(actor, features) {
+  for (const feat of features) {
     const featData = {
       name: feat.name,
       type: "feat",
@@ -383,8 +383,8 @@ async function updateActions(actor, actorData) {
   }
 }
 
-async function updateLegendaryActions(actor, actorData) {
-  const uses = actorData.legendaryActions.uses;
+async function updateLegendaryActions(actor, legendaryActions) {
+  const uses = legendaryActions.uses;
   const legendaryResourcesUpdate = {
     "data.resources.legact.value": uses,
     "data.resources.legact.max": uses,
@@ -393,6 +393,7 @@ async function updateLegendaryActions(actor, actorData) {
   console.log("updated resources");
 
   // todo
+  // set via "updateFeats"
   // set "Legendary Actions"-feat
   // const featDesc = actorData.legendaryActions.desc;
   // const itemUpdate = {
@@ -417,7 +418,7 @@ async function updateLegendaryActions(actor, actorData) {
   // await actor.createEmbeddedDocuments("Item", [doc]);
   console.log("updated Legendary Actions");
 
-  for (const legAction of actorData.legendaryActions.actions) {
+  for (const legAction of legendaryActions.actions) {
     const itemUpdate = {
       name: legAction.name,
       type: "feat",
@@ -452,29 +453,29 @@ async function updateLegendaryActions(actor, actorData) {
   }
 }
 
-function setSenses(updateData, actorData) {
-  for (const s of actorData.senses) {
+function setSenses(updateData, senses) {
+  for (const s of senses) {
     logger.logConsole("s", s);
     updateData[`data.attributes.senses.${s.sense}`] = s.mod;
   }
   return updateData;
 }
 
-function formatSpeeds(actorData) {
+function formatSpeeds(speed) {
   const speeds = {};
-  actorData.speed.forEach((s) => {
+  speed.forEach((s) => {
     speeds[s.type] = s.value;
   });
   return speeds;
 }
 
-function formatArmor(actorData) {
-  if (!actorData.armor.armorType) {
+function formatArmor(armor) {
+  if (!armor.armorType) {
     return "";
   }
 
   let armorType;
-  const type = actorData.armor.armorType.trim().toLocaleLowerCase();
+  const type = armor.armorType.trim().toLocaleLowerCase();
   if (type.includes("natural armor")) {
     armorType = "natural";
   } else {
@@ -484,9 +485,9 @@ function formatArmor(actorData) {
   return armorType;
 }
 
-function formatSize(actorData) {
+function formatSize(race) {
   let size;
-  const sizeData = actorData.race.size.trim().toLocaleLowerCase();
+  const sizeData = race.size.trim().toLocaleLowerCase();
   switch (sizeData) {
     // case "tiny":
     //   break;
@@ -511,7 +512,7 @@ function formatSize(actorData) {
   return size;
 }
 
-function createSkills(actionData, actor) {
+function createSkills(actorSkills, actor) {
   function calcSkillVal(actor, key, val) {
     const attribute = actor.data.data.skills[key].ability;
     const attributeMod = actor.data.data.abilities[attribute].mod;
@@ -520,8 +521,8 @@ function createSkills(actionData, actor) {
   }
 
   const skills = {};
-  for (const s in actionData.skills) {
-    const skillVal = actionData.skills[s];
+  for (const s in actorSkills) {
+    const skillVal = actorSkills[s];
     switch (s.trim().toLocaleLowerCase()) {
       case "acrobatics":
         skills.acr = parseInt(skillVal);
