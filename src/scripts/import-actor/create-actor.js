@@ -3,6 +3,7 @@ import {
   retrieveFromPackMany,
   retrieveFromPackItemImg,
   shortenAbility,
+  setProperty,
 } from "./../common.js";
 
 const logger = new Logger("create-actor.js");
@@ -139,16 +140,59 @@ export async function createActor(actorData) {
   // bonus actions => monsters usualy dont get bonus actions
   // reactions => monsters usualy dont get reactions (except the attack of opportunity)
 
-  // todo legendary actions
+  // legendary actions
   if (actorData.legendaryActions) {
     await updateLegendaryActions(actor, actorData.legendaryActions);
   }
+  // todo
+  // const otherFeats = [];
+  // // "Legendary Actions"-feat
+  // otherFeats.push({
+  //   name: "Legendary Actions",
+  //   desc: actorData.legendaryActions.desc,
+  // });
+  // // "Lair-Actions"-feat
+  // otherFeats.push({
+  //   name: "Lair Actions",
+  //   desc: undefined,
+  // });
+  // // "Regial-Effects"-feat
+  // otherFeats.push({
+  //   name: "Regial Effects",
+  //   desc: undefined,
+  // });
+  // await updateFeats(actor, otherFeats);
 
-  // todo lair actions
-
-  // todo regional effects
+  // legendary resistances
+  if (actorData.legendaryResistances) {
+    await updateLegendaryResistances(actor, actorData.legendaryResistances);
+  }
 
   logger.logConsole("actor", actor);
+}
+
+async function updateLegendaryResistances(actor, legendaryResistances) {
+  // actor
+  const perDay = parseInt(legendaryResistances.timesADay);
+  await actor.update({
+    "data.resources.legres.value": perDay,
+    "data.resources.legres.max": perDay,
+  });
+  //  feat
+  const name = "Legendary Resistance";
+  const itemUpdate = {
+    name,
+    type: "feat",
+    img: await retrieveFromPackItemImg(name),
+  };
+  setProperty(itemUpdate, "data.description.value", legendaryResistances.desc);
+  setProperty(itemUpdate, "data.activation.type", "special");
+  setProperty(itemUpdate, "data.consume.type", "attribute");
+  setProperty(itemUpdate, "data.consume.target", "resources.legres.value");
+  setProperty(itemUpdate, "data.consume.amount", 1);
+
+  const doc = new Item(itemUpdate).toObject();
+  await actor.createEmbeddedDocuments("Item", [doc]);
 }
 
 async function updateSpells(actor, spellcasting) {
@@ -390,33 +434,6 @@ async function updateLegendaryActions(actor, legendaryActions) {
     "data.resources.legact.max": uses,
   };
   await actor.update(legendaryResourcesUpdate);
-  console.log("updated resources");
-
-  // todo
-  // set via "updateFeats"
-  // set "Legendary Actions"-feat
-  // const featDesc = actorData.legendaryActions.desc;
-  // const itemUpdate = {
-  //   name: "Legendary Actions",
-  //   type: "feat",
-  //   flags: {
-  //     dnd5e: {
-  //       itemInfo: {
-  //         type: "legendary",
-  //       },
-  //     },
-  //   },
-  //   data: {
-  //     description: {
-  //       value: featDesc,
-  //     },
-  //     equipped: true,
-  //     proficient: true,
-  //   },
-  // };
-  // const doc = new Item(itemUpdate).toObject();
-  // await actor.createEmbeddedDocuments("Item", [doc]);
-  console.log("updated Legendary Actions");
 
   for (const legAction of legendaryActions.actions) {
     const itemUpdate = {
@@ -449,7 +466,6 @@ async function updateLegendaryActions(actor, legendaryActions) {
 
     const doc = new Item(itemUpdate).toObject();
     await actor.createEmbeddedDocuments("Item", [doc]);
-    console.log("updated doc", legAction.name);
   }
 }
 
