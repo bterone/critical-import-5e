@@ -1,0 +1,25 @@
+/* injected button */
+.critical-import-open-dialog-btn {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+/* dialog */
+.critical-import-btn {
+  width: 30%;
+}
+
+.critical-import-input {
+  margin-bottom: 10px;
+  height: 100%;
+  resize: none;
+}
+
+.critical-import-container {
+  height: 500px;
+}
+
+.critical-import-btn-container {
+  height: 20%;
+  text-align: right;
+}

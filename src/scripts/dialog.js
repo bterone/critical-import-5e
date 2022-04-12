@@ -3,54 +3,47 @@ import { Logger } from "./log.js";
 const logger = new Logger("dialog.js");
 logger.disable();
 
-export function openImportDialog(title, callback) {
+export async function openImportDialog(title, callback) {
   /**
    * HTMLElement.outerHTML does't work for input.value!
    * => because of this, a string representation is necessary
    */
-  const content =
-    `
-       <div>
-        <textarea id="importDialog` +
-    title +
-    `" wrap="hard" cols="1" placeholder="Usage:
-          - Paste the full ` +
-    title +
-    `statblock text, formatted following the WotC formular, into this box.
-          - If copy-paste errors occure, a fix inside this box may be done."></textarea>
-       </div>
+  const content = `
+    <div class="critical-import-container">
+    <textarea
+      id="critical-import-input-actor"
+      class="critical-import-input"
+      wrap="hard"
+      cols="1"
+      placeholder="Please paste your actor (formated in the WotC style) in here!"
+    ></textarea>
+  </div>  
      `;
 
-  let d = new Dialog({
+  const options = {
+    id: "critical-import-dialog-" + title,
+    resizable: false,
+    popup: true,
     title: "Critical Import 5e - Import " + title,
-    content,
-    buttons: {
-      done: {
-        icon: '<i class="fas fa-file-download"></i>',
-        label: "Import",
-        callback: callback,
+    classes: [],
+  };
+
+  let d = new Dialog(
+    {
+      content,
+      buttons: {
+        done: {
+          classes: ["critical-import-btn"],
+          icon: '<i class="fas fa-file-download"></i>',
+          label: "Import",
+          callback: async () => await callback(),
+        },
+      },
+      render: (html) => {
+        //
       },
     },
-    default: "close",
-    render: (html) =>
-      logger.logConsole(
-        "onRender - Register interactivity in the rendered dialog"
-      ),
-    close: (html) => {
-      logger.logConsole("closed Import " + title + " dialog");
-    },
-  });
+    options
+  );
   d.render(true);
-}
-
-export function createImportButton(label, callback) {
-  const icon = document.createElement("i");
-  icon.classList = "fas fa-file-download";
-
-  const btn = document.createElement("button");
-  btn.classList = "dndbeyondSync-menu-btn";
-  btn.innerText = label;
-  btn.onclick = callback;
-  btn.appendChild(icon);
-  return btn;
 }

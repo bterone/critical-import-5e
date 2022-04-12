@@ -1,4 +1,5 @@
-import { openImportDialog, createImportButton } from "./dialog.js";
+import { openImportDialog } from "./dialog.js";
+import { createImportButton } from "./inject.js";
 import { importActor } from "./import-actor/import-actor.js";
 import { Logger } from "./log.js";
 
@@ -13,15 +14,16 @@ Hooks.on("ready", () => {
   logger.logConsole("critical-import-5e | starting ...");
 });
 
-const DIALOG_ID = "importDialog";
 // monster, NPC
 Hooks.on("renderActorDirectory", (args) => {
   const footer = args.element[0].getElementsByTagName("footer")[0];
-  const label = "Actor ";
+  const label = "Actor";
   footer.appendChild(
-    createImportButton("Import " + label, () => {
-      openImportDialog(label, async () => {
-        const actorData = document.getElementById(DIALOG_ID + label).value;
+    createImportButton("Import " + label, async () => {
+      await openImportDialog(label, async () => {
+        const actorData = document.getElementById(
+          "critical-import-input-actor"
+        ).value;
         await importActor(actorData);
       });
     })
