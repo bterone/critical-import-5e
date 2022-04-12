@@ -190,9 +190,9 @@ export function gatherActorData(importedActorData) {
   }
 
   // Lair actions
-  const layActions = sections["lair actions"];
-  if (layActions) {
-    const lairActions = gatherActions(layActions);
+  const lairActions = sections["lair actions"];
+  if (lairActions) {
+    const lairActions = gatherActions(lairActions);
     actorData.lairActions = lairActions;
     logger.logConsole("lair actions", lairActions);
   }
