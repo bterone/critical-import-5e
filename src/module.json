@@ -1,7 +1,7 @@
 {
   "name": "critical-import-5e",
   "title": "Critical Import 5e",
-  "description": "Two way sync between D&D Beyond and FoundryVTT.",
+  "description": "Import module for monsters, NPCs, items, spells, and much more.",
   "author": "PragmaticBeaver",
   "authors": [
     {
