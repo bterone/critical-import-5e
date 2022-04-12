@@ -28,42 +28,42 @@ Hooks.on("renderActorDirectory", (args) => {
   );
 });
 
-// item, spell, class, monster feature, racial feature
-Hooks.on("renderItemDirectory", (args) => {
-  const footer = args.element[0].getElementsByTagName("footer")[0];
-  const labelItem = "Item ";
-  footer.appendChild(
-    createImportButton("Import " + labelItem, () => {
-      openImportDialog(labelItem, () => {
-        logger.logConsole(labelItem);
-      });
-    })
-  );
+// // item, spell, class, monster feature, racial feature
+// Hooks.on("renderItemDirectory", (args) => {
+//   const footer = args.element[0].getElementsByTagName("footer")[0];
+//   const labelItem = "Item ";
+//   footer.appendChild(
+//     createImportButton("Import " + labelItem, () => {
+//       openImportDialog(labelItem, () => {
+//         logger.logConsole(labelItem);
+//       });
+//     })
+//   );
 
-  const labelSpell = "Spell ";
-  footer.appendChild(
-    createImportButton("Import " + labelSpell, () => {
-      openImportDialog(labelSpell, () => {
-        logger.logConsole(labelSpell);
-      });
-    })
-  );
+//   const labelSpell = "Spell ";
+//   footer.appendChild(
+//     createImportButton("Import " + labelSpell, () => {
+//       openImportDialog(labelSpell, () => {
+//         logger.logConsole(labelSpell);
+//       });
+//     })
+//   );
 
-  const labelClass = "Class ";
-  footer.appendChild(
-    createImportButton("Import " + labelClass, () => {
-      openImportDialog(labelClass, () => {
-        logger.logConsole(labelClass);
-      });
-    })
-  );
+//   const labelClass = "Class ";
+//   footer.appendChild(
+//     createImportButton("Import " + labelClass, () => {
+//       openImportDialog(labelClass, () => {
+//         logger.logConsole(labelClass);
+//       });
+//     })
+//   );
 
-  const labelFeature = "Feature ";
-  footer.appendChild(
-    createImportButton("Import " + labelFeature, () => {
-      openImportDialog(labelFeature, () => {
-        logger.logConsole(labelFeature);
-      });
-    })
-  );
-});
+//   const labelFeature = "Feature ";
+//   footer.appendChild(
+//     createImportButton("Import " + labelFeature, () => {
+//       openImportDialog(labelFeature, () => {
+//         logger.logConsole(labelFeature);
+//       });
+//     })
+//   );
+// });
