@@ -80,3 +80,23 @@ export function shortenAbility(longAbilityName) {
       break;
   }
 }
+
+export function setProperty(obj, property, val) {
+  const props = property.split(".");
+  const end = props.length - 1;
+  let currentObj = obj;
+
+  for (let i = 0; i < props.length; i++) {
+    const prop = props[i];
+
+    if (i === end) {
+      currentObj[prop] = val;
+    } else {
+      if (!currentObj[prop]) {
+        currentObj[prop] = {};
+      }
+      currentObj = currentObj[prop];
+    }
+  }
+  return obj;
+}
