@@ -92,9 +92,6 @@ export async function createActor(actorData) {
       ? shortenAbility(actorData.spellcasting.basics.ability)
       : "",
   };
-
-  // senses
-  updateData = setSenses(updateData, actorData.senses);
   await actor.update(updateData);
 
   // skills
@@ -121,6 +118,11 @@ export async function createActor(actorData) {
     "data.skills.sur.value": skills.sur,
   };
   await actor.update(skillsUpdate);
+
+  // senses
+  if (actorData.senses) {
+    await updateSenses(actor, actorData.senses);
+  }
 
   // spells
   if (actorData.spellcasting) {
@@ -219,11 +221,11 @@ async function updateSpells(actor, spellcasting) {
       const spellDocs = await retrieveFromPackMany(spellPack, spells);
       for (const doc of spellDocs) {
         const usesPerDay = spells.timesPerDay;
-        doc["data.uses.value"] = usesPerDay;
-        doc["data.uses.max"] = usesPerDay;
-        doc["data.uses.per"] = "day";
-        doc["data.preparation.mode"] = "innate";
-        doc["data.preparation.prepared"] = true;
+        setProperty(doc, "data.uses.value", usesPerDay);
+        setProperty(doc, "data.uses.max", usesPerDay);
+        setProperty(doc, "data.uses.per", "day");
+        setProperty(doc, "data.preparation.mode", "innate");
+        setProperty(doc, "data.preparation.prepared", true);
         await actor.createEmbeddedDocuments("Item", [doc]);
       }
     }
@@ -243,9 +245,9 @@ async function updateSpells(actor, spellcasting) {
         const level = spellLevel.level;
         const slots = spellLevel.slots;
         const update = {};
-        update[`data.spells.spell${level}.value`] = slots;
-        update[`data.spells.spell${level}.max`] = slots;
-        update[`data.spells.spell${level}.override`] = slots;
+        setProperty(update, `data.spells.spell${level}.value`, slots);
+        setProperty(update, `data.spells.spell${level}.max`, slots);
+        setProperty(update, `data.spells.spell${level}.override`, slots);
         await actor.update(update);
 
         const spells = spellLevel.spells;
@@ -264,13 +266,9 @@ async function updateFeats(actor, features) {
       name: feat.name,
       type: "feat",
       img: await retrieveFromPackItemImg(feat.name),
-      data: {
-        description: {
-          value: feat.desc,
-        },
-      },
       // effects: undefined // effects of embeded-documents are currently not supported by FoundryVTT => maybe create feats as seperate document and link with actor?
     };
+    setProperty(featData, "data.description.value", feat.desc);
     logger.logConsole("featData", featData);
     const item = new Item(featData);
     await actor.createEmbeddedDocuments("Item", [item.toObject()]);
@@ -282,22 +280,20 @@ function updateAction(itemUpdate, action, actorData) {
   const isWeaponAttack = action.hit;
   if (isWeaponAttack) {
     itemUpdate.type = "weapon";
-    itemUpdate.data.weaponType = "natural";
-    itemUpdate.data.ability =
+    const abilityMod =
       parseInt(actorData.attributes.str.mod) +
         parseInt(actorData.proficiencyBonus.profBonus) ===
       parseInt(action.hit)
         ? "str"
         : "dex";
-    itemUpdate.data.identified = true;
-    itemUpdate.data.equipped = true;
-    itemUpdate.data.proficient = true;
+    setProperty(itemUpdate, "data.ability", abilityMod);
+    setProperty(itemUpdate, "data.weaponType", "natural");
+    setProperty(itemUpdate, "data.identified", true);
+    setProperty(itemUpdate, "data.equipped", true);
+    setProperty(itemUpdate, "data.proficient", true);
   }
 
   // damage
-  if (!itemUpdate.data.damage) {
-    itemUpdate.data.damage = {};
-  }
   const parts = [];
   for (const dmg of action.dmg) {
     if (!dmg.formula) {
@@ -314,77 +310,59 @@ function updateAction(itemUpdate, action, actorData) {
     }
     parts.push([dmgVal, dmg.type]);
   }
-  itemUpdate.data.damage.parts = parts;
+  setProperty(itemUpdate, "data.damage.parts", parts);
 
   // versatile
   const versatile = action.versatile;
   if (versatile) {
-    itemUpdate.data.damage.versatile = versatile.dmgroll; // todo use formula + @mod ?
-    itemUpdate.data.properties.ver = true;
+    setProperty(itemUpdate, "data.damage.versatile", versatile.dmgroll); // todo use formula + @mod ?
+    setProperty(itemUpdate, "data.properties.ver", true);
   }
 
   // reach
   const reach = action.reach;
   if (reach) {
-    if (!itemUpdate.data.reach) {
-      itemUpdate.data.reach = {};
-    }
-    itemUpdate.data.reach.value = reach;
-    itemUpdate.data.reach.units = "ft";
-    itemUpdate.data.actionType = "mwak";
+    setProperty(itemUpdate, "data.reach.value", reach);
+    setProperty(itemUpdate, "data.reach.units", "ft");
+    setProperty(itemUpdate, "data.actionType", "mwak");
 
     // melee attack
     if (isWeaponAttack) {
-      if (!itemUpdate.data.range) {
-        itemUpdate.data.range = {};
-      }
-      itemUpdate.data.range.value = `${reach} Feet`;
+      setProperty(itemUpdate, "data.range.value", `${reach} Feet`);
     }
   }
 
   // range
-  if (!itemUpdate.data.range) {
-    itemUpdate.data.range = {};
-  }
   const range = action.range;
   if (range) {
-    itemUpdate.data.range.value = range.normal;
-    itemUpdate.data.range.long = range.far;
-    itemUpdate.data.actionType = "rwak";
-    itemUpdate.data.ability = "dex"; // todo always dex?
+    setProperty(itemUpdate, "data.range.value", range.normal);
+    setProperty(itemUpdate, "data.range.long", range.far);
+    setProperty(itemUpdate, "data.actionType", "rwak");
+    setProperty(itemUpdate, "data.ability", "dex"); // todo always dex?
   }
 
   // shape
   const shape = action.shape;
   if (shape) {
-    if (!itemUpdate.data.target) {
-      itemUpdate.data.target = {};
-    }
-    itemUpdate.data.target.value = parseInt(shape.range);
-    itemUpdate.data.target.type = shape.shape;
-    itemUpdate.data.target.units = "ft";
+    setProperty(itemUpdate, "data.target.value", parseInt(shape.range));
+    setProperty(itemUpdate, "data.target.type", shape.shape);
+    setProperty(itemUpdate, "data.target.units", "ft");
   }
 
   // saves
   const save = action.savingThrow;
   if (save) {
-    if (!itemUpdate.data.save) {
-      itemUpdate.data.save = {};
-    }
-    itemUpdate.data.actionType = "save";
-    itemUpdate.data.save.ability = shortenAbility(save.ability);
-    itemUpdate.data.save.dc = save.dc;
-    itemUpdate.data.save.scaling = "flat";
+    setProperty(itemUpdate, "data.actionType", "save");
+    setProperty(itemUpdate, "data.save.ability", shortenAbility(save.ability));
+    setProperty(itemUpdate, "data.save.dc", save.dc);
+    setProperty(itemUpdate, "data.save.scaling", "flat");
   }
 
   // recharge
   const recharge = action.recharge;
   if (recharge) {
-    if (!itemUpdate.data.recharge) {
-      itemUpdate.data.recharge = {};
-    }
-    itemUpdate.data.recharge.value = recharge.from;
-    itemUpdate.data.recharge.charged = true;
+    setProperty(itemUpdate, "data.recharge.value", recharge.from);
+    setProperty(itemUpdate, "data.recharge.charged", true);
   }
 
   return itemUpdate;
@@ -403,19 +381,13 @@ async function updateActions(actor, actorData) {
       name,
       type: "feat",
       img: await retrieveFromPackItemImg(lowerName),
-      data: {
-        description: {
-          value: action.desc,
-        },
-        activation: {
-          type: "action",
-          cost: 1,
-        },
-      },
     };
+    setProperty(itemUpdate, "data.description.value", action.desc);
+    setProperty(itemUpdate, "data.activation.type", "action");
+    setProperty(itemUpdate, "data.activation.cost", 1);
 
     if (lowerName !== "multiattack") {
-      itemUpdate.data.quantity = 1;
+      setProperty(itemUpdate, "data.quantity", 1);
 
       if (lowerName !== "spellcasting") {
         itemUpdate = updateAction(itemUpdate, action, actorData);
@@ -429,52 +401,38 @@ async function updateActions(actor, actorData) {
 
 async function updateLegendaryActions(actor, legendaryActions) {
   const uses = legendaryActions.uses;
-  const legendaryResourcesUpdate = {
-    "data.resources.legact.value": uses,
-    "data.resources.legact.max": uses,
-  };
+  const legendaryResourcesUpdate = {};
+  setProperty(legendaryResourcesUpdate, "data.resources.legact.value", uses);
+  setProperty(legendaryResourcesUpdate, "data.resources.legact.max", uses);
   await actor.update(legendaryResourcesUpdate);
 
   for (const legAction of legendaryActions.actions) {
     const itemUpdate = {
       name: legAction.name,
       type: "feat",
-      flags: {
-        adnd5e: {
-          itemInfo: {
-            type: "legendary",
-          },
-        },
-      },
-      data: {
-        activation: {
-          type: "legendary",
-          cost: legAction.cost,
-        },
-        consume: {
-          type: "attribute",
-          target: "resources.legact.value",
-          amount: legAction.cost,
-        },
-        description: {
-          value: legAction.desc,
-        },
-        equipped: true,
-        proficient: true,
-      },
     };
+    setProperty(itemUpdate, "flags.adnd5e.itemInfo.type", "legendary");
+    setProperty(itemUpdate, "data.activation.type", "legendary");
+    setProperty(itemUpdate, "data.activation.cost", legAction.cost);
+    setProperty(itemUpdate, "data.consume.type", "attribute");
+    setProperty(itemUpdate, "data.consume.target", "resources.legact.value");
+    setProperty(itemUpdate, "data.consume.amount", legAction.cost);
+    setProperty(itemUpdate, "data.description.value", legAction.desc);
+    setProperty(itemUpdate, "data.equipped", true);
+    setProperty(itemUpdate, "data.proficient", true);
 
     const doc = new Item(itemUpdate).toObject();
     await actor.createEmbeddedDocuments("Item", [doc]);
   }
 }
 
-function setSenses(updateData, senses) {
+async function updateSenses(actor, senses) {
+  const updateData = {};
   for (const s of senses) {
     logger.logConsole("s", s);
-    updateData[`data.attributes.senses.${s.sense}`] = s.mod;
+    setProperty(updateData, `data.attributes.senses.${s.sense}`, s.mod);
   }
-  return updateData;
+  await actor.update(updateData);
 }
 
 function formatSpeeds(speed) {
