@@ -135,12 +135,18 @@ export async function createActor(actorData) {
 
   // actions
   if (actorData.actions) {
-    await updateActions(actor, actorData);
+    await updateActions(actor, actorData, actorData.actions, "action");
   }
 
-  // todo
   // bonus actions => monsters usualy dont get bonus actions BUT NPCs do!
+  if (actorData.bonusActions) {
+    await updateActions(actor, actorData, actorData.bonusActions, "bonus");
+  }
+
   // reactions => monsters usualy dont get reactions (except the attack of opportunity) BUT NPCs do!
+  if (actorData.reactions) {
+    await updateActions(actor, actorData, actorData.reactions, "reaction");
+  }
 
   // legendary resistances
   if (actorData.legendaryResistances) {
@@ -152,7 +158,7 @@ export async function createActor(actorData) {
     const legAction = actorData.legendaryActions;
     await updateLegendaryActions(actor, legAction);
     // "Legendary Actions"-feat
-    // todo throws engine error, why?
+    // todo - throws engine error, why?
     // const name = "Legendary Actions";
     // const featData = {
     //   name,
@@ -282,7 +288,8 @@ async function updateFeats(actor, features) {
   }
 }
 
-function updateAction(itemUpdate, action, actorData) {
+// actionType can be "action", "reaction", "bonus"
+function updateAction(itemUpdate, action, actorData, actionType) {
   // attack
   const isWeaponAttack = action.hit;
   if (isWeaponAttack) {
@@ -372,11 +379,18 @@ function updateAction(itemUpdate, action, actorData) {
     setProperty(itemUpdate, "data.recharge.charged", true);
   }
 
+  // bonus action | reaction
+  if (actionType) {
+    setProperty(update, "data.activation.cost", 1);
+    setProperty(update, "flags.adnd5e.itemInfo.type", actionType);
+    setProperty(update, "data.activation.type", actionType);
+  }
+
   return itemUpdate;
 }
 
-async function updateActions(actor, actorData) {
-  for (const action of actorData.actions) {
+async function updateActions(actor, actorData, actions, actionType) {
+  for (const action of actions) {
     const name = action.name;
     if (!name) {
       return;
@@ -390,7 +404,7 @@ async function updateActions(actor, actorData) {
       img: await retrieveFromPackItemImg(lowerName),
     };
     setProperty(itemUpdate, "data.description.value", action.desc);
-    setProperty(itemUpdate, "data.activation.type", "action");
+    setProperty(itemUpdate, "data.activation.type", actionType);
     setProperty(itemUpdate, "data.activation.cost", 1);
 
     if (lowerName !== "multiattack") {
