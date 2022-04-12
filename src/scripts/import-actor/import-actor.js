@@ -6,6 +6,9 @@ const logger = new Logger("import-actor.js");
 // logger.disable();
 
 export async function importActor(importedActorData) {
+  if (!importedActorData) {
+    return;
+  }
   const actorData = gatherActorData(importedActorData);
   logger.logConsole("actorData", actorData);
   await createActor(actorData);
