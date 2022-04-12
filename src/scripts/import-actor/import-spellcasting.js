@@ -1,5 +1,5 @@
-import { Logger } from "./log";
-import { trimElements } from "./common";
+import { Logger } from "../log";
+import { trimElements } from "../common";
 
 const logger = new Logger("import-spellcasting.js");
 logger.disable();
