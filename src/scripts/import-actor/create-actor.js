@@ -18,7 +18,6 @@ export async function createActor(actorData) {
   const speeds = formatSpeeds(actorData.speed);
   logger.logConsole("speeds", speeds);
 
-  // a single object because multiple "update"-function calls slow the app down
   let updateData = {
     // source
     "data.details.source": "Critical Import 5e",
@@ -139,20 +138,34 @@ export async function createActor(actorData) {
     await updateActions(actor, actorData);
   }
 
-  // bonus actions => monsters usualy dont get bonus actions
-  // reactions => monsters usualy dont get reactions (except the attack of opportunity)
+  // todo
+  // bonus actions => monsters usualy dont get bonus actions BUT NPCs do!
+  // reactions => monsters usualy dont get reactions (except the attack of opportunity) BUT NPCs do!
+
+  // legendary resistances
+  if (actorData.legendaryResistances) {
+    await updateLegendaryResistances(actor, actorData.legendaryResistances);
+  }
 
   // legendary actions
   if (actorData.legendaryActions) {
-    await updateLegendaryActions(actor, actorData.legendaryActions);
+    const legAction = actorData.legendaryActions;
+    await updateLegendaryActions(actor, legAction);
+    // "Legendary Actions"-feat
+    // todo throws engine error, why?
+    // const name = "Legendary Actions";
+    // const featData = {
+    //   name,
+    //   type: "feat",
+    //   img: await retrieveFromPackItemImg(name),
+    // };
+    // setProperty(featData, "data.description.value", legAction.desc);
+    // setProperty(featData, "flags.adnd5e.itemInfo.type", "legendary");
+    // const item = new Item(featData);
+    // await actor.createEmbeddedDocuments("Item", [item.toObject()]);
   }
+
   // todo
-  // const otherFeats = [];
-  // // "Legendary Actions"-feat
-  // otherFeats.push({
-  //   name: "Legendary Actions",
-  //   desc: actorData.legendaryActions.desc,
-  // });
   // // "Lair-Actions"-feat
   // otherFeats.push({
   //   name: "Lair Actions",
@@ -163,12 +176,6 @@ export async function createActor(actorData) {
   //   name: "Regial Effects",
   //   desc: undefined,
   // });
-  // await updateFeats(actor, otherFeats);
-
-  // legendary resistances
-  if (actorData.legendaryResistances) {
-    await updateLegendaryResistances(actor, actorData.legendaryResistances);
-  }
 
   logger.logConsole("actor", actor);
 }
