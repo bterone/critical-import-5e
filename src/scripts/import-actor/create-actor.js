@@ -11,7 +11,7 @@ logger.disable();
 
 export async function createActor(actorData) {
   const actor = await Actor.create({
-    name: actorData.race.name,
+    name: actorData.race?.name || "New Actor",
     type: "npc",
   });
 
@@ -22,23 +22,23 @@ export async function createActor(actorData) {
     // source
     "data.details.source": "Critical Import 5e",
     // attributes; saves === "proficient"
-    "data.abilities.cha.value": actorData.attributes.cha.base,
-    "data.abilities.cha.mod": actorData.attributes.cha.mod,
+    "data.abilities.cha.value": actorData.attributes.cha?.base,
+    "data.abilities.cha.mod": actorData.attributes.cha?.mod,
     "data.abilities.cha.proficient": actorData.saves.cha ? 1 : 0,
-    "data.abilities.con.value": actorData.attributes.con.base,
-    "data.abilities.con.mod": actorData.attributes.con.mod,
+    "data.abilities.con.value": actorData.attributes.con?.base,
+    "data.abilities.con.mod": actorData.attributes.con?.mod,
     "data.abilities.con.proficient": actorData.saves.con ? 1 : 0,
-    "data.abilities.dex.value": actorData.attributes.dex.base,
-    "data.abilities.dex.mod": actorData.attributes.dex.mod,
+    "data.abilities.dex.value": actorData.attributes.dex?.base,
+    "data.abilities.dex.mod": actorData.attributes.dex?.mod,
     "data.abilities.dex.proficient": actorData.saves.dex ? 1 : 0,
-    "data.abilities.int.value": actorData.attributes.int.base,
-    "data.abilities.int.mod": actorData.attributes.int.mod,
+    "data.abilities.int.value": actorData.attributes.int?.base,
+    "data.abilities.int.mod": actorData.attributes.int?.mod,
     "data.abilities.int.proficient": actorData.saves.int ? 1 : 0,
-    "data.abilities.str.value": actorData.attributes.str.base,
-    "data.abilities.str.mod": actorData.attributes.str.mod,
+    "data.abilities.str.value": actorData.attributes.str?.base,
+    "data.abilities.str.mod": actorData.attributes.str?.mod,
     "data.abilities.str.proficient": actorData.saves.str ? 1 : 0,
-    "data.abilities.wis.value": actorData.attributes.wis.base,
-    "data.abilities.wis.mod": actorData.attributes.wis.mod,
+    "data.abilities.wis.value": actorData.attributes.wis?.base,
+    "data.abilities.wis.mod": actorData.attributes.wis?.mod,
     "data.abilities.wis.proficient": actorData.saves.wis ? 1 : 0,
     // init
     "data.attributes.init.bonus": actorData.attributes?.dex?.mod,
@@ -51,21 +51,21 @@ export async function createActor(actorData) {
     "data.attributes.movement.swim": parseInt(speeds.swim),
     "data.attributes.movement.hover": parseInt(speeds.hover),
     // health
-    "data.attributes.hp.value": actorData.health.hp,
-    "data.attributes.hp.max": actorData.health.hp,
-    "data.attributes.hp.formula": actorData.health.formularBonus
-      ? `${actorData.health.formular} + ${actorData.health.formularBonus}`
-      : actorData.health.formular,
+    "data.attributes.hp.value": actorData.health?.hp,
+    "data.attributes.hp.max": actorData.health?.hp,
+    "data.attributes.hp.formula": actorData.health?.formularBonus
+      ? `${actorData.health?.formular} + ${actorData.health?.formularBonus}`
+      : actorData.health?.formular,
     // challenge
-    "data.details.cr": actorData.challenge.cr,
-    "data.details.xp.value": actorData.challenge.xp,
+    "data.details.cr": actorData.challenge?.cr,
+    "data.details.xp.value": actorData.challenge?.xp,
     // armor
     "data.attributes.ac.calc": formatArmor(actorData.armor),
-    "data.attributes.ac.flat": actorData.armor.armorClass?.trim(),
+    "data.attributes.ac.flat": actorData.armor?.armorClass?.trim(),
     // racialData
-    "data.details.alignment": actorData.race.alignment?.trim(),
-    "data.details.race": actorData.race.race?.trim(),
-    "data.details.type": actorData.race.type?.trim(),
+    "data.details.alignment": actorData.race?.alignment?.trim(),
+    "data.details.race": actorData.race?.race?.trim(),
+    "data.details.type": actorData.race?.type?.trim(),
     "data.traits.size": formatSize(actorData.race),
     // proficiency bonus
     "data.data.attributes.prof": parseInt(
@@ -88,7 +88,7 @@ export async function createActor(actorData) {
     "data.traits.languages.custom": actorData.languages?.custom,
     // spellcasting
     "data.attributes.spellcasting": actorData.spellcasting?.basics
-      ? shortenAbility(actorData.spellcasting.basics.ability)
+      ? shortenAbility(actorData.spellcasting?.basics.ability)
       : "",
   };
   await actor.update(updateData);
@@ -465,7 +465,7 @@ function formatSpeeds(speed) {
 }
 
 function formatArmor(armor) {
-  if (!armor.armorType) {
+  if (!armor?.armorType) {
     return "";
   }
 
@@ -482,7 +482,7 @@ function formatArmor(armor) {
 
 function formatSize(race) {
   let size;
-  const sizeData = race.size.trim().toLocaleLowerCase();
+  const sizeData = race?.size?.trim().toLocaleLowerCase();
   switch (sizeData) {
     // case "tiny":
     //   break;

@@ -234,6 +234,10 @@ function removeActions(actorData) {
   // remove actions to reduce error possibilities
   for (const idx in reducedActorData) {
     const l = reducedActorData[idx];
+    if (typeof l !== "string") {
+      return reducedActorData;
+    }
+
     const line = l.trim().toLocaleLowerCase();
     if (KNOWN_SECTION_HEADERS.includes(line)) {
       reducedActorData.splice(idx);
