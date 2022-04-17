@@ -15,108 +15,108 @@ export async function createActor(actorData) {
     type: "npc",
   });
 
-  const speeds = formatSpeeds(actorData.speed);
-  logger.logConsole("speeds", speeds);
+  let updateData = {};
 
-  let updateData = {
-    // source
-    "data.details.source": "Critical Import 5e",
-    // attributes; saves === "proficient"
-    "data.abilities.cha.value": actorData.attributes.cha?.base,
-    "data.abilities.cha.mod": actorData.attributes.cha?.mod,
-    "data.abilities.cha.proficient": actorData.saves.cha ? 1 : 0,
-    "data.abilities.con.value": actorData.attributes.con?.base,
-    "data.abilities.con.mod": actorData.attributes.con?.mod,
-    "data.abilities.con.proficient": actorData.saves.con ? 1 : 0,
-    "data.abilities.dex.value": actorData.attributes.dex?.base,
-    "data.abilities.dex.mod": actorData.attributes.dex?.mod,
-    "data.abilities.dex.proficient": actorData.saves.dex ? 1 : 0,
-    "data.abilities.int.value": actorData.attributes.int?.base,
-    "data.abilities.int.mod": actorData.attributes.int?.mod,
-    "data.abilities.int.proficient": actorData.saves.int ? 1 : 0,
-    "data.abilities.str.value": actorData.attributes.str?.base,
-    "data.abilities.str.mod": actorData.attributes.str?.mod,
-    "data.abilities.str.proficient": actorData.saves.str ? 1 : 0,
-    "data.abilities.wis.value": actorData.attributes.wis?.base,
-    "data.abilities.wis.mod": actorData.attributes.wis?.mod,
-    "data.abilities.wis.proficient": actorData.saves.wis ? 1 : 0,
-    // init
-    "data.attributes.init.bonus": actorData.attributes?.dex?.mod,
-    // speed
-    "data.attributes.speed.value": parseInt(speeds.speed),
-    "data.attributes.movement.walk": parseInt(speeds.speed),
-    "data.attributes.movement.burrow": parseInt(speeds.burrow),
-    "data.attributes.movement.climb": parseInt(speeds.climb),
-    "data.attributes.movement.fly": parseInt(speeds.fly),
-    "data.attributes.movement.swim": parseInt(speeds.swim),
-    "data.attributes.movement.hover": parseInt(speeds.hover),
-    // health
-    "data.attributes.hp.value": actorData.health?.hp,
-    "data.attributes.hp.max": actorData.health?.hp,
-    "data.attributes.hp.formula": actorData.health?.formularBonus
-      ? `${actorData.health?.formular} + ${actorData.health?.formularBonus}`
-      : actorData.health?.formular,
-    // challenge
-    "data.details.cr": actorData.challenge?.cr,
-    "data.details.xp.value": actorData.challenge?.xp,
-    // armor
-    "data.attributes.ac.calc": formatArmor(actorData.armor),
-    "data.attributes.ac.flat": actorData.armor?.armorClass?.trim(),
-    // racialData
-    "data.details.alignment": actorData.race?.alignment?.trim(),
-    "data.details.race": actorData.race?.race?.trim(),
-    "data.details.type": actorData.race?.type?.trim(),
-    "data.traits.size": formatSize(actorData.race),
-    // proficiency bonus
-    "data.data.attributes.prof": parseInt(
-      actorData.proficiencyBonus?.profBonus
-    ),
-    // damage resistances
-    "data.traits.dr.value": actorData.dmgResistances?.resistances,
-    "data.traits.dr.custom": actorData.dmgResistances?.custom,
-    // damage immunities
-    "data.traits.di.value": actorData.dmgImmunities?.immunities,
-    "data.traits.di.custom": actorData.dmgImmunities?.custom,
-    // damage vulnerability
-    "data.traits.dv.value": actorData.dmgVulnerabilities?.vulnerabilities,
-    "data.traits.dv.custom": actorData.dmgVulnerabilities?.custom,
-    // conditional immunities
-    "data.traits.ci.value": actorData.conditionImmunities?.immunities,
-    "data.traits.ci.custom": actorData.conditionImmunities?.custom,
-    // languages
-    "data.traits.languages.value": actorData.languages?.langs,
-    "data.traits.languages.custom": actorData.languages?.custom,
-    // spellcasting
-    "data.attributes.spellcasting": actorData.spellcasting?.basics
-      ? shortenAbility(actorData.spellcasting?.basics.ability)
-      : "",
-  };
+  // source
+  setProperty(updateData, "data.details.source", "Critical Import 5e");
+
+  // attributes & initiative
+  if (actorData.attributes) {
+    updateData = setAttributes(updateData, actorData);
+  }
+
+  // saves
+  if (actorData.saves) {
+    updateData = setSaves(updateData, actorData);
+  }
+
+  // speed / movement
+  if (actorData.speed) {
+    updateData = setSpeed(updateData, actorData);
+  }
+
+  // health
+  if (actorData.health) {
+    updateData = setHealth(updateData, actorData);
+  }
+
+  // challenge
+  if (actorData.challenge) {
+    updateData = setChallenge(updateData, actorData);
+  }
+
+  // armor
+  if (actorData.armor) {
+    updateData = setArmor(updateData, actorData);
+  }
+
+  // racial data
+  if (actorData.race) {
+    updateData = setRace(updateData, actorData);
+  }
+
+  // damage resistances
+  if (actorData.dmgResistances) {
+    updateData = setResistances(updateData, actorData);
+  }
+
+  // damage immunities
+  if (actorData.dmgImmunities) {
+    updateData = setDmgImmunities(updateData, actorData);
+  }
+
+  // damage vulnerability
+  if (actorData.dmgVulnerabilities) {
+    updateData = setDmgVulnerabilities(updateData, actorData);
+  }
+
+  // conditional immunities
+  if (actorData.conditionImmunities) {
+    updateData = setConditionImmunities(updateData, actorData);
+  }
+
+  // languages
+  if (actorData.languages) {
+    updateData = setLanguages(updateData, actorData);
+  }
+
+  // proficiency bonus
+  if (actorData.proficiencyBonus) {
+    setProperty(
+      updateData,
+      "data.data.attributes.prof",
+      parseInt(actorData.proficiencyBonus.profBonus)
+    );
+  }
+
   await actor.update(updateData);
 
   // skills
-  // has to be done after basic information has been set
-  const skills = createSkills(actorData.skills, actor);
-  const skillsUpdate = {
-    "data.skills.acr.value": skills.acr,
-    "data.skills.ani.value": skills.ani,
-    "data.skills.arc.value": skills.arc,
-    "data.skills.ath.value": skills.ath,
-    "data.skills.dec.value": skills.dec,
-    "data.skills.his.value": skills.his,
-    "data.skills.ins.value": skills.ins,
-    "data.skills.itm.value": skills.itm,
-    "data.skills.inv.value": skills.inv,
-    "data.skills.med.value": skills.med,
-    "data.skills.nat.value": skills.nat,
-    "data.skills.prf.value": skills.prf,
-    "data.skills.prc.value": skills.prc,
-    "data.skills.per.value": skills.per,
-    "data.skills.rel.value": skills.rel,
-    "data.skills.slt.value": skills.slt,
-    "data.skills.ste.value": skills.ste,
-    "data.skills.sur.value": skills.sur,
-  };
-  await actor.update(skillsUpdate);
+  if (actorData.skills) {
+    // has to be done after basic information has been set
+    const skills = createSkills(actorData.skills, actor);
+    const skillsUpdate = {
+      "data.skills.acr.value": skills.acr,
+      "data.skills.ani.value": skills.ani,
+      "data.skills.arc.value": skills.arc,
+      "data.skills.ath.value": skills.ath,
+      "data.skills.dec.value": skills.dec,
+      "data.skills.his.value": skills.his,
+      "data.skills.ins.value": skills.ins,
+      "data.skills.itm.value": skills.itm,
+      "data.skills.inv.value": skills.inv,
+      "data.skills.med.value": skills.med,
+      "data.skills.nat.value": skills.nat,
+      "data.skills.prf.value": skills.prf,
+      "data.skills.prc.value": skills.prc,
+      "data.skills.per.value": skills.per,
+      "data.skills.rel.value": skills.rel,
+      "data.skills.slt.value": skills.slt,
+      "data.skills.ste.value": skills.ste,
+      "data.skills.sur.value": skills.sur,
+    };
+    await actor.update(skillsUpdate);
+  }
 
   // senses
   if (actorData.senses) {
@@ -125,6 +125,13 @@ export async function createActor(actorData) {
 
   // spells
   if (actorData.spellcasting) {
+    setProperty(
+      updateData,
+      "data.attributes.spellcasting",
+      actorData.spellcasting.basics
+        ? shortenAbility(actorData.spellcasting.basics?.ability)
+        : ""
+    );
     await updateSpells(actor, actorData.spellcasting);
   }
 
@@ -184,6 +191,319 @@ export async function createActor(actorData) {
   // });
 
   logger.logConsole("actor", actor);
+}
+
+function setAttributes(updateData, actorData) {
+  // CHA
+  if (actorData.attributes.cha) {
+    setProperty(
+      updateData,
+      "data.abilities.cha.value",
+      actorData.attributes.cha.base
+    );
+    setProperty(
+      updateData,
+      "data.abilities.cha.mod",
+      actorData.attributes.cha.mod
+    );
+  }
+
+  // CON
+  if (actorData.attributes.con) {
+    setProperty(
+      updateData,
+      "data.abilities.con.value",
+      actorData.attributes.con.base
+    );
+    setProperty(
+      updateData,
+      "data.abilities.con.mod",
+      actorData.attributes.con.mod
+    );
+  }
+
+  // DEX
+  if (actorData.attributes.dex) {
+    setProperty(
+      updateData,
+      "data.abilities.dex.value",
+      actorData.attributes.dex.base
+    );
+    setProperty(
+      updateData,
+      "data.abilities.dex.mod",
+      actorData.attributes.dex.mod
+    );
+    // initiative
+    setProperty(
+      updateData,
+      "data.attributes.init.bonus",
+      actorData.attributes.dex.mod
+    );
+  }
+
+  // INT
+  if (actorData.attributes.int) {
+    setProperty(
+      updateData,
+      "data.abilities.int.value",
+      actorData.attributes.int.base
+    );
+    setProperty(
+      updateData,
+      "data.abilities.int.mod",
+      actorData.attributes.int.mod
+    );
+  }
+
+  // STR
+  if (actorData.attributes.str) {
+    setProperty(
+      updateData,
+      "data.abilities.str.value",
+      actorData.attributes.str.base
+    );
+    setProperty(
+      updateData,
+      "data.abilities.str.mod",
+      actorData.attributes.str.mod
+    );
+  }
+
+  // WIS
+  if (actorData.attributes.wis) {
+    setProperty(
+      updateData,
+      "data.abilities.wis.value",
+      actorData.attributes.wis.base
+    );
+    setProperty(
+      updateData,
+      "data.abilities.wis.mod",
+      actorData.attributes.wis.mod
+    );
+  }
+
+  return updateData;
+}
+
+function setSaves(updateData, actorData) {
+  // "proficient" represents save value
+
+  // CHA
+  setProperty(
+    updateData,
+    "data.abilities.cha.proficient",
+    actorData.saves.cha ? 1 : 0
+  );
+  // CON
+  setProperty(
+    updateData,
+    "data.abilities.con.proficient",
+    actorData.saves.con ? 1 : 0
+  );
+  // DEX
+  setProperty(
+    updateData,
+    "data.abilities.dex.proficient",
+    actorData.saves.dex ? 1 : 0
+  );
+  // INT
+  setProperty(
+    updateData,
+    "data.abilities.int.proficient",
+    actorData.saves.int ? 1 : 0
+  );
+  // STR
+  setProperty(
+    updateData,
+    "data.abilities.str.proficient",
+    actorData.saves.str ? 1 : 0
+  );
+  // WIS
+  setProperty(
+    updateData,
+    "data.abilities.wis.proficient",
+    actorData.saves.wis ? 1 : 0
+  );
+
+  return updateData;
+}
+
+function setSpeed(updateData, actorData) {
+  const speeds = {};
+  actorData.speed.forEach((s) => {
+    speeds[s.type] = s.value;
+  });
+
+  // base speed
+  setProperty(
+    updateData,
+    "data.attributes.speed.value",
+    parseInt(speeds.speed)
+  );
+  setProperty(
+    updateData,
+    "data.attributes.movement.walk",
+    parseInt(speeds.speed)
+  );
+
+  // burrow
+  setProperty(
+    updateData,
+    "data.attributes.movement.burrow",
+    parseInt(speeds.burrow)
+  );
+
+  // climb
+  setProperty(
+    updateData,
+    "data.attributes.movement.climb",
+    parseInt(speeds.climb)
+  );
+
+  // fly
+  setProperty(updateData, "data.attributes.movement.fly", parseInt(speeds.fly));
+
+  // swim
+  setProperty(
+    updateData,
+    "data.attributes.movement.swim",
+    parseInt(speeds.swim)
+  );
+
+  // hover
+  setProperty(
+    updateData,
+    "data.attributes.movement.hover",
+    parseInt(speeds.hover)
+  );
+
+  return updateData;
+}
+
+function setHealth(updateData, actorData) {
+  // HP current
+  setProperty(updateData, "data.attributes.hp.value", actorData.health.hp);
+  // HP max
+  setProperty(updateData, "data.attributes.hp.max", actorData.health.hp);
+  // Formular
+  setProperty(
+    updateData,
+    "data.attributes.hp.formula",
+    actorData.health.formularBonus
+      ? `${actorData.health.formular} + ${actorData.health.formularBonus}`
+      : actorData.health.formular
+  );
+
+  return updateData;
+}
+
+function setChallenge(updateData, actorData) {
+  // CR
+  setProperty(updateData, "data.details.cr", actorData.challenge.cr);
+  // XP
+  setProperty(updateData, "data.details.xp.value", actorData.challenge.xp);
+  return updateData;
+}
+
+function setArmor(updateData, actorData) {
+  setProperty(
+    updateData,
+    "data.attributes.ac.calc",
+    formatArmor(actorData.armor)
+  );
+
+  setProperty(
+    updateData,
+    "data.attributes.ac.flat",
+    actorData.armor.armorClass?.trim()
+  );
+
+  return updateData;
+}
+
+function setRace(updateData, actorData) {
+  setProperty(
+    updateData,
+    "data.details.alignment",
+    actorData.race.alignment?.trim()
+  );
+  setProperty(updateData, "data.details.race", actorData.race.race?.trim());
+  setProperty(updateData, "data.details.type", actorData.race.type?.trim());
+  setProperty(updateData, "data.traits.size", formatSize(actorData.race));
+
+  return updateData;
+}
+
+function setResistances(updateData, actorData) {
+  setProperty(
+    updateData,
+    "data.traits.dr.value",
+    actorData.dmgResistances.resistances
+  );
+  setProperty(
+    updateData,
+    "data.traits.dr.custom",
+    actorData.dmgResistances.custom
+  );
+  return updateData;
+}
+
+function setDmgImmunities(updateData, actorData) {
+  setProperty(
+    updateData,
+    "data.traits.di.value",
+    actorData.dmgImmunities.immunities
+  );
+  setProperty(
+    updateData,
+    "data.traits.di.custom",
+    actorData.dmgImmunities.custom
+  );
+  return updateData;
+}
+
+function setDmgVulnerabilities(updateData, actorData) {
+  setProperty(
+    updateData,
+    "data.traits.dv.value",
+    actorData.dmgVulnerabilities.vulnerabilities
+  );
+  setProperty(
+    updateData,
+    "data.traits.dv.custom",
+    actorData.dmgVulnerabilities.custom
+  );
+  return updateData;
+}
+
+function setConditionImmunities(updateData, actorData) {
+  setProperty(
+    updateData,
+    "data.traits.ci.value",
+    actorData.conditionImmunities.immunities
+  );
+  setProperty(
+    updateData,
+    "data.traits.ci.custom",
+    actorData.conditionImmunities.custom
+  );
+  return updateData;
+}
+
+function setLanguages(updateData, actorData) {
+  setProperty(
+    updateData,
+    "data.traits.languages.value",
+    actorData.languages.langs
+  );
+  setProperty(
+    updateData,
+    "data.traits.languages.custom",
+    actorData.languages.custom
+  );
+  return updateData;
 }
 
 async function updateLegendaryResistances(actor, legendaryResistances) {
@@ -454,14 +774,6 @@ async function updateSenses(actor, senses) {
     setProperty(updateData, `data.attributes.senses.${s.sense}`, s.mod);
   }
   await actor.update(updateData);
-}
-
-function formatSpeeds(speed) {
-  const speeds = {};
-  speed.forEach((s) => {
-    speeds[s.type] = s.value;
-  });
-  return speeds;
 }
 
 function formatArmor(armor) {
