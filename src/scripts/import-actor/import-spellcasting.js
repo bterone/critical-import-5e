@@ -54,6 +54,9 @@ function gatherSpellcastingProps(lines, startIdx) {
   if (spellCastingText && !castingBasics) {
     // has hidden spells
     const hidden = hiddenSpellcastingRgx.exec(spellCastingText);
+    if (!hidden) {
+      return;
+    }
     const hiddenSpellcasting = hidden.groups;
     spellcasting.spells = {
       atWill: trimElements(hiddenSpellcasting.spells, ","),
