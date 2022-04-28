@@ -4,6 +4,7 @@ const logger = new Logger("gather-spell-data.js");
 // logger.disable();
 
 const materialComponentRgx = /-.?-.?\((?<material>.*)?\)/i;
+const atHigherLevelsRgx = /\bat higher levels\b.?\s?(?<higherLevelsDesc>.*)/i;
 
 /**
  * Spell params:
@@ -68,18 +69,26 @@ export function gatherSpellData(importedSpellData) {
     }
   }
 
-  // material components
-  if (rawSpellDto.components?.toLocaleLowerCase().includes("m")) {
-    let material;
-    for (let i = 0; i < rawSpellDto.other?.length; i++) {
-      const component = rawSpellDto.other[i];
-      material = materialComponentRgx.exec(component);
-      if (material) {
-        rawSpellDto.materialComponents = material.groups.material;
-        // remove line from rawSpellDto.other
-        rawSpellDto.other.splice(i, 1);
-        break;
-      }
+  // convert list of unknown data
+  for (let i = 0; i < rawSpellDto.other?.length; i++) {
+    const line = rawSpellDto.other[i];
+
+    // material components
+    const material = materialComponentRgx.exec(line);
+    if (material) {
+      rawSpellDto.materialComponents = material.groups.material;
+    }
+
+    // at higher levels
+    const atHigherLevels = atHigherLevelsRgx.exec(line);
+    if (atHigherLevels) {
+      rawSpellDto.atHigherLevels = atHigherLevels.groups.higherLevelsDesc;
+    }
+
+    // spell description
+    const isDesc = !material && !atHigherLevels;
+    if (isDesc) {
+      rawSpellDto.desc = line;
     }
   }
 
