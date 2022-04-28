@@ -29,8 +29,9 @@ const atHigherLevelsRgx = /\bat higher levels\b.?\s?(?<higherLevelsDesc>.*)/i;
 
 export function gatherSpellData(importedSpellData) {
   // todo
-  // gather D&D Beyond
   // gather WotC style (Grimhollow PDF's for example)
+
+  // importedSpellData from D&D Beyond
 
   logger.logConsole("importedSpellData", importedSpellData);
   const validHeaders = [
@@ -57,7 +58,7 @@ export function gatherSpellData(importedSpellData) {
 
     if (validHeaders.includes(value)) {
       // is header
-      currentHeader = value;
+      currentHeader = value.replace("/", "").replace(" ", "");
       logger.logConsole("set currentHeader", currentHeader);
     } else if (currentHeader !== undefined) {
       // is value

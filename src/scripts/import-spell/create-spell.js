@@ -1,4 +1,11 @@
 import { Logger } from "../log.js";
+import {
+  retrieveFromPackMany,
+  retrieveFromPackItemImg,
+  shortenAbility,
+  setProperty,
+} from "./../common.js";
+
 const logger = new Logger("create-spell.js");
 // logger.disable();
 
@@ -88,5 +95,113 @@ const logger = new Logger("create-spell.js");
 // }
 
 export async function createSpell(spellData) {
+  const item = await Item.create({
+    name: spellData.name || "New Spell",
+    type: "spell",
+  });
+
   // todo
+
+  let itemUpdate = {};
+
+  // source
+  setProperty(itemUpdate, "data.source", "Critical Import 5e");
+
+  // level
+  if (spellData.level) {
+    setProperty(itemUpdate, "data.level", spellData.level);
+  }
+
+  // casting time
+  if (spellData.castingtime) {
+    //
+  }
+
+  // range/area
+  if (spellData.rangearea) {
+    //
+  }
+
+  // components
+  if (spellData.components) {
+    //   "components": {
+    //     "value": "",
+    //     "vocal": false,
+    //     "somatic": false,
+    //     "material": false,
+    //     "ritual": false,
+    //     "concentration": false
+    //   },
+    const components = spellData.components;
+    setProperty(itemUpdate, "data.components.vocal", components.includes("V"));
+    setProperty(
+      itemUpdate,
+      "data.components.somatic",
+      components.includes("S")
+    );
+    setProperty(
+      itemUpdate,
+      "data.components.material",
+      components.includes("M")
+    );
+    // todo
+    // ritual
+    // concentration
+  }
+
+  // duration
+  if (spellData.duration) {
+    //
+  }
+
+  // school
+  if (spellData.school) {
+    //
+  }
+
+  // attack/save
+  if (spellData.attacksave) {
+    //
+  }
+
+  // damage/effect
+  if (spellData.damageeffect) {
+    //
+  }
+
+  // material components
+  if (spellData.materialComponents) {
+    //   "materials": {
+    //     "value": "",
+    //     "consumed": false,
+    //     "cost": 0,
+    //     "supply": 0
+    //   },
+    setProperty(
+      itemUpdate,
+      "data.materials.value",
+      spellData.materialComponents
+    );
+    // todo
+    // material consumed?
+  }
+
+  // at higher levels
+  if (spellData.atHigherLevels) {
+    //
+  }
+
+  // spell description
+  if (spellData.desc) {
+    //
+  }
+
+  // todo
+  // school
+  // preparation ?
+  // scaling ?
+
+  await item.update(itemUpdate);
+
+  logger.logConsole("item", item);
 }
