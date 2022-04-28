@@ -3,6 +3,8 @@ import { Logger } from "../log.js";
 const logger = new Logger("gather-spell-data.js");
 // logger.disable();
 
+const materialComponentRgx = /-.?-.?\((?<material>.*)?\)/i;
+
 /**
  * Spell params:
  *
@@ -66,5 +68,21 @@ export function gatherSpellData(importedSpellData) {
     }
   }
 
+  // material components
+  if (rawSpellDto.components?.toLocaleLowerCase().includes("m")) {
+    let material;
+    for (let i = 0; i < rawSpellDto.other?.length; i++) {
+      const component = rawSpellDto.other[i];
+      material = materialComponentRgx.exec(component);
+      if (material) {
+        rawSpellDto.materialComponents = material.groups.material;
+        // remove line from rawSpellDto.other
+        rawSpellDto.other.splice(i, 1);
+        break;
+      }
+    }
+  }
+
   logger.logConsole("rawSpellDto", rawSpellDto);
+  return rawSpellDto;
 }
