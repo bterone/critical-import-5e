@@ -101,6 +101,7 @@ export async function createSpell(spellData) {
   });
 
   // todo
+  // actionType = rsak ?
 
   let itemUpdate = {};
 
@@ -109,12 +110,14 @@ export async function createSpell(spellData) {
 
   // level
   if (spellData.level) {
-    setProperty(itemUpdate, "data.level", spellData.level);
+    setProperty(itemUpdate, "data.level", parseInt(spellData.level));
   }
 
   // casting time
   if (spellData.castingtime) {
-    //
+    setProperty(itemUpdate, "data.activation.type", "action"); // todo
+    setProperty(itemUpdate, "data.activation.cost", 1);
+    // setProperty(itemUpdate, "data.activation.condition", ""); // todo
   }
 
   // range/area
@@ -151,22 +154,28 @@ export async function createSpell(spellData) {
 
   // duration
   if (spellData.duration) {
-    //
+    // setProperty(itemUpdate, "data.duration.value", "");
+    setProperty(
+      itemUpdate,
+      "data.duration.units",
+      shortenDuration(spellData.duration)
+    );
   }
 
   // school
   if (spellData.school) {
-    //
+    setProperty(itemUpdate, "data.school", shortenSchool(spellData.school));
   }
 
   // attack/save
   if (spellData.attacksave) {
-    //
+    // actionType = rsak ?
   }
 
   // damage/effect
   if (spellData.damageeffect) {
-    //
+    // todo gather dice
+    // const damageType = spellData.damageeffect; // todo gather damage type
   }
 
   // material components
@@ -193,7 +202,11 @@ export async function createSpell(spellData) {
 
   // spell description
   if (spellData.desc) {
-    //
+    setProperty(
+      itemUpdate,
+      "data.description.value",
+      `<p>${spellData.desc}</p>`
+    );
   }
 
   // todo
@@ -204,4 +217,38 @@ export async function createSpell(spellData) {
   await item.update(itemUpdate);
 
   logger.logConsole("item", item);
+}
+
+// todo
+function shortenDuration(duration) {
+  switch (duration.trim().toLocaleLowerCase()) {
+    case "instantaneous":
+      return "inst";
+    default:
+      return duration;
+  }
+}
+
+// todo
+function shortenSchool(school) {
+  switch (school.trim().toLocaleLowerCase()) {
+    case "abjuration":
+      return "";
+    case "transmutation":
+      return "";
+    case "conjuration":
+      return "";
+    case "divination":
+      return "";
+    case "enchantment":
+      return "";
+    case "evocation":
+      return "evo";
+    case "illusion":
+      return "";
+    case "necromancy":
+      return "";
+    default:
+      return school;
+  }
 }
