@@ -1,98 +1,8 @@
 import { Logger } from "../log.js";
-import {
-  retrieveFromPackMany,
-  retrieveFromPackItemImg,
-  shortenAbility,
-  setProperty,
-} from "./../common.js";
+import { setProperty } from "./../common.js";
 
 const logger = new Logger("create-spell.js");
 // logger.disable();
-
-/**
- * create spell using FoundryVTT API:
- */
-
-//  "Item": {
-//   "types": ["weapon", "equipment", "consumable", "tool", "loot", "class", "spell", "feat", "backpack"],
-//   "templates": {
-//     "itemDescription": {
-//       "description": {
-//         "value": "",
-//         "chat": "",
-//         "unidentified": ""
-//       },
-//       "source": ""
-//     },
-//     "physicalItem": {
-//       "quantity": 1,
-//       "weight": 0,
-//       "price": 0,
-//       "attunement": 0,
-//       "equipped": false,
-//       "rarity": "",
-//       "identified": true
-//     },
-//     "activatedEffect": {
-//       "activation": {
-//         "type": "",
-//         "cost": 0,
-//         "condition": ""
-//       },
-//       "duration": {
-//         "value": null,
-//         "units": ""
-//       },
-//       "target": {
-//         "value": null,
-//         "width": null,
-//         "units": "",
-//         "type": ""
-//       },
-//       "range": {
-//         "value": null,
-//         "long": null,
-//         "units": ""
-//       },
-//       "uses": {
-//         "value": null,
-//         "max": "",
-//         "per": null
-//       },
-//       "consume": {
-//         "type": "",
-//         "target": null,
-//         "amount": null
-//       }
-//     }
-
-//  "spell": {
-//   "templates": ["itemDescription", "activatedEffect", "action"],
-//   "level": 1,
-//   "school": "",
-//   "components": {
-//     "value": "",
-//     "vocal": false,
-//     "somatic": false,
-//     "material": false,
-//     "ritual": false,
-//     "concentration": false
-//   },
-//   "materials": {
-//     "value": "",
-//     "consumed": false,
-//     "cost": 0,
-//     "supply": 0
-//   },
-//   "preparation": {
-//     "mode": "prepared",
-//     "prepared": false
-//   },
-//   "scaling": {
-//     "mode": "none",
-//     "formula": null
-//   }
-// }
 
 export async function createSpell(spellData) {
   const item = await Item.create({
@@ -100,13 +10,14 @@ export async function createSpell(spellData) {
     type: "spell",
   });
 
-  // todo
-  // actionType = rsak ?
-
   let itemUpdate = {};
 
   // source
   setProperty(itemUpdate, "data.source", "Critical Import 5e");
+
+  // preparation
+  setProperty(itemUpdate, "data.preparation.mode", "prepared");
+  setProperty(itemUpdate, "data.preparation.prepared", true);
 
   // level
   if (spellData.level) {
@@ -122,7 +33,8 @@ export async function createSpell(spellData) {
 
   // range/area
   if (spellData.rangearea) {
-    //
+    setProperty(itemUpdate, "data.range.value", parseInt(spellData.rangearea));
+    setProperty(itemUpdate, "data.range.units", "ft");
   }
 
   // components
@@ -169,13 +81,16 @@ export async function createSpell(spellData) {
 
   // attack/save
   if (spellData.attacksave) {
-    // actionType = rsak ?
+    setProperty(
+      itemUpdate,
+      "data.actionType",
+      shortenAttackOrSave(spellData.attacksave)
+    );
   }
 
   // damage/effect
   if (spellData.damageeffect) {
-    // todo gather dice
-    // const damageType = spellData.damageeffect; // todo gather damage type
+    setProperty(itemUpdate, "data.damage.parts", spellData.damage);
   }
 
   // material components
@@ -197,22 +112,23 @@ export async function createSpell(spellData) {
 
   // at higher levels
   if (spellData.atHigherLevels) {
-    //
+    setProperty(
+      itemUpdate,
+      "data.scaling.formula",
+      spellData.damageAtHigherLevels
+    );
+    setProperty(itemUpdate, "data.scaling.mode", "level");
   }
 
   // spell description
   if (spellData.desc) {
-    setProperty(
-      itemUpdate,
-      "data.description.value",
-      `<p>${spellData.desc}</p>`
-    );
+    let val = `<p>${spellData.desc}`;
+    if (spellData.atHigherLevels) {
+      val += `<br><br><strong>At higher levels.</strong> ${spellData.atHigherLevels}`;
+    }
+    val += "</p>";
+    setProperty(itemUpdate, "data.description.value", val);
   }
-
-  // todo
-  // school
-  // preparation ?
-  // scaling ?
 
   await item.update(itemUpdate);
 
@@ -250,5 +166,15 @@ function shortenSchool(school) {
       return "";
     default:
       return school;
+  }
+}
+
+// todo
+function shortenAttackOrSave(attackOrSave) {
+  switch (attackOrSave.trim().toLocaleLowerCase()) {
+    case "ranged":
+      return "rsak";
+    default:
+      return attackOrSave;
   }
 }
