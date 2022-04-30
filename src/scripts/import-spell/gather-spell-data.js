@@ -5,6 +5,7 @@ const logger = new Logger("gather-spell-data.js");
 
 const materialComponentRgx = /-.?-.?\((?<material>.*)?\)/i;
 const atHigherLevelsRgx = /\bat higher levels\b.?\s?(?<higherLevelsDesc>.*)/i;
+const atHigherLevelsDamageRgx = /(?<dmgRoll>\dd\d)/i;
 
 /**
  * Spell params:
@@ -28,6 +29,8 @@ const atHigherLevelsRgx = /\bat higher levels\b.?\s?(?<higherLevelsDesc>.*)/i;
  */
 
 export function gatherSpellData(importedSpellData) {
+  const damageRgx = /(?<dmgRoll>\dd\d)\s?(?<dmgType>[a-z]*)/gi;
+
   // todo
   // gather WotC style (Grimhollow PDF's for example)
 
@@ -83,7 +86,14 @@ export function gatherSpellData(importedSpellData) {
     // at higher levels
     const atHigherLevels = atHigherLevelsRgx.exec(line);
     if (atHigherLevels) {
-      rawSpellDto.atHigherLevels = atHigherLevels.groups.higherLevelsDesc;
+      const desc = atHigherLevels.groups.higherLevelsDesc;
+      rawSpellDto.atHigherLevels = desc;
+
+      const match = atHigherLevelsDamageRgx.exec(desc);
+      const m = match.groups;
+      if (m) {
+        rawSpellDto.damageAtHigherLevels = m.dmgRoll;
+      }
     }
 
     // spell description
@@ -92,6 +102,18 @@ export function gatherSpellData(importedSpellData) {
       rawSpellDto.desc = line;
     }
   }
+
+  // todo target
+
+  const dmg = [];
+  let match;
+  while ((match = damageRgx.exec(rawSpellDto.desc)) != null) {
+    const m = match?.groups;
+    if (m) {
+      dmg.push([m.dmgRoll, m.dmgType]);
+    }
+  }
+  rawSpellDto.damage = dmg;
 
   logger.logConsole("rawSpellDto", rawSpellDto);
   return rawSpellDto;
