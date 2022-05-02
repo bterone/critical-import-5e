@@ -6,6 +6,7 @@ const logger = new Logger("gather-spell-data.js");
 const materialComponentRgx = /-.?-.?\((?<material>.*)?\)/i;
 const atHigherLevelsRgx = /\bat higher levels\b.?\s?(?<higherLevelsDesc>.*)/i;
 const atHigherLevelsDamageRgx = /(?<dmgRoll>\dd\d)/i;
+const targetRgx = /(?<target>\bwilling creature\b|\ba target\b)/i;
 
 /**
  * Spell params:
@@ -103,7 +104,12 @@ export function gatherSpellData(importedSpellData) {
     }
   }
 
-  // todo target
+  // target
+  const target = targetRgx.exec(rawSpellDto.desc);
+  const m = target?.groups;
+  if (m) {
+    rawSpellDto.target = m.target;
+  }
 
   const dmg = [];
   let match;
