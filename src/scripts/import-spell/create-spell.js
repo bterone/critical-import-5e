@@ -111,7 +111,9 @@ export async function createSpell(spellData) {
   }
 
   // at higher levels
+  let atHigherLevelsDesc = "";
   if (spellData.atHigherLevels) {
+    atHigherLevelsDesc = `<br><br><strong>At higher levels.</strong> ${spellData.atHigherLevels}`;
     setProperty(
       itemUpdate,
       "data.scaling.formula",
@@ -122,12 +124,8 @@ export async function createSpell(spellData) {
 
   // spell description
   if (spellData.desc) {
-    let val = `<p>${spellData.desc}`;
-    if (spellData.atHigherLevels) {
-      val += `<br><br><strong>At higher levels.</strong> ${spellData.atHigherLevels}`;
-    }
-    val += "</p>";
-    setProperty(itemUpdate, "data.description.value", val);
+    const desc = `<p>${spellData.desc}${atHigherLevelsDesc}</p>`;
+    setProperty(itemUpdate, "data.description.value", desc);
   }
 
   await item.update(itemUpdate);
