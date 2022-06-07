@@ -37,6 +37,11 @@ export async function createSpell(spellData) {
     setProperty(itemUpdate, "data.range.units", "ft");
   }
 
+  // target
+  if (spellData.target) {
+    setTarget(itemUpdate);
+  }
+
   // components
   if (spellData.components) {
     //   "components": {
@@ -131,6 +136,18 @@ export async function createSpell(spellData) {
   await item.update(itemUpdate);
 
   logger.logConsole("item", item);
+}
+
+// todo set shape
+function setTarget(itemUpdate) {
+  // a creature
+  // x creatures
+  // self
+  // shape is a type of target
+  setProperty(itemUpdate, "data.target.type", "creature"); // cone
+  setProperty(itemUpdate, "data.target.units", undefined); // ft
+  setProperty(itemUpdate, "data.target.value", 1); // 15
+  setProperty(itemUpdate, "data.target.width", undefined);
 }
 
 // todo

@@ -7,6 +7,7 @@ const materialComponentRgx = /-.?-.?\((?<material>.*)?\)/i;
 const atHigherLevelsRgx = /\bat higher levels\b.?\s?(?<higherLevelsDesc>.*)/i;
 const atHigherLevelsDamageRgx = /(?<dmgRoll>\dd\d)/i;
 const targetRgx = /(?<target>\bwilling creature\b|\ba target\b)/i;
+const shapeRgx = /(?<shape>[0-9]+\b-foot\b(\s|-)?[a-z]+)/i;
 
 /**
  * Spell params:
@@ -103,17 +104,25 @@ export function gatherSpellData(importedSpellData) {
       rawSpellDto.desc = line;
     }
   }
+  const desc = rawSpellDto.desc;
 
   // target
-  const target = targetRgx.exec(rawSpellDto.desc);
-  const m = target?.groups;
-  if (m) {
-    rawSpellDto.target = m.target;
+  const target = targetRgx.exec(desc);
+  const targetMatch = target?.groups;
+  if (targetMatch) {
+    rawSpellDto.target = targetMatch.target;
+  }
+
+  // shape
+  const shape = shapeRgx.exec(desc);
+  const shapeMatch = shape?.groups;
+  if (shapeMatch) {
+    rawSpellDto.shape = shapeMatch.shape;
   }
 
   const dmg = [];
   let match;
-  while ((match = damageRgx.exec(rawSpellDto.desc)) != null) {
+  while ((match = damageRgx.exec(desc)) != null) {
     const m = match?.groups;
     if (m) {
       dmg.push([m.dmgRoll, m.dmgType]);
