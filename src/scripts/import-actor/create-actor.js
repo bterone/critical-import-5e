@@ -548,18 +548,24 @@ async function updateSpells(actor, spellcasting) {
         await actor.createEmbeddedDocuments("Item", [doc]);
       }
     }
+
     // per day
-    const spells = spellcasting.spells?.spellList?.spells;
-    if (spells) {
-      const spellDocs = await retrieveFromPackMany(spellPack, spells);
-      for (const doc of spellDocs) {
-        const usesPerDay = spells.timesPerDay;
-        setProperty(doc, "data.uses.value", usesPerDay);
-        setProperty(doc, "data.uses.max", usesPerDay);
-        setProperty(doc, "data.uses.per", "day");
-        setProperty(doc, "data.preparation.mode", "innate");
-        setProperty(doc, "data.preparation.prepared", true);
-        await actor.createEmbeddedDocuments("Item", [doc]);
+    const spellLists = spellcasting.spells?.spellList;
+    if (spellLists) {
+      for (const spellList of spellLists) {
+        const spellDocs = await retrieveFromPackMany(
+          spellPack,
+          spellList.spells
+        );
+        for (const doc of spellDocs) {
+          const usesPerDay = spellList.timesPerDay;
+          setProperty(doc, "data.uses.value", usesPerDay);
+          setProperty(doc, "data.uses.max", usesPerDay);
+          setProperty(doc, "data.uses.per", "day");
+          setProperty(doc, "data.preparation.mode", "innate");
+          setProperty(doc, "data.preparation.prepared", true);
+          await actor.createEmbeddedDocuments("Item", [doc]);
+        }
       }
     }
   } else if (spellcasting.basics.casting) {
