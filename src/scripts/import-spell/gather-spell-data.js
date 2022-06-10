@@ -32,6 +32,8 @@ const shapeRgx = /(?<shape>[0-9]+\b-foot\b(\s|-)?[a-z]+)/i;
 
 export function gatherSpellData(importedSpellData) {
   const damageRgx = /(?<dmgRoll>\dd\d)\s?(?<dmgType>[a-z]*)/gi;
+  const allDamageRgx =
+    /(?<versatile>(\dd\d)\s?([a-z]*)\s\bdamage\b[a-zA-Z\s]+(\bstart\b|\bend\b)[a-zA-Z\s]+\bturn\b)|(?<dmgRoll>\dd\d)\s?(?<dmgType>[a-z]*)/gi;
 
   // todo
   // gather WotC style (Grimhollow PDF's for example)
@@ -120,15 +122,36 @@ export function gatherSpellData(importedSpellData) {
     rawSpellDto.shape = shapeMatch.shape;
   }
 
+  // damage
   const dmg = [];
+  const versatileDmg = [];
   let match;
-  while ((match = damageRgx.exec(desc)) != null) {
+  while ((match = allDamageRgx.exec(desc)) != null) {
     const m = match?.groups;
-    if (m) {
-      dmg.push([m.dmgRoll, m.dmgType]);
+    if (!m) {
+      continue;
+    }
+    dmg.push([m.dmgRoll, m.dmgType]);
+
+    const versatileDesc = m.versatile;
+    if (versatileDesc) {
+      let vMatch;
+      while ((vMatch = damageRgx.exec(versatileDesc)) != null) {
+        const vm = vMatch?.groups;
+        if (!vm) {
+          continue;
+        }
+        versatileDmg.push([vm.dmgRoll, vm.dmgType]);
+      }
     }
   }
-  rawSpellDto.damage = dmg;
+
+  if (dmg.length > 0) {
+    rawSpellDto.damage = dmg;
+  }
+  if (versatileDmg.length > 0) {
+    rawSpellDto.versatileDmg = versatileDmg;
+  }
 
   logger.logConsole("rawSpellDto", rawSpellDto);
   return rawSpellDto;
