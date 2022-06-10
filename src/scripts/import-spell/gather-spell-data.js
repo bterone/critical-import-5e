@@ -128,20 +128,15 @@ export function gatherSpellData(importedSpellData) {
   let match;
   while ((match = allDamageRgx.exec(desc)) != null) {
     const m = match?.groups;
-    if (!m) {
-      continue;
-    }
-    dmg.push([m.dmgRoll, m.dmgType]);
-
-    const versatileDesc = m.versatile;
-    if (versatileDesc) {
+    if (m.dmgRoll || m.dmgType) {
+      dmg.push([m.dmgRoll, m.dmgType]);
+    } else if (m.versatile) {
       let vMatch;
-      while ((vMatch = damageRgx.exec(versatileDesc)) != null) {
+      while ((vMatch = damageRgx.exec(m.versatile)) != null) {
         const vm = vMatch?.groups;
-        if (!vm) {
-          continue;
+        if (vm) {
+          versatileDmg.push([vm.dmgRoll, vm.dmgType]);
         }
-        versatileDmg.push([vm.dmgRoll, vm.dmgType]);
       }
     }
   }
