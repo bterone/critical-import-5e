@@ -94,8 +94,16 @@ export async function createSpell(spellData) {
   }
 
   // damage/effect
-  if (spellData.damageeffect) {
+  if (spellData.damage) {
     setProperty(itemUpdate, "data.damage.parts", spellData.damage);
+  }
+
+  // versatile damage
+  if (spellData.versatileDmg) {
+    const vDmg = spellData.versatileDmg
+      .map((element) => element[0])
+      .reduce((prev, curr) => prev + " + " + curr);
+    setProperty(itemUpdate, "data.damage.versatile", `${vDmg} + @mod`);
   }
 
   // material components
