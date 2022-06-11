@@ -103,7 +103,7 @@ export async function createSpell(spellData) {
     const vDmg = spellData.versatileDmg
       .map((element) => element[0])
       .reduce((prev, curr) => prev + " + " + curr);
-    setProperty(itemUpdate, "data.damage.versatile", `${vDmg} + @mod`);
+    setProperty(itemUpdate, "data.damage.versatile", vDmg);
   }
 
   // material components
