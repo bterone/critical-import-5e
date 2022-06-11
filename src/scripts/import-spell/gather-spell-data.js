@@ -103,7 +103,10 @@ export function gatherSpellData(importedSpellData) {
     // spell description
     const isDesc = !material && !atHigherLevels;
     if (isDesc) {
-      rawSpellDto.desc = line;
+      const descLine = rawSpellDto.desc
+        ? rawSpellDto.desc + `\n\n${line}`
+        : line;
+      rawSpellDto.desc = descLine;
     }
   }
   const desc = rawSpellDto.desc;
