@@ -1,5 +1,5 @@
 import { Logger } from "../log.js";
-import { setProperty } from "./../common.js";
+import { retrieveFromPackImg, setProperty } from "./../common.js";
 
 const logger = new Logger("create-spell.js");
 // logger.disable();
@@ -8,6 +8,7 @@ export async function createSpell(spellData) {
   const item = await Item.create({
     name: spellData.name || "New Spell",
     type: "spell",
+    img: await retrieveFromPackImg(spellData.name),
   });
 
   let itemUpdate = {};
