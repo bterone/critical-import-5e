@@ -25,22 +25,30 @@ export async function createSpell(spellData) {
     setProperty(itemUpdate, "data.level", parseInt(spellData.level));
   }
 
+  // todo
   // casting time
-  if (spellData.castingtime) {
+  if (spellData.castingTime) {
     setProperty(itemUpdate, "data.activation.type", "action"); // todo
     setProperty(itemUpdate, "data.activation.cost", 1);
     // setProperty(itemUpdate, "data.activation.condition", ""); // todo
   }
 
-  // range/area
-  if (spellData.rangearea) {
-    setProperty(itemUpdate, "data.range.value", parseInt(spellData.rangearea));
-    setProperty(itemUpdate, "data.range.units", "ft");
+  // range
+  if (spellData.range) {
+    setProperty(
+      itemUpdate,
+      "data.range.value",
+      parseInt(spellData.range.normal)
+    );
+    setProperty(itemUpdate, "data.range.units", spellData.range.type); // self, any, touch, special, ...
   }
 
+  // todo area
+
   // target
-  if (spellData.target) {
-    setTarget(itemUpdate);
+  const target = spellData.target | spellData.shape;
+  if (target) {
+    setTarget(itemUpdate, target);
   }
 
   // components
@@ -109,6 +117,7 @@ export async function createSpell(spellData) {
 
   // material components
   if (spellData.materialComponents) {
+    // todo
     //   "materials": {
     //     "value": "",
     //     "consumed": false,
@@ -120,8 +129,6 @@ export async function createSpell(spellData) {
       "data.materials.value",
       spellData.materialComponents
     );
-    // todo
-    // material consumed?
   }
 
   // at higher levels
@@ -147,14 +154,26 @@ export async function createSpell(spellData) {
   logger.logConsole("item", item);
 }
 
-// todo set shape
-function setTarget(itemUpdate) {
-  // a creature
-  // x creatures
-  // self
-  // shape is a type of target
-  setProperty(itemUpdate, "data.target.type", "creature"); // cone
-  setProperty(itemUpdate, "data.target.units", undefined); // ft
+// todo
+function setTarget(itemUpdate, target) {
+  // "15-foot cone" or "any creature", "willing creature", ...
+
+  // todo
+  // cut string
+  // set values
+
+  function setTargetType(itemUpdate, target) {
+    // todo
+    setProperty(itemUpdate, "data.target.type", "creature"); // cone, cube, enemy, ...
+  }
+  setTargetType(itemUpdate, target);
+
+  function setTargetUnits(itemUpdate, target) {
+    // todo
+    setProperty(itemUpdate, "data.target.units", undefined); // ft, self, any, ...
+  }
+  setTargetUnits(itemUpdate, target);
+
   setProperty(itemUpdate, "data.target.value", 1); // 15
   setProperty(itemUpdate, "data.target.width", undefined);
 }
