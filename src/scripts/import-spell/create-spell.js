@@ -35,12 +35,21 @@ export async function createSpell(spellData) {
 
   // range
   if (spellData.range) {
-    setProperty(
-      itemUpdate,
-      "data.range.value",
-      parseInt(spellData.range.normal)
-    );
-    setProperty(itemUpdate, "data.range.units", spellData.range.type); // self, any, touch, special, ...
+    switch (spellData.range.type) {
+      case "self":
+      case "touch":
+        logger.logWarn("ignoring range");
+        break;
+      default:
+        setProperty(
+          itemUpdate,
+          "data.range.value",
+          parseInt(spellData.range.normal)
+        );
+        setProperty(itemUpdate, "data.range.long", 0); // for spells this is always 0
+        break;
+    }
+    setProperty(itemUpdate, "data.range.units", spellData.range.type);
   }
 
   // todo area
