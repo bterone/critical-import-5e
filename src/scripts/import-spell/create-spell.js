@@ -90,25 +90,17 @@ export async function createSpell(spellData) {
   // duration
   if (spellData.duration) {
     // setProperty(itemUpdate, "data.duration.value", "");
-    setProperty(
-      itemUpdate,
-      "data.duration.units",
-      shortenDuration(spellData.duration)
-    );
+    setProperty(itemUpdate, "data.duration.units", spellData.duration);
   }
 
   // school
   if (spellData.school) {
-    setProperty(itemUpdate, "data.school", shortenSchool(spellData.school));
+    setProperty(itemUpdate, "data.school", spellData.school);
   }
 
   // attack/save
-  if (spellData.attacksave) {
-    setProperty(
-      itemUpdate,
-      "data.actionType",
-      shortenAttackOrSave(spellData.attacksave)
-    );
+  if (spellData.actionType) {
+    setProperty(itemUpdate, "data.actionType", spellData.actionType);
   }
 
   // damage/effect
@@ -185,48 +177,4 @@ function setTarget(itemUpdate, target) {
 
   setProperty(itemUpdate, "data.target.value", 1); // 15
   setProperty(itemUpdate, "data.target.width", undefined);
-}
-
-// todo
-function shortenDuration(duration) {
-  switch (duration.trim().toLocaleLowerCase()) {
-    case "instantaneous":
-      return "inst";
-    default:
-      return duration;
-  }
-}
-
-// todo
-function shortenSchool(school) {
-  switch (school.trim().toLocaleLowerCase()) {
-    case "abjuration":
-      return "";
-    case "transmutation":
-      return "";
-    case "conjuration":
-      return "";
-    case "divination":
-      return "";
-    case "enchantment":
-      return "";
-    case "evocation":
-      return "evo";
-    case "illusion":
-      return "";
-    case "necromancy":
-      return "";
-    default:
-      return school;
-  }
-}
-
-// todo
-function shortenAttackOrSave(attackOrSave) {
-  switch (attackOrSave.trim().toLocaleLowerCase()) {
-    case "ranged":
-      return "rsak";
-    default:
-      return attackOrSave;
-  }
 }
