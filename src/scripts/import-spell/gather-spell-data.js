@@ -3,11 +3,13 @@ import { Logger } from "../log.js";
 const logger = new Logger("gather-spell-data.js");
 // logger.disable();
 
-const materialComponentRgx = /-.?-.?\((?<material>.*)?\)/i;
-const atHigherLevelsRgx = /\bat higher levels\b.?\s?(?<higherLevelsDesc>.*)/i;
-const atHigherLevelsDamageRgx = /(?<dmgRoll>\dd\d)/i;
-const targetRgx = /(?<target>\bwilling creature\b|\ba target\b)/i;
-const shapeRgx = /(?<shape>[0-9]+\b-foot\b(\s|-)?[a-z]+)/i;
+const MATERIAL_COMPONENT_RGX = /-.?-.?\((?<material>.*)?\)/i;
+const AT_HIGHER_LEVEL_RGX = /\bat higher levels\b.?\s?(?<higherLevelsDesc>.*)/i;
+const AT_HIGHER_LEVEL_DAMAGE_RGX = /(?<dmgRoll>\dd\d)/i;
+const TARGET_RGX = /(?<target>\bwilling creature\b|\ba target\b)/i;
+const SHAPE_RGX = /(?<shape>[0-9]+\b-foot\b(\s|-)?[a-z]+)/i;
+const RANGE_RGX = /((?<type>[a-zA-Z]+)?\s\()?((?<range>\d+)\s\bft\b)/i;
+const ATTACK_SAVE_RGX = /((?<ability>[A-Z]{3})\s)?(?<type>[a-zA-Z]+)/;
 
 /**
  * Spell params:
@@ -89,13 +91,13 @@ export function gatherSpellData(importedSpellData) {
           break;
 
         case validHeaders.rangeArea:
-          const rangeRgx = /((?<type>[a-zA-Z]+)?\s\()?((?<range>\d+)\s\bft\b)/i;
-          const match = rangeRgx.exec(portion);
-          if (!match.groups) {
+          // todo area ?
+          const raMatch = RANGE_RGX.exec(portion);
+          if (!raMatch.groups) {
             logger.logWarn(`couldn't parse range/area ${portion}`);
             continue;
           }
-          const mGroups = match.groups;
+          const mGroups = raMatch.groups;
           rawSpellDto.range = {
             type: mGroups.type ? mGroups.type.toLocaleLowerCase() : "ft",
             normal: parseInt(mGroups.range),
@@ -103,13 +105,33 @@ export function gatherSpellData(importedSpellData) {
           };
           break;
         case validHeaders.components:
-        // todo
+          // todo
+          break;
         case validHeaders.duration:
-        // todo
+          rawSpellDto.duration = shortenDuration(portion);
+          break;
         case validHeaders.school:
-        // todo
+          rawSpellDto.school = shortenSchool(portion);
+          break;
         case validHeaders.attackSave:
-        // todo
+          const asMatch = ATTACK_SAVE_RGX.exec(portion);
+          if (!asMatch.groups) {
+            logger.logWarn(`couldn't parse attack/save ${portion}`);
+            continue;
+          }
+
+          const asGroups = asMatch.groups;
+          if (asGroups.type) {
+            rawSpellDto.actionType = shortenAttackOrSave(asGroups.type);
+          }
+          if (asGroups.ability) {
+            rawSpellDto.save = {
+              ability: asGroups.ability.trim().toLocaleLowerCase(),
+              dc: null, // todo
+              scaling: "spell", // todo
+            };
+          }
+          break;
         case validHeaders.damageEffect:
         // todo
         default:
@@ -129,18 +151,18 @@ export function gatherSpellData(importedSpellData) {
     const line = rawSpellDto.rawHeaderData.other[i];
 
     // material components
-    const material = materialComponentRgx.exec(line);
+    const material = MATERIAL_COMPONENT_RGX.exec(line);
     if (material) {
       rawSpellDto.materialComponents = material.groups.material;
     }
 
     // at higher levels
-    const atHigherLevels = atHigherLevelsRgx.exec(line);
+    const atHigherLevels = AT_HIGHER_LEVEL_RGX.exec(line);
     if (atHigherLevels) {
       const desc = atHigherLevels.groups.higherLevelsDesc;
       rawSpellDto.atHigherLevels = desc;
 
-      const match = atHigherLevelsDamageRgx.exec(desc);
+      const match = AT_HIGHER_LEVEL_DAMAGE_RGX.exec(desc);
       const m = match.groups;
       if (m) {
         rawSpellDto.damageAtHigherLevels = m.dmgRoll;
@@ -159,14 +181,14 @@ export function gatherSpellData(importedSpellData) {
   const desc = rawSpellDto.desc;
 
   // target
-  const target = targetRgx.exec(desc);
+  const target = TARGET_RGX.exec(desc);
   const targetMatch = target?.groups;
   if (targetMatch) {
     rawSpellDto.target = targetMatch.target;
   }
 
   // shape
-  const shape = shapeRgx.exec(desc);
+  const shape = SHAPE_RGX.exec(desc);
   const shapeMatch = shape?.groups;
   if (shapeMatch) {
     rawSpellDto.shape = shapeMatch.shape;
@@ -241,6 +263,8 @@ function shortenAttackOrSave(attackOrSave) {
   switch (attackOrSave.trim().toLocaleLowerCase()) {
     case "ranged":
       return "rsak";
+    case "save":
+      return "save";
     default:
       return attackOrSave;
   }
