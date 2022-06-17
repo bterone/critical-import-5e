@@ -3,6 +3,17 @@ import { Logger } from "../log.js";
 const logger = new Logger("gather-spell-data.js");
 // logger.disable();
 
+const VALID_HEADERS = {
+  level: "level",
+  castingTime: "casting time",
+  rangeArea: "range/area",
+  components: "components",
+  duration: "duration",
+  school: "school",
+  attackSave: "attack/save",
+  damageEffect: "damage/effect",
+};
+
 const MATERIAL_COMPONENT_RGX = /-.?-.?\((?<material>.*)?\)/i;
 const AT_HIGHER_LEVEL_RGX = /\bat higher levels\b.?\s?(?<higherLevelsDesc>.*)/i;
 const AT_HIGHER_LEVEL_DAMAGE_RGX = /(?<dmgRoll>\dd\d)/i;
@@ -32,31 +43,16 @@ const ATTACK_SAVE_RGX = /((?<ability>[A-Z]{3})\s)?(?<type>[a-zA-Z]+)/;
  *
  */
 
+// todo  - gather WotC style (Grimhollow PDF's for example)
 export function gatherSpellData(importedSpellData) {
   const damageRgx = /(?<dmgRoll>\dd\d)\s?(?<dmgType>[a-z]*)/gi;
   const allDamageRgx =
     /(?<versatile>(\dd\d)\s?([a-z]*)\s\bdamage\b[a-zA-Z\s]+(\bstart\b|\bend\b)[a-zA-Z\s]+\bturn\b)|(?<dmgRoll>\dd\d)\s?(?<dmgType>[a-z]*)/gi;
 
-  // todo
-  // gather WotC style (Grimhollow PDF's for example)
-
-  // importedSpellData from D&D Beyond
-
   logger.logConsole("importedSpellData", importedSpellData);
-  const validHeaders = {
-    level: "level",
-    castingTime: "casting time",
-    rangeArea: "range/area",
-    components: "components",
-    duration: "duration",
-    school: "school",
-    attackSave: "attack/save",
-    damageEffect: "damage/effect",
-  };
-
   const inputPortions = importedSpellData.trim().split(/\n/g);
 
-  const rawSpellDto = {
+  const spellDto = {
     name: inputPortions.splice(0, 1)[0],
     rawHeaderData: { other: [] },
   };
@@ -68,7 +64,7 @@ export function gatherSpellData(importedSpellData) {
       continue;
     }
 
-    const containsHeader = Object.values(validHeaders).indexOf(value) > -1;
+    const containsHeader = Object.values(VALID_HEADERS).indexOf(value) > -1;
     if (containsHeader) {
       // is header
       currentHeader = value;
@@ -78,61 +74,35 @@ export function gatherSpellData(importedSpellData) {
       // rawSpellDto.rawHeaderData[currentHeader] = portion;
 
       switch (currentHeader) {
-        case validHeaders.level:
-          rawSpellDto.level = parseInt(portion);
+        case VALID_HEADERS.level:
+          spellDto.level = parseInt(portion.trim());
           break;
 
-        case validHeaders.castingTime:
-          const casting = portion.split(" ");
-          rawSpellDto.castingTime = {
-            value: parseInt(casting[0]),
-            type: casting[1],
-          };
+        case VALID_HEADERS.castingTime:
+          spellDto.castingTime = parseCastingTime(portion);
           break;
 
-        case validHeaders.rangeArea:
-          // todo area ?
-          const raMatch = RANGE_RGX.exec(portion);
-          if (!raMatch.groups) {
-            logger.logWarn(`couldn't parse range/area ${portion}`);
-            continue;
-          }
-          const mGroups = raMatch.groups;
-          rawSpellDto.range = {
-            type: mGroups.type ? mGroups.type.toLocaleLowerCase() : "ft",
-            normal: parseInt(mGroups.range),
-            max: 0,
-          };
+        case VALID_HEADERS.rangeArea:
+          spellDto.range = parseRange(portion);
+          // todo area
           break;
-        case validHeaders.components:
-          // todo
+        case VALID_HEADERS.components:
+          spellDto.components = portion;
           break;
-        case validHeaders.duration:
-          rawSpellDto.duration = shortenDuration(portion);
+        case VALID_HEADERS.duration:
+          spellDto.duration = shortenDuration(portion);
           break;
-        case validHeaders.school:
-          rawSpellDto.school = shortenSchool(portion);
+        case VALID_HEADERS.school:
+          spellDto.school = shortenSpellSchool(portion);
           break;
-        case validHeaders.attackSave:
-          const asMatch = ATTACK_SAVE_RGX.exec(portion);
-          if (!asMatch.groups) {
-            logger.logWarn(`couldn't parse attack/save ${portion}`);
-            continue;
-          }
-
-          const asGroups = asMatch.groups;
-          if (asGroups.type) {
-            rawSpellDto.actionType = shortenAttackOrSave(asGroups.type);
-          }
-          if (asGroups.ability) {
-            rawSpellDto.save = {
-              ability: asGroups.ability.trim().toLocaleLowerCase(),
-              dc: null, // todo
-              scaling: "spell", // todo
-            };
+        case VALID_HEADERS.attackSave:
+          const attackOrSave = parseAttackOrSave(portion);
+          if (attackOrSave) {
+            spellDto.actionType = attackOrSave.actionType;
+            spellDto.save = attackOrSave.save;
           }
           break;
-        case validHeaders.damageEffect:
+        case VALID_HEADERS.damageEffect:
         // todo
         default:
           logger.logWarn(`unknown RawHeader ${currentHeader}`);
@@ -142,56 +112,54 @@ export function gatherSpellData(importedSpellData) {
       currentHeader = undefined;
     } else {
       // is value without known header
-      rawSpellDto.rawHeaderData.other.push(portion);
+      spellDto.rawHeaderData.other.push(portion);
     }
   }
 
   // convert list of unknown data
-  for (let i = 0; i < rawSpellDto.rawHeaderData.other?.length; i++) {
-    const line = rawSpellDto.rawHeaderData.other[i];
+  for (let i = 0; i < spellDto.rawHeaderData.other?.length; i++) {
+    const line = spellDto.rawHeaderData.other[i];
 
-    // material components
+    // specific material components
     const material = MATERIAL_COMPONENT_RGX.exec(line);
     if (material) {
-      rawSpellDto.materialComponents = material.groups.material;
+      spellDto.materialComponents = material.groups.material;
     }
 
     // at higher levels
     const atHigherLevels = AT_HIGHER_LEVEL_RGX.exec(line);
     if (atHigherLevels) {
       const desc = atHigherLevels.groups.higherLevelsDesc;
-      rawSpellDto.atHigherLevels = desc;
+      spellDto.atHigherLevels = desc;
 
       const match = AT_HIGHER_LEVEL_DAMAGE_RGX.exec(desc);
       const m = match.groups;
       if (m) {
-        rawSpellDto.damageAtHigherLevels = m.dmgRoll;
+        spellDto.damageAtHigherLevels = m.dmgRoll;
       }
     }
 
     // spell description
     const isDesc = !material && !atHigherLevels;
     if (isDesc) {
-      const descLine = rawSpellDto.desc
-        ? rawSpellDto.desc + `\n\n${line}`
-        : line;
-      rawSpellDto.desc = descLine;
+      const descLine = spellDto.desc ? spellDto.desc + `\n\n${line}` : line;
+      spellDto.desc = descLine;
     }
   }
-  const desc = rawSpellDto.desc;
+  const desc = spellDto.desc;
 
   // target
   const target = TARGET_RGX.exec(desc);
   const targetMatch = target?.groups;
   if (targetMatch) {
-    rawSpellDto.target = targetMatch.target;
+    spellDto.target = targetMatch.target;
   }
 
   // shape
   const shape = SHAPE_RGX.exec(desc);
   const shapeMatch = shape?.groups;
   if (shapeMatch) {
-    rawSpellDto.shape = shapeMatch.shape;
+    spellDto.shape = shapeMatch.shape;
   }
 
   // damage
@@ -214,14 +182,61 @@ export function gatherSpellData(importedSpellData) {
   }
 
   if (dmg.length > 0) {
-    rawSpellDto.damage = dmg;
+    spellDto.damage = dmg;
   }
   if (versatileDmg.length > 0) {
-    rawSpellDto.versatileDmg = versatileDmg;
+    spellDto.versatileDmg = versatileDmg;
   }
 
-  logger.logConsole("rawSpellDto", rawSpellDto);
-  return rawSpellDto;
+  logger.logConsole("rawSpellDto", spellDto);
+  return spellDto;
+}
+
+function parseCastingTime(portion) {
+  const casting = portion.split(" ");
+  return {
+    value: parseInt(casting[0]),
+    type: casting[1],
+  };
+}
+
+function parseRange(portion) {
+  const raMatch = RANGE_RGX.exec(portion);
+  if (!raMatch.groups) {
+    logger.logWarn(`couldn't parse range/area ${portion}`);
+    return;
+  }
+
+  const mGroups = raMatch.groups;
+  return {
+    type: mGroups.type ? mGroups.type.toLocaleLowerCase() : "ft",
+    normal: parseInt(mGroups.range),
+    max: 0,
+  };
+}
+
+function parseAttackOrSave(portion) {
+  const asMatch = ATTACK_SAVE_RGX.exec(portion);
+  if (!asMatch.groups) {
+    logger.logWarn(`couldn't parse attack/save ${portion}`);
+    return;
+  }
+
+  const attackOrSave = {};
+
+  const asGroups = asMatch.groups;
+  if (asGroups.type) {
+    attackOrSave.actionType = shortenAttackOrSave(asGroups.type);
+  }
+  if (asGroups.ability) {
+    attackOrSave.save = {
+      ability: asGroups.ability.trim().toLocaleLowerCase(),
+      dc: null, // todo
+      scaling: "spell", // todo could also be "none" or "cantrip"
+    };
+  }
+
+  return attackOrSave;
 }
 
 // todo
@@ -235,7 +250,7 @@ function shortenDuration(duration) {
 }
 
 // todo
-function shortenSchool(school) {
+function shortenSpellSchool(school) {
   switch (school.trim().toLocaleLowerCase()) {
     case "abjuration":
       return "";

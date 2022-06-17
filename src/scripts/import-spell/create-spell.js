@@ -57,7 +57,12 @@ export async function createSpell(spellData) {
   // target
   const target = spellData.target | spellData.shape;
   if (target) {
-    setTarget(itemUpdate, target);
+    // todo
+    // "15-foot cone" or "any creature", "willing creature", ...
+    setProperty(itemUpdate, "data.target.type", "creature"); // cone, cube, enemy, ...
+    setProperty(itemUpdate, "data.target.units", undefined); // ft, self, any, ...
+    setProperty(itemUpdate, "data.target.value", 1); // 15
+    setProperty(itemUpdate, "data.target.width", undefined);
   }
 
   // components
@@ -98,10 +103,19 @@ export async function createSpell(spellData) {
     setProperty(itemUpdate, "data.school", spellData.school);
   }
 
-  // attack/save
+  // actionType
   if (spellData.actionType) {
     setProperty(itemUpdate, "data.actionType", spellData.actionType);
   }
+
+  // save
+  if (spellData.save) {
+    setProperty(itemUpdate, "data.save.ability", spellData.save.ability);
+    setProperty(itemUpdate, "data.save.dc", spellData.save.dc);
+    setProperty(itemUpdate, "data.save.scaling", spellData.save.scaling);
+  }
+
+  // todo attack ?
 
   // damage/effect
   if (spellData.damage) {
