@@ -211,8 +211,8 @@ function parseDuration(portion) {
 function parseCastingTime(portion) {
   const casting = portion.split(" ");
   return {
-    value: parseInt(casting[0]),
-    type: casting[1],
+    value: parseInt(casting[0].trim()),
+    type: casting[1].trim().toLocaleLowerCase(),
   };
 }
 
@@ -286,14 +286,35 @@ function shortenSpellSchool(school) {
   return school.trim().toLocaleLowerCase().slice(0, 3);
 }
 
-// todo
+/**
+ *
+ * @param {string} attackOrSave from D&D Beyond
+ * @returns FoundryVtt actionType
+ */
 function shortenAttackOrSave(attackOrSave) {
   switch (attackOrSave.trim().toLocaleLowerCase()) {
+    // case "ranged weapon": // ranged weapon attack
+    //   return "rwak";
+    // case "melee weapon": // melee weapon attack
+    //   return "mwak";
+    // case "utility":
+    //   return "util";
+    // case "other":
+    //   return "other";
+    // case "ability check":
+    //   return "abil";
+    // case "healing": // damage/effect
+    //   return "heal";
+    case "none":
+      return "util";
     case "ranged":
       return "rsak";
+    case "melee":
+      return "msak";
     case "save":
       return "save";
     default:
-      return attackOrSave;
+      logger.logWarn(`can't parse ${attackOrSave}`);
+      return undefined;
   }
 }
