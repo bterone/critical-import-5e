@@ -25,11 +25,14 @@ export async function createSpell(spellData) {
     setProperty(itemUpdate, "data.level", parseInt(spellData.level));
   }
 
-  // todo
   // casting time
   if (spellData.castingTime) {
-    setProperty(itemUpdate, "data.activation.type", "action"); // todo
-    setProperty(itemUpdate, "data.activation.cost", 1);
+    setProperty(itemUpdate, "data.activation.type", spellData.castingTime.type);
+    setProperty(
+      itemUpdate,
+      "data.activation.cost",
+      spellData.castingTime.value
+    );
     // setProperty(itemUpdate, "data.activation.condition", ""); // todo
   }
 
