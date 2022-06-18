@@ -218,7 +218,7 @@ function parseCastingTime(portion) {
 
 function parseRange(portion) {
   const raMatch = RANGE_RGX.exec(portion);
-  if (!raMatch.groups) {
+  if (!raMatch?.groups) {
     logger.logWarn(`couldn't parse range/area ${portion}`);
     return;
   }
@@ -233,7 +233,7 @@ function parseRange(portion) {
 
 function parseAttackOrSave(portion) {
   const asMatch = ATTACK_SAVE_RGX.exec(portion);
-  if (!asMatch.groups) {
+  if (!asMatch?.groups) {
     logger.logWarn(`couldn't parse attack/save ${portion}`);
     return;
   }
