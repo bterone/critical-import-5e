@@ -282,28 +282,8 @@ function shortenDuration(duration) {
   }
 }
 
-// todo
 function shortenSpellSchool(school) {
-  switch (school.trim().toLocaleLowerCase()) {
-    case "abjuration":
-      return "";
-    case "transmutation":
-      return "";
-    case "conjuration":
-      return "";
-    case "divination":
-      return "";
-    case "enchantment":
-      return "";
-    case "evocation":
-      return "evo";
-    case "illusion":
-      return "";
-    case "necromancy":
-      return "";
-    default:
-      return school;
-  }
+  return school.trim().toLocaleLowerCase().slice(0, 3);
 }
 
 // todo
