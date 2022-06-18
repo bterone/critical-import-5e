@@ -21,6 +21,7 @@ const TARGET_RGX = /(?<target>\bwilling creature\b|\ba target\b)/i;
 const SHAPE_RGX = /(?<shape>[0-9]+\b-foot\b(\s|-)?[a-z]+)/i;
 const RANGE_RGX = /((?<type>[a-zA-Z]+)?\s\()?((?<range>\d+)\s\bft\b)/i;
 const ATTACK_SAVE_RGX = /((?<ability>[A-Z]{3})\s)?(?<type>[a-zA-Z]+)/;
+const DURATION_RGX = /((?<value>\d+)\s+)?(?<type>[a-zA-Z]+)/i;
 
 /**
  * Spell params:
@@ -90,7 +91,7 @@ export function gatherSpellData(importedSpellData) {
           spellDto.components = portion;
           break;
         case VALID_HEADERS.duration:
-          spellDto.duration = shortenDuration(portion);
+          spellDto.duration = parseDuration(portion);
           break;
         case VALID_HEADERS.school:
           spellDto.school = shortenSpellSchool(portion);
@@ -152,6 +153,7 @@ export function gatherSpellData(importedSpellData) {
   const target = TARGET_RGX.exec(desc);
   const targetMatch = target?.groups;
   if (targetMatch) {
+    // todo evaluate options
     spellDto.target = targetMatch.target;
   }
 
@@ -159,6 +161,7 @@ export function gatherSpellData(importedSpellData) {
   const shape = SHAPE_RGX.exec(desc);
   const shapeMatch = shape?.groups;
   if (shapeMatch) {
+    // todo split string into parameters
     spellDto.shape = shapeMatch.shape;
   }
 
@@ -190,6 +193,19 @@ export function gatherSpellData(importedSpellData) {
 
   logger.logConsole("rawSpellDto", spellDto);
   return spellDto;
+}
+
+function parseDuration(portion) {
+  const match = DURATION_RGX.exec(portion);
+  if (!match?.groups) {
+    return;
+  }
+
+  const groups = match.groups;
+  return {
+    type: shortenDuration(groups.type),
+    value: groups.value ? parseInt(groups.value) : undefined,
+  };
 }
 
 function parseCastingTime(portion) {
@@ -239,11 +255,28 @@ function parseAttackOrSave(portion) {
   return attackOrSave;
 }
 
-// todo
 function shortenDuration(duration) {
   switch (duration.trim().toLocaleLowerCase()) {
     case "instantaneous":
       return "inst";
+    case "hours":
+      return "hour";
+    case "turns":
+      return "turn";
+    case "rounds":
+      return "round";
+    case "minutes":
+      return "minute";
+    case "days":
+      return "day";
+    case "months":
+      return "month";
+    case "years":
+      return "year";
+    case "permanent":
+      return "perm";
+    case "special":
+      return "spec";
     default:
       return duration;
   }

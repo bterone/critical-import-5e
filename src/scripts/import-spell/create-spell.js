@@ -94,8 +94,8 @@ export async function createSpell(spellData) {
 
   // duration
   if (spellData.duration) {
-    // setProperty(itemUpdate, "data.duration.value", "");
-    setProperty(itemUpdate, "data.duration.units", spellData.duration);
+    setProperty(itemUpdate, "data.duration.value", spellData.duration.value);
+    setProperty(itemUpdate, "data.duration.units", spellData.duration.type);
   }
 
   // school
