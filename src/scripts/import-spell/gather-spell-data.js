@@ -19,7 +19,7 @@ const AT_HIGHER_LEVEL_RGX = /\bat higher levels\b.?\s?(?<higherLevelsDesc>.*)/i;
 const AT_HIGHER_LEVEL_DAMAGE_RGX = /(?<dmgRoll>\dd\d)/i;
 const TARGET_RGX = /(?<target>\bwilling creature\b|\ba target\b)/i;
 const SHAPE_RGX = /(?<shape>[0-9]+\b-foot\b(\s|-)?[a-z]+)/i;
-const RANGE_RGX = /((?<type>[a-zA-Z]+)?\s\()?((?<range>\d+)\s\bft\b)/i;
+const RANGE_RGX = /((?<type>[a-zA-Z]+)?(\s\()?)?((?<range>\d+)\s\bft\b)?/i;
 const ATTACK_SAVE_RGX = /((?<ability>[A-Z]{3})\s)?(?<type>[a-zA-Z]+)/;
 const DURATION_RGX = /((?<value>\d+)\s+)?(?<type>[a-zA-Z]+)/i;
 
@@ -226,7 +226,7 @@ function parseRange(portion) {
   const mGroups = raMatch.groups;
   return {
     type: mGroups.type ? mGroups.type.toLocaleLowerCase() : "ft",
-    normal: parseInt(mGroups.range),
+    normal: mGroups.range ? parseInt(mGroups.range) : 0,
     max: 0,
   };
 }
