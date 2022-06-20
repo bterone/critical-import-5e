@@ -49,9 +49,10 @@ const DURATION_RGX =
 
 // todo  - gather WotC style (Grimhollow PDF's for example)
 export function gatherSpellData(importedSpellData) {
-  const damageRgx = /(?<dmgRoll>\d+d\d+(.+\d+)?)\s?(?<dmgType>[a-z]*)/gi;
+  const damageRgx =
+    /((?<dmgRoll>\d+d\d+((.+\d+)?))\s?(?<dmgType>[a-z]*))(?<mod>.+\bspellcasting ability modifier\b)?/gi;
   const allDamageRgx =
-    /(?<versatile>(\d+d\d+)\s?([a-z]*)\s\bdamage\b[a-zA-Z\s]+(\bstart\b|\bend\b)[a-zA-Z\s]+\bturn\b)|(?<dmgRoll>\d+d\d+(.+\d+)?)\s?(?<dmgType>[a-z]*)/gi;
+    /(?<versatile>(\d+d\d+)\s?([a-z]*)\s\bdamage\b[a-zA-Z\s]+(\bstart\b|\bend\b)[a-zA-Z\s]+\bturn\b)|((?<dmgRoll>\d+d\d+((.+\d+)?))\s?(?<dmgType>[a-z]*))(?<mod>.+\bspellcasting ability modifier\b)?/gi;
 
   logger.logConsole("importedSpellData", importedSpellData);
   const inputPortions = importedSpellData.trim().split(/\n/g);
@@ -191,8 +192,10 @@ export function gatherSpellData(importedSpellData) {
   let match;
   while ((match = allDamageRgx.exec(desc)) != null) {
     const m = match?.groups;
-    if (m.dmgRoll || m.dmgType) {
-      dmg.push([m.dmgRoll, m.dmgType]);
+    if (m.dmgRoll) {
+      m.mod
+        ? dmg.push([m.dmgRoll + " + @mod", m.dmgType])
+        : dmg.push([m.dmgRoll, m.dmgType]);
     } else if (m.versatile) {
       let vMatch;
       while ((vMatch = damageRgx.exec(m.versatile)) != null) {
