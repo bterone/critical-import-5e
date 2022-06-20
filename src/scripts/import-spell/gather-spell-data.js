@@ -23,7 +23,8 @@ const SHAPE_RGX =
 const AREA_RGX = /([a-zA-Z]+)\s\((?<area>\d+)/i;
 const RANGE_RGX = /((?<type>[a-zA-Z]+)?(\s\()?)?((?<range>\d+)\s\bft\b)?/i;
 const ATTACK_SAVE_RGX = /((?<ability>[A-Z]{3})\s)?(?<type>[a-zA-Z]+)/;
-const DURATION_RGX = /((?<value>\d+)\s+)?(?<type>[a-zA-Z]+)/i;
+const DURATION_RGX =
+  /(?<concentration>[a-zA-Z]+)\s+?((?<value>\d+)\s+)?(?<type>[a-zA-Z]+)/i;
 
 /**
  * Spell params:
@@ -179,7 +180,7 @@ export function gatherSpellData(importedSpellData) {
        */
       spellDto.target = {
         type: "creature",
-        value: targetMatch.includes("each") ? undefined : 1,
+        value: targetMatch.target.includes("each") ? undefined : 1,
       };
     }
   }
@@ -311,18 +312,25 @@ function shortenDuration(duration) {
     case "instantaneous":
       return "inst";
     case "hours":
+    case "hour":
       return "hour";
     case "turns":
+    case "turn":
       return "turn";
     case "rounds":
+    case "round":
       return "round";
     case "minutes":
+    case "minute":
       return "minute";
     case "days":
+    case "day":
       return "day";
     case "months":
+    case "month":
       return "month";
     case "years":
+    case "year":
       return "year";
     case "permanent":
       return "perm";
