@@ -140,7 +140,7 @@ export function gatherSpellData(importedSpellData) {
       spellDto.atHigherLevels = desc;
 
       const match = AT_HIGHER_LEVEL_DAMAGE_RGX.exec(desc);
-      const m = match.groups;
+      const m = match?.groups;
       if (m) {
         spellDto.damageAtHigherLevels = m.dmgRoll;
       }
@@ -365,7 +365,7 @@ function shortenAttackOrSave(attackOrSave) {
     // case "healing": // damage/effect
     //   return "heal";
     case "none":
-      return "util";
+      return "other";
     case "ranged":
       return "rsak";
     case "melee":
