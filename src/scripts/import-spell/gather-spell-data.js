@@ -24,7 +24,7 @@ const AREA_RGX = /([a-zA-Z]+)\s\((?<area>\d+)/i;
 const RANGE_RGX = /((?<type>[a-zA-Z]+)?(\s\()?)?((?<range>\d+)\s\bft\b)?/i;
 const ATTACK_SAVE_RGX = /((?<ability>[A-Z]{3})\s)?(?<type>[a-zA-Z]+)/;
 const DURATION_RGX =
-  /(?<concentration>[a-zA-Z]+)\s+?((?<value>\d+)\s+)?(?<type>[a-zA-Z]+)/i;
+  /((?<concentration>[a-zA-Z]+)?\s+?((?<value>\d+)\s+)?)?(?<type>[a-zA-Z]+)/i;
 
 /**
  * Spell params:
