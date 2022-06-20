@@ -17,8 +17,10 @@ const VALID_HEADERS = {
 const MATERIAL_COMPONENT_RGX = /-.?-.?\((?<material>.*)?\)/i;
 const AT_HIGHER_LEVEL_RGX = /\bat higher levels\b.?\s?(?<higherLevelsDesc>.*)/i;
 const AT_HIGHER_LEVEL_DAMAGE_RGX = /(?<dmgRoll>\dd\d)/i;
-const TARGET_RGX = /(?<target>\bwilling creature\b|\ba target\b)/i;
-const SHAPE_RGX = /(?<shape>[0-9]+\b-foot\b(\s|-)?[a-z]+)/i;
+const TARGET_RGX = /(?<target>(\ba\b|\bwilling\b)\screature\b|\ba target\b)/i;
+const SHAPE_RGX =
+  /((?<value>\d+).+(\bfoot\b|\bfeet\b|\bft\b).+)?(?<shape>(\bcone\b|\bcube\b|\bcylinder\b|\bline\b|\bradius\b|\bsphere\b|\bsquare\b|\bwall\b))(\s?(?<length>\d+).+\blong\b.+(?<width>\d+).+\bwide\b)?/i;
+const AREA_RGX = /([a-zA-Z]+)\s\((?<area>\d+)/i;
 const RANGE_RGX = /((?<type>[a-zA-Z]+)?(\s\()?)?((?<range>\d+)\s\bft\b)?/i;
 const ATTACK_SAVE_RGX = /((?<ability>[A-Z]{3})\s)?(?<type>[a-zA-Z]+)/;
 const DURATION_RGX = /((?<value>\d+)\s+)?(?<type>[a-zA-Z]+)/i;
@@ -85,7 +87,7 @@ export function gatherSpellData(importedSpellData) {
 
         case VALID_HEADERS.rangeArea:
           spellDto.range = parseRange(portion);
-          // todo area
+          spellDto.area = parseArea(portion);
           break;
         case VALID_HEADERS.components:
           spellDto.components = portion;
@@ -149,20 +151,34 @@ export function gatherSpellData(importedSpellData) {
   }
   const desc = spellDto.desc;
 
-  // target
-  const target = TARGET_RGX.exec(desc);
-  const targetMatch = target?.groups;
-  if (targetMatch) {
-    // todo evaluate options
-    spellDto.target = targetMatch.target;
-  }
-
-  // shape
-  const shape = SHAPE_RGX.exec(desc);
-  const shapeMatch = shape?.groups;
-  if (shapeMatch) {
-    // todo split string into parameters
-    spellDto.shape = shapeMatch.shape;
+  // target with shape
+  if (spellDto.area) {
+    // shape
+    const shape = SHAPE_RGX.exec(desc);
+    const shapeMatch = shape?.groups;
+    if (shapeMatch) {
+      spellDto.shape = {
+        type: shapeMatch.shape,
+        length: shapeMatch.length,
+        width: shapeMatch.width,
+        value: shapeMatch.value,
+      };
+    }
+  } else {
+    // target
+    const target = TARGET_RGX.exec(desc);
+    const targetMatch = target?.groups;
+    if (targetMatch) {
+      // todo
+      /**
+       * target.type = creature, cone, ally, none, ... // todo determine type
+       * target.units = ft, none, self, touch, any, special, ... // todo determine units
+       */
+      spellDto.target = {
+        type: "creature",
+        value: targetMatch.includes("each") ? undefined : 1,
+      };
+    }
   }
 
   // damage
@@ -216,10 +232,23 @@ function parseCastingTime(portion) {
   };
 }
 
+function parseArea(portion) {
+  const match = AREA_RGX.exec(portion);
+  if (!match?.groups) {
+    logger.logWarn(`couldn't parse area ${portion}`);
+    return;
+  }
+
+  return {
+    value: parseInt(match.groups.area.trim()),
+    units: "ft",
+  };
+}
+
 function parseRange(portion) {
   const raMatch = RANGE_RGX.exec(portion);
   if (!raMatch?.groups) {
-    logger.logWarn(`couldn't parse range/area ${portion}`);
+    logger.logWarn(`couldn't parse range ${portion}`);
     return;
   }
 
