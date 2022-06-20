@@ -18,7 +18,7 @@ export async function createSpell(spellData) {
 
   // preparation
   setProperty(itemUpdate, "data.preparation.mode", "prepared");
-  setProperty(itemUpdate, "data.preparation.prepared", true);
+  setProperty(itemUpdate, "data.preparation.prepared", false);
 
   // level
   if (spellData.level) {
