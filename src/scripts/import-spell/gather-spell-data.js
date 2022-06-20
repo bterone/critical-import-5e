@@ -14,7 +14,7 @@ const VALID_HEADERS = {
   damageEffect: "damage/effect",
 };
 
-const MATERIAL_COMPONENT_RGX = /-.?-.?\((?<material>.*)?\)/i;
+const MATERIAL_COMPONENT_RGX = /(-|\*).?-.?\((?<material>.*)?\)/i;
 const AT_HIGHER_LEVEL_RGX = /\bat higher levels\b.?\s?(?<higherLevelsDesc>.*)/i;
 const AT_HIGHER_LEVEL_DAMAGE_RGX = /(?<dmgRoll>\d+d\d+)/i;
 const TARGET_RGX = /(?<target>(\ba\b|\bwilling\b)\screature\b|\ba target\b)/i;
