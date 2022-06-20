@@ -55,8 +55,11 @@ export function gatherSpellData(importedSpellData) {
   logger.logConsole("importedSpellData", importedSpellData);
   const inputPortions = importedSpellData.trim().split(/\n/g);
 
+  const title = parseSpellTitle(inputPortions);
+
   const spellDto = {
-    name: inputPortions.splice(0, 1)[0],
+    name: title.name,
+    concentration: title.concentration,
     rawHeaderData: { other: [] },
   };
 
@@ -209,6 +212,25 @@ export function gatherSpellData(importedSpellData) {
 
   logger.logConsole("rawSpellDto", spellDto);
   return spellDto;
+}
+
+function parseSpellTitle(userInput) {
+  const rawName = userInput.splice(0, 1)[0].trim();
+  const isConcentrationSpell = rawName
+    .toLocaleLowerCase()
+    .includes("concentration");
+
+  let name = rawName;
+  let concentration = false;
+  if (isConcentrationSpell) {
+    name = rawName.replace("Concentration", "").trim();
+    concentration = true;
+  }
+
+  return {
+    name,
+    concentration,
+  };
 }
 
 function parseDuration(portion) {

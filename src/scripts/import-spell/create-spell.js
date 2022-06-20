@@ -93,9 +93,13 @@ export async function createSpell(spellData) {
       "data.components.material",
       components.includes("M")
     );
+    setProperty(
+      itemUpdate,
+      "data.components.concentration",
+      spellData.concentration
+    );
     // todo
     // ritual
-    // concentration
   }
 
   // duration
