@@ -67,7 +67,11 @@ export async function createSpell(spellData) {
     const shape = spellData.shape;
     setProperty(itemUpdate, "data.target.type", shape.type);
     setProperty(itemUpdate, "data.target.units", "ft");
-    setProperty(itemUpdate, "data.target.value", shape.length);
+    setProperty(
+      itemUpdate,
+      "data.target.value",
+      shape.length ? shape.length : shape.value
+    );
     setProperty(itemUpdate, "data.target.width", shape.width);
   }
 
