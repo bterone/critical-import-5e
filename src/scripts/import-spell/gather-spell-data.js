@@ -16,7 +16,7 @@ const VALID_HEADERS = {
 
 const MATERIAL_COMPONENT_RGX = /-.?-.?\((?<material>.*)?\)/i;
 const AT_HIGHER_LEVEL_RGX = /\bat higher levels\b.?\s?(?<higherLevelsDesc>.*)/i;
-const AT_HIGHER_LEVEL_DAMAGE_RGX = /(?<dmgRoll>\dd\d)/i;
+const AT_HIGHER_LEVEL_DAMAGE_RGX = /(?<dmgRoll>\d+d\d+)/i;
 const TARGET_RGX = /(?<target>(\ba\b|\bwilling\b)\screature\b|\ba target\b)/i;
 const SHAPE_RGX =
   /((?<value>\d+).+(\bfoot\b|\bfeet\b|\bft\b).+)?(?<shape>(\bcone\b|\bcube\b|\bcylinder\b|\bline\b|\bradius\b|\bsphere\b|\bsquare\b|\bwall\b))(\s?(?<length>\d+).+\blong\b.+(?<width>\d+).+\bwide\b)?/i;
@@ -48,9 +48,9 @@ const DURATION_RGX = /((?<value>\d+)\s+)?(?<type>[a-zA-Z]+)/i;
 
 // todo  - gather WotC style (Grimhollow PDF's for example)
 export function gatherSpellData(importedSpellData) {
-  const damageRgx = /(?<dmgRoll>\dd\d)\s?(?<dmgType>[a-z]*)/gi;
+  const damageRgx = /(?<dmgRoll>\d+d\d+)\s?(?<dmgType>[a-z]*)/gi;
   const allDamageRgx =
-    /(?<versatile>(\dd\d)\s?([a-z]*)\s\bdamage\b[a-zA-Z\s]+(\bstart\b|\bend\b)[a-zA-Z\s]+\bturn\b)|(?<dmgRoll>\dd\d)\s?(?<dmgType>[a-z]*)/gi;
+    /(?<versatile>(\d+d\d+)\s?([a-z]*)\s\bdamage\b[a-zA-Z\s]+(\bstart\b|\bend\b)[a-zA-Z\s]+\bturn\b)|(?<dmgRoll>\d+d\d+)\s?(?<dmgType>[a-z]*)/gi;
 
   logger.logConsole("importedSpellData", importedSpellData);
   const inputPortions = importedSpellData.trim().split(/\n/g);
