@@ -49,9 +49,9 @@ const DURATION_RGX =
 
 // todo  - gather WotC style (Grimhollow PDF's for example)
 export function gatherSpellData(importedSpellData) {
-  const damageRgx = /(?<dmgRoll>\d+d\d+)\s?(?<dmgType>[a-z]*)/gi;
+  const damageRgx = /(?<dmgRoll>\d+d\d+(.+\d+)?)\s?(?<dmgType>[a-z]*)/gi;
   const allDamageRgx =
-    /(?<versatile>(\d+d\d+)\s?([a-z]*)\s\bdamage\b[a-zA-Z\s]+(\bstart\b|\bend\b)[a-zA-Z\s]+\bturn\b)|(?<dmgRoll>\d+d\d+)\s?(?<dmgType>[a-z]*)/gi;
+    /(?<versatile>(\d+d\d+)\s?([a-z]*)\s\bdamage\b[a-zA-Z\s]+(\bstart\b|\bend\b)[a-zA-Z\s]+\bturn\b)|(?<dmgRoll>\d+d\d+(.+\d+)?)\s?(?<dmgType>[a-z]*)/gi;
 
   logger.logConsole("importedSpellData", importedSpellData);
   const inputPortions = importedSpellData.trim().split(/\n/g);
