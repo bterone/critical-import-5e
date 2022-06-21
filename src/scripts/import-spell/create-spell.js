@@ -22,7 +22,7 @@ export async function createSpell(spellData) {
 
   // level
   if (spellData.level) {
-    setProperty(itemUpdate, "data.level", parseInt(spellData.level));
+    setProperty(itemUpdate, "data.level", spellData.level);
   }
 
   // casting time
@@ -172,9 +172,21 @@ export async function createSpell(spellData) {
     setProperty(itemUpdate, "data.scaling.mode", "level");
   }
 
+  // cantrip scaling ("at higher levels" for cantrips)
+  let cantripScalingDesc = "";
+  if (spellData.cantripScaling) {
+    cantripScalingDesc = `<br><br><strong>Scaling;</strong> ${spellData.cantripScaling.desc}`;
+    setProperty(
+      itemUpdate,
+      "data.scaling.formula",
+      spellData.cantripScaling.dmg
+    );
+    setProperty(itemUpdate, "data.scaling.mode", "cantrip");
+  }
+
   // spell description
   if (spellData.desc) {
-    const desc = `<p>${spellData.desc}${atHigherLevelsDesc}</p>`;
+    const desc = `<p>${spellData.desc}${atHigherLevelsDesc}${cantripScalingDesc}</p>`;
     setProperty(itemUpdate, "data.description.value", desc);
   }
 
