@@ -3,19 +3,20 @@ import { Logger } from "./log.js";
 const logger = new Logger("dialog.js");
 logger.disable();
 
-export async function openImportDialog(title, callback) {
+export async function openImportDialog(title, placeholderText, callback) {
   /**
    * HTMLElement.outerHTML does't work for input.value!
    * => because of this, a string representation is necessary
+   * => Templates would be an alternative which would result in a lot of so called glue-code
    */
   const content = `
     <div class="critical-import-container">
     <textarea
-      id="critical-import-input-actor"
+      id="critical-import-input-${title}"
       class="critical-import-input"
       wrap="hard"
       cols="1"
-      placeholder="Please paste your actor (formated in the WotC style) in here!"
+      placeholder="${placeholderText}"
     ></textarea>
   </div>  
      `;

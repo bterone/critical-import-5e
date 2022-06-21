@@ -39,7 +39,7 @@ export async function retrieveFromPackMany(packName, itemNames) {
   return items;
 }
 
-export async function retrieveFromPackItemImg(itemName) {
+export async function retrieveFromPackImg(itemName) {
   const name = itemName.toLowerCase();
 
   const item = await retrieveFromPack("dnd5e.items", name);
@@ -58,6 +58,12 @@ export async function retrieveFromPackItemImg(itemName) {
   logger.logConsole("monsterFeat", monsterFeat);
   if (monsterFeat) {
     return monsterFeat.img;
+  }
+
+  const spell = await retrieveFromPack("dnd5e.spells", name);
+  logger.logConsole("spell", spell);
+  if (spell) {
+    return spell.img;
   }
 }
 

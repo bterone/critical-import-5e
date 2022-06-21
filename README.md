@@ -11,16 +11,12 @@ https://trello.com/b/GZDotdDc/critical-import-5e
 
 ### Development environment
 
-For a simple development environment add a symlink for the root directory of this repository into your FoundryVTT modules dir.
+For a simple development environment add a symlink from the "dist/PROJECT_NAME" directory of this repository into your FoundryVTT modules dir.
 
 #### MacOS example
 
 ```
-ln -s ~/src/critical-import-5e/ /Users/Beaver/Library/Application\ Support/FoundryVTT/Data/modules
+ln -s ~/src/critical-import-5e/dist/critical-import-5e/ /Users/Beaver/Library/Application\ Support/FoundryVTT/Data/modules
 ```
 
-To build the project run the following command
-
-```
-yarn run build
-```
+To build the project execute `yarn run build` or for a distribution build `yarn run build-dist`.

@@ -1,7 +1,7 @@
 import { Logger } from "../log.js";
 import {
   retrieveFromPackMany,
-  retrieveFromPackItemImg,
+  retrieveFromPackImg,
   shortenAbility,
   setProperty,
 } from "./../common.js";
@@ -518,7 +518,7 @@ async function updateLegendaryResistances(actor, legendaryResistances) {
   const itemUpdate = {
     name,
     type: "feat",
-    img: await retrieveFromPackItemImg(name),
+    img: await retrieveFromPackImg(name),
   };
   setProperty(itemUpdate, "data.description.value", legendaryResistances.desc);
   setProperty(itemUpdate, "data.activation.type", "special");
@@ -604,7 +604,7 @@ async function updateFeats(actor, features) {
     const featData = {
       name: feat.name,
       type: "feat",
-      img: await retrieveFromPackItemImg(feat.name),
+      img: await retrieveFromPackImg(feat.name),
       // effects: undefined // effects of embeded-documents are currently not supported by FoundryVTT => maybe create feats as seperate document and link with actor?
     };
     setProperty(featData, "data.description.value", feat.desc);
@@ -727,7 +727,7 @@ async function updateActions(actor, actorData, actions, actionType) {
     let itemUpdate = {
       name,
       type: "feat",
-      img: await retrieveFromPackItemImg(lowerName),
+      img: await retrieveFromPackImg(lowerName),
     };
     setProperty(itemUpdate, "data.description.value", action.desc);
     setProperty(itemUpdate, "data.activation.type", actionType);
