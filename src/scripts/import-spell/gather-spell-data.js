@@ -16,6 +16,7 @@ const VALID_HEADERS = {
 
 const MATERIAL_COMPONENT_RGX = /(-|\*).?-.?\((?<material>.*)?\)/i;
 const AT_HIGHER_LEVEL_RGX = /\bat higher levels\b.?\s?(?<higherLevelsDesc>.*)/i;
+const CANTRIP_SCALING_RGX = /.*\when you reach.?\b.*\blevel.?\b/i;
 const AT_HIGHER_LEVEL_DAMAGE_RGX = /(?<dmgRoll>\d+d\d+)/i;
 const TARGET_RGX = /(?<target>(\ba\b|\bwilling\b)\screature\b|\ba target\b)/i;
 const SHAPE_RGX =
@@ -25,35 +26,17 @@ const RANGE_RGX = /((?<type>[a-zA-Z]+)?(\s\()?)?((?<range>\d+)\s\bft\b)?/i;
 const ATTACK_SAVE_RGX = /((?<ability>[A-Z]{3})\s)?(?<type>[a-zA-Z]+)/;
 const DURATION_RGX =
   /((?<concentration>[a-zA-Z]+)?\s+?((?<value>\d+)\s+)?)?(?<type>[a-zA-Z]+)/i;
+const DAMAGE_RGX =
+  /((?<dmgRoll>\d+d\d+((.+\+.+\d+)?))\s?(?<dmgType>(\bacid\b|\bbludgeoning\b|\bcold\b|\bfire\b|\bforce\b|\blightning\b|\bnecrotic\b|\bpiercing\b|\bpoison\b|\bpsychic\b|\bradiant\b|\bslashing\b|\bthunder\b|\bhealing\b))?)(?<mod>.+\bspellcasting ability modifier\b)?/i;
 
 /**
- * Spell params:
- *
- * level
- * castingTime
- * range/area
- * components
- * componentDesc
- * duration
- * concentration
- * school
- * attack/save
- * damage/effect
- * desc
- * atHigherLevels
  * dmg?
  * hit?
  * special effects like mage armor's AC buff?
- *
  */
 
 // todo  - gather WotC style (Grimhollow PDF's for example)
 export function gatherSpellData(importedSpellData) {
-  const damageRgx =
-    /((?<dmgRoll>\d+d\d+((.+\d+)?))\s?(?<dmgType>[a-z]*))(?<mod>.+\bspellcasting ability modifier\b)?/gi;
-  const allDamageRgx =
-    /(?<versatile>(\d+d\d+)\s?([a-z]*)\s\bdamage\b[a-zA-Z\s]+(\bstart\b|\bend\b)[a-zA-Z\s]+\bturn\b)|((?<dmgRoll>\d+d\d+((.+\d+)?))\s?(?<dmgType>[a-z]*))(?<mod>.+\bspellcasting ability modifier\b)?/gi;
-
   logger.logConsole("importedSpellData", importedSpellData);
   const inputPortions = importedSpellData.trim().split(/\n/g);
 
@@ -83,7 +66,12 @@ export function gatherSpellData(importedSpellData) {
 
       switch (currentHeader) {
         case VALID_HEADERS.level:
-          spellDto.level = parseInt(portion.trim());
+          spellDto.level = portion
+            .trim()
+            .toLocaleLowerCase()
+            .includes("cantrip")
+            ? 0
+            : parseInt(portion.trim());
           break;
 
         case VALID_HEADERS.castingTime:
@@ -111,7 +99,8 @@ export function gatherSpellData(importedSpellData) {
           }
           break;
         case VALID_HEADERS.damageEffect:
-        // todo
+          logger.logConsole(`ignoring damage/effect ${portion}`);
+          break;
         default:
           logger.logWarn(`unknown RawHeader ${currentHeader}`);
           break;
@@ -147,8 +136,18 @@ export function gatherSpellData(importedSpellData) {
       }
     }
 
+    // cantrip scaling ("at higher levels" for cantrips)
+    const isCantripScaling = CANTRIP_SCALING_RGX.test(line);
+    if (isCantripScaling) {
+      const match = DAMAGE_RGX.exec(line);
+      spellDto.cantripScaling = {
+        desc: line,
+        dmg: match?.groups ? match.groups.dmgRoll : undefined,
+      };
+    }
+
     // spell description
-    const isDesc = !material && !atHigherLevels;
+    const isDesc = !material && !atHigherLevels && !isCantripScaling;
     if (isDesc) {
       const descLine = spellDto.desc ? spellDto.desc + `\n\n${line}` : line;
       spellDto.desc = descLine;
@@ -174,11 +173,6 @@ export function gatherSpellData(importedSpellData) {
     const target = TARGET_RGX.exec(desc);
     const targetMatch = target?.groups;
     if (targetMatch) {
-      // todo
-      /**
-       * target.type = creature, cone, ally, none, ... // todo determine type
-       * target.units = ft, none, self, touch, any, special, ... // todo determine units
-       */
       spellDto.target = {
         type: "creature",
         value: targetMatch.target.includes("each") ? undefined : 1,
@@ -187,10 +181,28 @@ export function gatherSpellData(importedSpellData) {
   }
 
   // damage
+  const { dmg, versatileDmg } = gatherDamage(desc);
+  if (dmg.length > 0) {
+    spellDto.damage = dmg;
+  }
+  if (versatileDmg.length > 0) {
+    spellDto.versatileDmg = versatileDmg;
+  }
+
+  logger.logConsole("rawSpellDto", spellDto);
+  return spellDto;
+}
+
+function gatherDamage(text) {
+  const damageRgx =
+    /((?<dmgRoll>\d+d\d+((.+\+.+\d+)?))\s?(?<dmgType>(\bacid\b|\bbludgeoning\b|\bcold\b|\bfire\b|\bforce\b|\blightning\b|\bnecrotic\b|\bpiercing\b|\bpoison\b|\bpsychic\b|\bradiant\b|\bslashing\b|\bthunder\b|\bhealing\b))?)(?<mod>.+\bspellcasting ability modifier\b)?/gi;
+  const allDamageRgx =
+    /(?<versatile>(\d+d\d+)\s?([a-z]*)\s\bdamage\b[a-zA-Z\s]+(\bstart\b|\bend\b)[a-zA-Z\s]+\bturn\b)|((?<dmgRoll>\d+d\d+((.+\+.+\d+)?))\s?(?<dmgType>(\bacid\b|\bbludgeoning\b|\bcold\b|\bfire\b|\bforce\b|\blightning\b|\bnecrotic\b|\bpiercing\b|\bpoison\b|\bpsychic\b|\bradiant\b|\bslashing\b|\bthunder\b|\bhealing\b))?)(?<mod>.+\bspellcasting ability modifier\b)?/gi;
+
   const dmg = [];
   const versatileDmg = [];
   let match;
-  while ((match = allDamageRgx.exec(desc)) != null) {
+  while ((match = allDamageRgx.exec(text)) != null) {
     const m = match?.groups;
     if (m.dmgRoll) {
       m.mod
@@ -207,15 +219,7 @@ export function gatherSpellData(importedSpellData) {
     }
   }
 
-  if (dmg.length > 0) {
-    spellDto.damage = dmg;
-  }
-  if (versatileDmg.length > 0) {
-    spellDto.versatileDmg = versatileDmg;
-  }
-
-  logger.logConsole("rawSpellDto", spellDto);
-  return spellDto;
+  return { dmg, versatileDmg };
 }
 
 function parseSpellTitle(userInput) {
@@ -261,7 +265,7 @@ function parseCastingTime(portion) {
 function parseArea(portion) {
   const match = AREA_RGX.exec(portion);
   if (!match?.groups) {
-    logger.logWarn(`couldn't parse area ${portion}`);
+    logger.logWarn(`couldn't parse area "${portion}"`);
     return;
   }
 
@@ -274,7 +278,7 @@ function parseArea(portion) {
 function parseRange(portion) {
   const raMatch = RANGE_RGX.exec(portion);
   if (!raMatch?.groups) {
-    logger.logWarn(`couldn't parse range ${portion}`);
+    logger.logWarn(`couldn't parse range "${portion}"`);
     return;
   }
 
@@ -287,23 +291,23 @@ function parseRange(portion) {
 }
 
 function parseAttackOrSave(portion) {
-  const asMatch = ATTACK_SAVE_RGX.exec(portion);
-  if (!asMatch?.groups) {
-    logger.logWarn(`couldn't parse attack/save ${portion}`);
+  const match = ATTACK_SAVE_RGX.exec(portion);
+  if (!match?.groups) {
+    logger.logWarn(`couldn't parse attack/save "${portion}"`);
     return;
   }
 
   const attackOrSave = {};
 
-  const asGroups = asMatch.groups;
-  if (asGroups.type) {
-    attackOrSave.actionType = shortenAttackOrSave(asGroups.type);
+  const groups = match.groups;
+  if (groups.type) {
+    attackOrSave.actionType = shortenAttackOrSave(groups.type);
   }
-  if (asGroups.ability) {
+  if (groups.ability) {
     attackOrSave.save = {
-      ability: asGroups.ability.trim().toLocaleLowerCase(),
+      ability: groups.ability.trim().toLocaleLowerCase(),
       dc: null, // todo
-      scaling: "spell", // todo could also be "none" or "cantrip"
+      scaling: "spell", // todo
     };
   }
 
