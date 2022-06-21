@@ -1,7 +1,7 @@
 import { Logger } from "../log.js";
 
 const logger = new Logger("gather-spell-data.js");
-// logger.disable();
+logger.disable();
 
 const VALID_HEADERS = {
   level: "level",
@@ -28,12 +28,6 @@ const DURATION_RGX =
   /((?<concentration>[a-zA-Z]+)?\s+?((?<value>\d+)\s+)?)?(?<type>[a-zA-Z]+)/i;
 const DAMAGE_RGX =
   /((?<dmgRoll>\d+d\d+((.+\+.+\d+)?))\s?(?<dmgType>(\bacid\b|\bbludgeoning\b|\bcold\b|\bfire\b|\bforce\b|\blightning\b|\bnecrotic\b|\bpiercing\b|\bpoison\b|\bpsychic\b|\bradiant\b|\bslashing\b|\bthunder\b|\bhealing\b))?)(?<mod>.+\bspellcasting ability modifier\b)?/i;
-
-/**
- * dmg?
- * hit?
- * special effects like mage armor's AC buff?
- */
 
 // todo  - gather WotC style (Grimhollow PDF's for example)
 export function gatherSpellData(importedSpellData) {
@@ -92,11 +86,9 @@ export function gatherSpellData(importedSpellData) {
           spellDto.school = shortenSpellSchool(portion);
           break;
         case VALID_HEADERS.attackSave:
-          const attackOrSave = parseAttackOrSave(portion);
-          if (attackOrSave) {
-            spellDto.actionType = attackOrSave.actionType;
-            spellDto.save = attackOrSave.save;
-          }
+          const { actionType, save } = parseAttackOrSave(portion);
+          spellDto.actionType = actionType;
+          spellDto.save = save;
           break;
         case VALID_HEADERS.damageEffect:
           logger.logConsole(`ignoring damage/effect ${portion}`);
@@ -306,8 +298,8 @@ function parseAttackOrSave(portion) {
   if (groups.ability) {
     attackOrSave.save = {
       ability: groups.ability.trim().toLocaleLowerCase(),
-      dc: null, // todo
-      scaling: "spell", // todo
+      dc: null,
+      scaling: "spell",
     };
   }
 
