@@ -1,6 +1,6 @@
 import { Logger } from "../log.js";
-import { gatherActions } from "./import-actions.js";
-import { gatherSpellcasting } from "./import-spellcasting.js";
+import { gatherActions } from "./gather-actions.js";
+import { gatherSpellcasting } from "./gather-spellcasting.js";
 
 const logger = new Logger("gather-actor-data.js");
 logger.disable();
