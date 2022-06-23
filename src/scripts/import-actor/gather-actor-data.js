@@ -71,7 +71,7 @@ export function gatherActorData(importedActorData) {
     "immunities"
   );
   if (dmgImmu) {
-    logger.logConsole("dmgImmu", dmgImmu);
+    logger.logConsole("dmgImmunities", dmgImmu);
     actorData.dmgImmunities = {};
     actorData.dmgImmunities.immunities = dmgImmu.types;
     actorData.dmgImmunities.custom = dmgImmu.custom;
@@ -82,7 +82,7 @@ export function gatherActorData(importedActorData) {
     "resistances"
   );
   if (dmgRes) {
-    logger.logConsole("dmgRes", dmgRes);
+    logger.logConsole("dmgResistances", dmgRes);
     actorData.dmgResistances = {};
     actorData.dmgResistances.resistances = dmgRes.types;
     actorData.dmgResistances.custom = dmgRes.custom;
@@ -93,7 +93,7 @@ export function gatherActorData(importedActorData) {
     "vulnerabilities"
   );
   if (dmgVul) {
-    logger.logConsole("dmgVul", dmgVul);
+    logger.logConsole("dmgVulnerabilities", dmgVul);
     actorData.dmgVulnerabilities = {};
     actorData.dmgVulnerabilities.vulnerabilities = dmgVul.types;
     actorData.dmgVulnerabilities.custom = dmgVul.custom;
@@ -104,7 +104,7 @@ export function gatherActorData(importedActorData) {
     "immunities"
   );
   if (conditionImmun) {
-    logger.logConsole("conditionImmun", conditionImmun);
+    logger.logConsole("conditionImmunities", conditionImmun);
     actorData.conditionImmunities = {};
     actorData.conditionImmunities.immunities = conditionImmun.types;
     actorData.conditionImmunities.custom = conditionImmun.custom;
@@ -123,6 +123,9 @@ export function gatherActorData(importedActorData) {
     actorData.languages = {};
     actorData.languages.langs = languages.types;
     actorData.languages.custom = languages.custom;
+    // todo
+    // custom = "any two languages"
+    // value = ["custom"]
   }
 
   const challenge = challengeRgx.exec(importedActorData);
