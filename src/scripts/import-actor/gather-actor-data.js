@@ -8,24 +8,24 @@ logger.disable();
 export function gatherActorData(importedActorData) {
   // Regex needs to be calculated each time a actor is imported. If not, the regex will fail!
   const racialDetailsRgx =
-    /(?<name>.+)(\r|\n|\r\n)(?<size>(Tiny|Small|Medium|Large|Huge|Gargantuan))\s(?<type>.+)\s?(?<race>.+)?\s?,\s?(?<alignment>.+)(\r|\n|\r\n)/gi;
+    /(?<name>.+)(\r|\n|\r\n)(?<size>(\bTiny\b|\bSmall\b|\bMedium\b|\bLarge\b|\bHuge\b|\bGargantuan\b))\s(?<type>.+)\s?(?<race>.+)?\s?,\s?(?<alignment>.+)(\r|\n|\r\n)/gi;
   const armorRgx =
-    /(armor|armour) class\s?(?<armorClass>\d+)\s?(\((?<armorType>.+)\))?/gi;
+    /\barmou?r class\b\s?(?<armorClass>\d+)\s?(\((?<armorType>.+)\))?/gi;
   const healthRgx =
-    /(hit points|hp)\s?(?<hp>\d+)\s?(\(?(?<formular>\d+d\d+)?(\s?\+\s?(?<formularBonus>\d+))?)?/gi;
-  const dmgImmunitiesRgx =
-    /(damage immunities|damage immunity)\s?(?<immunities>.+)/gi;
+    /(\bhit points\b|\bhp\b)\s?(?<hp>\d+)\s?(\(?(?<formular>\d+d\d+)?(\s?\+\s?(?<formularBonus>\d+))?)?/gi;
+  const dmgImmunitiesRgx = /\bdamage immunit(ies|y)\b\s?(?<immunities>.+)/gi;
   const dmgVulnerabilitiesRgx =
     /\bdamage\svulnerabilities\b\s(?<vulnerabilities>.+)/gi;
   const dmgResistancesRgx = /\bdamage\sresistances\b\s(?<resistances>.+)/gi;
   const conditionImmunitesRgx =
     /\bcondition\simmunities\b\s(?<immunities>.+)/gi;
-  const languagesRgx = /(languages|language)\s?(?<languages>.*)/gi;
-  const challengeRgx = /(challenge|cr)\s?(?<cr>([\d/]+))\s?\((?<xp>[\d,]+)/gi;
+  const languagesRgx = /\blanguages?\b\s(?<languages>.*)/gi;
+  const challengeRgx =
+    /(\bchallenge\b|\bcr\b)\s?(?<cr>([\d/]+))\s?\((?<xp>[\d,]+)/gi;
   const proficiencyBonusRgx =
-    /(proficiency bonus|prof bonus)\s?(?<profBonus>\+\d+)/gi;
+    /(\bproficiency bonus\b|\bprof bonus\b)\s?(?<profBonus>\+\d+)/gi;
   const legendaryResistancesRgx =
-    /legendary resistance\s?\(?(?<timesADay>\d+).day.?\.?(?<desc>.+)/gi;
+    /\blegendary resistance\b\s?\(?(?<timesADay>\d+).\bday\b.?\.?(?<desc>.+)/gi;
   const legendaryActionRgx = /\btake\b.+(?<uses>\d+).?\blegendary actions\b/i;
   const legendaryActionCostsRgx = /\bcosts\b.?(?<cost>\d).?\bactions\b/i;
 
@@ -114,15 +114,15 @@ export function gatherActorData(importedActorData) {
   actorData.senses = senses;
   logger.logConsole("senses", senses);
 
-  const langs = extractCsvDict(
+  const languages = extractCsvDict(
     languagesRgx.exec(importedActorData),
     "languages"
   );
-  if (langs) {
-    logger.logConsole("langs", langs);
+  if (languages) {
+    logger.logConsole("languages", languages);
     actorData.languages = {};
-    actorData.languages.langs = langs.types;
-    actorData.languages.custom = langs.custom;
+    actorData.languages.langs = languages.types;
+    actorData.languages.custom = languages.custom;
   }
 
   const challenge = challengeRgx.exec(importedActorData);
