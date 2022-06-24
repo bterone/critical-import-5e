@@ -4,11 +4,6 @@ FoundryVTT import module for monsters, NPCs, items, spells, and so on.
 
 ## Development
 
-### Dev board
-
-The kanban board can be found here:
-https://trello.com/b/GZDotdDc/critical-import-5e
-
 ### Development environment
 
 For a simple development environment add a symlink from the "dist/PROJECT_NAME" directory of this repository into your FoundryVTT modules dir.
