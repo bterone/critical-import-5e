@@ -111,13 +111,13 @@ export function gatherSpellData(importedSpellData) {
 
     // specific material components
     const material = MATERIAL_COMPONENT_RGX.exec(line);
-    if (material) {
+    if (material?.groups) {
       spellDto.materialComponents = material.groups.material;
     }
 
     // at higher levels
     const atHigherLevels = AT_HIGHER_LEVEL_RGX.exec(line);
-    if (atHigherLevels) {
+    if (atHigherLevels?.groups) {
       const desc = atHigherLevels.groups.higherLevelsDesc;
       spellDto.atHigherLevels = desc;
 
