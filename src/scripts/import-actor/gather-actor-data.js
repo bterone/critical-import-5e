@@ -66,67 +66,68 @@ export function gatherActorData(importedActorData) {
   actorData.skills = skills;
   logger.logConsole("skills", skills);
 
-  const dmgImmu = extractCsvDict(
-    dmgImmunitiesRgx.exec(importedActorData),
-    "immunities"
-  );
-  if (dmgImmu) {
-    logger.logConsole("dmgImmunities", dmgImmu);
-    actorData.dmgImmunities = {};
-    actorData.dmgImmunities.immunities = dmgImmu.types;
-    actorData.dmgImmunities.custom = dmgImmu.custom;
+  const dmgImmunities = dmgImmunitiesRgx.exec(importedActorData);
+  if (dmgImmunities?.groups) {
+    const { values, custom } = parseValueList(dmgImmunities.groups.immunities);
+    actorData.dmgImmunities = {
+      immunities: values,
+      custom,
+    };
   }
 
-  const dmgRes = extractCsvDict(
-    dmgResistancesRgx.exec(importedActorData),
-    "resistances"
-  );
-  if (dmgRes) {
-    logger.logConsole("dmgResistances", dmgRes);
-    actorData.dmgResistances = {};
-    actorData.dmgResistances.resistances = dmgRes.types;
-    actorData.dmgResistances.custom = dmgRes.custom;
+  const dmgResistances = dmgResistancesRgx.exec(importedActorData);
+  if (dmgResistances?.groups) {
+    const { values, custom } = parseValueList(
+      dmgResistances.groups.resistances
+    );
+    actorData.dmgResistances = {
+      resistances: values,
+      custom,
+    };
   }
 
-  const dmgVul = extractCsvDict(
-    dmgVulnerabilitiesRgx.exec(importedActorData),
-    "vulnerabilities"
-  );
-  if (dmgVul) {
-    logger.logConsole("dmgVulnerabilities", dmgVul);
-    actorData.dmgVulnerabilities = {};
-    actorData.dmgVulnerabilities.vulnerabilities = dmgVul.types;
-    actorData.dmgVulnerabilities.custom = dmgVul.custom;
+  const dmgVulnerabilities = dmgVulnerabilitiesRgx.exec(importedActorData);
+  if (dmgVulnerabilities?.groups) {
+    const { values, custom } = parseValueList(
+      dmgVulnerabilities.groups.vulnerabilities
+    );
+    actorData.dmgVulnerabilities = {
+      vulnerabilities: values,
+      custom,
+    };
   }
 
-  const conditionImmun = extractCsvDict(
-    conditionImmunitesRgx.exec(importedActorData),
-    "immunities"
-  );
-  if (conditionImmun) {
-    logger.logConsole("conditionImmunities", conditionImmun);
-    actorData.conditionImmunities = {};
-    actorData.conditionImmunities.immunities = conditionImmun.types;
-    actorData.conditionImmunities.custom = conditionImmun.custom;
+  const conditionImmunities = conditionImmunitesRgx.exec(importedActorData);
+  if (conditionImmunities?.groups) {
+    const { values, custom } = parseValueList(
+      conditionImmunities.groups.immunities
+    );
+    actorData.conditionImmunities = {
+      immunities: values,
+      custom,
+    };
+  }
+
+  const languages = languagesRgx.exec(importedActorData);
+  if (languages?.groups) {
+    let { values, custom } = parseValueList(languages.groups.languages);
+
+    for (const language of values) {
+      if (!language.includes("languages")) {
+        continue;
+      }
+      custom = custom ? `${language}; ${custom}` : language;
+    }
+
+    actorData.languages = {
+      langs: values,
+      custom,
+    };
   }
 
   const senses = gatherSenses(importedActorData);
   actorData.senses = senses;
   logger.logConsole("senses", senses);
-
-  const languages = extractCsvDict(
-    languagesRgx.exec(importedActorData),
-    "languages"
-  );
-  if (languages) {
-    logger.logConsole("languages", languages);
-    actorData.languages = {};
-    actorData.languages.langs = languages.types;
-    actorData.languages.custom = languages.custom;
-    // todo
-    // custom = "any two languages"
-    // value = ["custom"]
-  }
 
   const challenge = challengeRgx.exec(importedActorData);
   if (challenge) {
@@ -362,36 +363,41 @@ export function gatherFeatures(actorDataWithoutActions) {
   return feats;
 }
 
-function extractCsvDict(csvDict, propName) {
-  if (!csvDict) {
+function parseValueList(csvText) {
+  if (!csvText) {
     return;
   }
 
-  logger.logConsole("damageTypes", csvDict);
+  const text = csvText.trim().toLocaleLowerCase();
+  logger.logConsole("types", text);
 
-  const values = csvDict.groups?.[propName].trim().toLocaleLowerCase();
-  logger.logConsole("types", values);
-  if (values.includes(";")) {
+  if (text.includes(";")) {
     // list with custom conditions
-    const sections = values.split(";");
+    const sections = text.split(";");
     const vs = sections[0].replace(" ", "").split(",");
     const vals = [];
     for (const v of vs) {
       vals.push(v.trim());
     }
     const custom = sections[1];
-    return { types: vals, custom };
-  } else if (values.includes("from")) {
+    return { values: vals, custom };
+  } else if (text.includes("from")) {
     // custom condition only
-    return { types: undefined, custom: values };
-  } else {
+    return { values: undefined, custom: text };
+  } else if (text.includes(",")) {
     // types only
     const vals = [];
-    for (const v of values.replace(" ", "").split(",")) {
+    for (const v of text.split(",")) {
       vals.push(v.trim());
     }
     return {
-      types: vals,
+      values: vals,
+      custom: undefined,
+    };
+  } else {
+    // single value
+    return {
+      values: [text.trim()],
       custom: undefined,
     };
   }
