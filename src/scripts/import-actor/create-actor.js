@@ -168,18 +168,6 @@ export async function createActor(actorData) {
   if (actorData.legendaryActions) {
     const legAction = actorData.legendaryActions;
     await updateLegendaryActions(actor, legAction);
-    // "Legendary Actions"-feat
-    // todo - throws engine error, why?
-    // const name = "Legendary Actions";
-    // const featData = {
-    //   name,
-    //   type: "feat",
-    //   img: await retrieveFromPackItemImg(name),
-    // };
-    // setProperty(featData, "data.description.value", legAction.desc);
-    // setProperty(featData, "flags.adnd5e.itemInfo.type", "legendary");
-    // const item = new Item(featData);
-    // await actor.createEmbeddedDocuments("Item", [item.toObject()]);
   }
 
   // todo
@@ -188,6 +176,7 @@ export async function createActor(actorData) {
   //   name: "Lair Actions",
   //   desc: undefined,
   // });
+
   // // "Regial-Effects"-feat
   // otherFeats.push({
   //   name: "Regial Effects",
