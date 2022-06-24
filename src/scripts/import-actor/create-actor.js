@@ -9,6 +9,10 @@ import {
 const logger = new Logger("create-actor.js");
 logger.disable();
 
+// todo - refactor =>
+// create-script should only create not mutate!
+// mutation should be done inside gather script!
+
 export async function createActor(actorData) {
   const actor = await Actor.create({
     name: actorData.race?.name || "New Actor",
