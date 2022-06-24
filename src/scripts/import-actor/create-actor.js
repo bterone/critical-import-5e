@@ -761,6 +761,7 @@ async function updateLegendaryActions(actor, legendaryActions) {
     const itemUpdate = {
       name: legAction.name,
       type: "feat",
+      img: await retrieveFromPackImg(legAction.name),
     };
     setProperty(itemUpdate, "flags.adnd5e.itemInfo.type", "legendary");
     setProperty(itemUpdate, "data.activation.type", "legendary");
@@ -775,6 +776,20 @@ async function updateLegendaryActions(actor, legendaryActions) {
     const doc = new Item(itemUpdate).toObject();
     await actor.createEmbeddedDocuments("Item", [doc]);
   }
+
+  const name = "Legendary Actions";
+  const legendaryActionDesc = {
+    name,
+    type: "feat",
+    img: await retrieveFromPackImg(name),
+  };
+  setProperty(
+    legendaryActionDesc,
+    "data.description.value",
+    legendaryActions.desc
+  );
+  const doc = new Item(legendaryActionDesc).toObject();
+  await actor.createEmbeddedDocuments("Item", [doc]);
 }
 
 async function updateSenses(actor, senses) {

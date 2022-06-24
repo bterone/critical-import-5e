@@ -177,7 +177,7 @@ export function gatherActorData(importedActorData) {
   const lActions = sections["legendary actions"];
   if (lActions) {
     // first section is legendary actions description
-    const desc = lActions.splice(0, 1);
+    const desc = lActions.splice(0, 1)[0];
     actorData.legendaryActions = {};
     actorData.legendaryActions.desc = desc;
     actorData.legendaryActions.uses =
