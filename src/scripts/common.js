@@ -33,7 +33,10 @@ export async function retrieveFromPackMany(packName, itemNames) {
   const items = [];
   for (const itemName of itemNames) {
     logger.logConsole("itemName", itemName);
-    const obj = await retrieveFromPack(packName, itemName);
+    const name = itemName.includes("(")
+      ? itemName.slice(0, itemName.indexOf("(")).trim()
+      : itemName;
+    const obj = await retrieveFromPack(packName, name);
     items.push(obj);
   }
   return items;
