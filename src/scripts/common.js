@@ -71,23 +71,23 @@ export async function retrieveFromPackImg(itemName) {
 }
 
 export function shortenAbility(longAbilityName) {
-  switch (longAbilityName.trim().toLowerCase()) {
-    case "strength":
-      return "str";
-    case "dexterity":
-      return "dex";
-    case "constitution":
-      return "con";
-    case "intelligence":
-      return "int";
-    case "wisdom":
-      return "wis";
-    case "charisma":
-      return "cha";
-    default:
-      logger.logWarn("unknown ability", longAbilityName);
-      break;
+  const abilities = {
+    strength: "str",
+    dexterity: "dex",
+    constitution: "con",
+    intelligence: "int",
+    wisdom: "wis",
+    charisma: "cha",
+  };
+  const abilityName = longAbilityName.trim().toLowerCase();
+  const ability = abilities[abilityName];
+
+  if (!ability) {
+    logger.logWarn("unknown ability", longAbilityName);
+    return;
   }
+
+  return ability;
 }
 
 export function setProperty(obj, property, val) {
