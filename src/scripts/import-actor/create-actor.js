@@ -841,69 +841,38 @@ function createSkills(actorSkills, actor) {
     return (val - attributeMod) / proficiencyBonus;
   }
 
+  const skillMap = {
+    acrobatics: "acr",
+    "animal handling": "ani",
+    arcana: "arc",
+    athletics: "ath",
+    deception: "dec",
+    history: "his",
+    insight: "ins",
+    intimidation: "itm",
+    investigation: "inv",
+    medicine: "med",
+    nature: "nat",
+    performance: "prf",
+    perception: "prc",
+    persuasion: "per",
+    religion: "rel",
+    "sleight of hand": "slt",
+    stealth: "ste",
+    survival: "sur",
+  };
+
   const skills = {};
-  for (const s in actorSkills) {
-    const skillVal = actorSkills[s];
-    switch (s.trim().toLocaleLowerCase()) {
-      case "acrobatics":
-        skills.acr = parseInt(skillVal);
-        break;
-      case "animal handling":
-        skills.ani = parseInt(skillVal);
-        break;
-      case "arcana":
-        skills.arc = parseInt(skillVal);
-        break;
-      case "athletics":
-        skills.ath = parseInt(skillVal);
-        break;
-      case "deception":
-        skills.dec = parseInt(skillVal);
-        break;
-      case "history":
-        skills.his = parseInt(skillVal);
-        break;
-      case "insight":
-        skills.ins = parseInt(skillVal);
-        break;
-      case "intimidation":
-        skills.itm = parseInt(skillVal);
-        break;
-      case "investigation":
-        skills.inv = parseInt(skillVal);
-        break;
-      case "medicine":
-        skills.med = parseInt(skillVal);
-        break;
-      case "nature":
-        skills.nat = parseInt(skillVal);
-        break;
-      case "performance":
-        skills.prf = parseInt(skillVal);
-        break;
-      case "perception":
-        skills.prc = parseInt(skillVal);
-        break;
-      case "persuasion":
-        skills.per = parseInt(skillVal);
-        break;
-      case "religion":
-        skills.rel = parseInt(skillVal);
-        break;
-      case "sleight of hand":
-        skills.slt = parseInt(skillVal);
-        break;
-      case "stealth":
-        skills.ste = parseInt(skillVal);
-        break;
-      case "survival":
-        skills.sur = parseInt(skillVal);
-        break;
-      default:
-        logger.logWarn("unkown skill", s);
-        break;
+  for (const skill in actorSkills) {
+    const skillProperty = skillMap[skill.trim().toLocaleLowerCase()];
+    if (!skillProperty) {
+      logger.logWarn("unkown skill", skill);
+      continue;
     }
+    const skillVal = parseInt(actorSkills[skill]);
+    skills[skillProperty] = skillVal;
   }
+
   logger.logConsole("skills", skills);
 
   for (const skill in skills) {
