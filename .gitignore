@@ -105,3 +105,4 @@ dist
 
 # custom
 .dev
+.DS_Store
