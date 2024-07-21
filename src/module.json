@@ -1,19 +1,19 @@
 {
-  "name": "critical-import-5e",
-  "title": "Critical Import 5e",
+  "name": "critical-import-5e-v2",
+  "title": "Critical Import 5e V2",
   "description": "Import module for monsters, NPCs, items, spells, and much more.",
-  "author": "PragmaticBeaver",
+  "author": "bterone",
   "authors": [
     {
-      "name": "PragmaticBeaver",
-      "url": "https://github.com/PragmaticBeaver"
+      "name": "bterone",
+      "url": "https://github.com/bterone"
     }
   ],
-  "url": "https://github.com/PragmaticBeaver/critical-import-5e",
-  "license": "https://github.com/PragmaticBeaver/critical-import-5e/blob/main/LICENSE",
-  "readme": "https://github.com/PragmaticBeaver/critical-import-5e/blob/main/README.md",
-  "download": "https://github.com/PragmaticBeaver/critical-import-5e/releases/latest/download/critical-import-5e.zip",
-  "manifest": "https://github.com/PragmaticBeaver/critical-import-5e/releases/latest/download/module.json",
+  "url": "https://github.com/bterone/critical-import-5e",
+  "license": "https://github.com/bterone/critical-import-5e/blob/main/LICENSE",
+  "readme": "https://github.com/bterone/critical-import-5e/blob/main/README.md",
+  "download": "https://github.com/bterone/critical-import-5e/releases/latest/download/critical-import-5e-v2.zip",
+  "manifest": "https://github.com/bterone/critical-import-5e/releases/latest/download/module.json",
   "version": "1.1.1",
   "minimumCoreVersion": "0.9.0",
   "compatibleCoreVersion": "10",
