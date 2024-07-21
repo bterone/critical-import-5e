@@ -22,7 +22,7 @@ export async function createActor(actorData) {
   let updateData = {};
 
   // source
-  setProperty(updateData, "data.details.source", "Critical Import 5e");
+  setProperty(updateData, "system.details.source", "Critical Import 5e v2");
 
   // attributes & initiative
   if (actorData.attributes) {
@@ -88,7 +88,7 @@ export async function createActor(actorData) {
   if (actorData.proficiencyBonus) {
     setProperty(
       updateData,
-      "data.data.attributes.prof",
+      "system.data.attributes.prof",
       parseInt(actorData.proficiencyBonus.profBonus)
     );
   }
@@ -100,24 +100,24 @@ export async function createActor(actorData) {
     // has to be done after basic information has been set
     const skills = createSkills(actorData.skills, actor);
     const skillsUpdate = {
-      "data.skills.acr.value": skills.acr,
-      "data.skills.ani.value": skills.ani,
-      "data.skills.arc.value": skills.arc,
-      "data.skills.ath.value": skills.ath,
-      "data.skills.dec.value": skills.dec,
-      "data.skills.his.value": skills.his,
-      "data.skills.ins.value": skills.ins,
-      "data.skills.itm.value": skills.itm,
-      "data.skills.inv.value": skills.inv,
-      "data.skills.med.value": skills.med,
-      "data.skills.nat.value": skills.nat,
-      "data.skills.prf.value": skills.prf,
-      "data.skills.prc.value": skills.prc,
-      "data.skills.per.value": skills.per,
-      "data.skills.rel.value": skills.rel,
-      "data.skills.slt.value": skills.slt,
-      "data.skills.ste.value": skills.ste,
-      "data.skills.sur.value": skills.sur,
+      "system.skills.acr.value": skills.acr,
+      "system.skills.ani.value": skills.ani,
+      "system.skills.arc.value": skills.arc,
+      "system.skills.ath.value": skills.ath,
+      "system.skills.dec.value": skills.dec,
+      "system.skills.his.value": skills.his,
+      "system.skills.ins.value": skills.ins,
+      "system.skills.itm.value": skills.itm,
+      "system.skills.inv.value": skills.inv,
+      "system.skills.med.value": skills.med,
+      "system.skills.nat.value": skills.nat,
+      "system.skills.prf.value": skills.prf,
+      "system.skills.prc.value": skills.prc,
+      "system.skills.per.value": skills.per,
+      "system.skills.rel.value": skills.rel,
+      "system.skills.slt.value": skills.slt,
+      "system.skills.ste.value": skills.ste,
+      "system.skills.sur.value": skills.sur,
     };
     await actor.update(skillsUpdate);
   }
@@ -131,7 +131,7 @@ export async function createActor(actorData) {
   if (actorData.spellcasting) {
     setProperty(
       updateData,
-      "data.attributes.spellcasting",
+      "system.attributes.spellcasting",
       actorData.spellcasting.basics
         ? shortenAbility(actorData.spellcasting.basics?.ability)
         : ""
@@ -191,12 +191,12 @@ function setAttributes(updateData, actorData) {
   if (actorData.attributes.cha) {
     setProperty(
       updateData,
-      "data.abilities.cha.value",
+      "system.abilities.cha.value",
       actorData.attributes.cha.base
     );
     setProperty(
       updateData,
-      "data.abilities.cha.mod",
+      "system.abilities.cha.mod",
       actorData.attributes.cha.mod
     );
   }
@@ -205,12 +205,12 @@ function setAttributes(updateData, actorData) {
   if (actorData.attributes.con) {
     setProperty(
       updateData,
-      "data.abilities.con.value",
+      "system.abilities.con.value",
       actorData.attributes.con.base
     );
     setProperty(
       updateData,
-      "data.abilities.con.mod",
+      "system.abilities.con.mod",
       actorData.attributes.con.mod
     );
   }
@@ -219,18 +219,18 @@ function setAttributes(updateData, actorData) {
   if (actorData.attributes.dex) {
     setProperty(
       updateData,
-      "data.abilities.dex.value",
+      "system.abilities.dex.value",
       actorData.attributes.dex.base
     );
     setProperty(
       updateData,
-      "data.abilities.dex.mod",
+      "system.abilities.dex.mod",
       actorData.attributes.dex.mod
     );
     // initiative
     setProperty(
       updateData,
-      "data.attributes.init.bonus",
+      "system.attributes.init.bonus",
       actorData.attributes.dex.mod
     );
   }
@@ -239,12 +239,12 @@ function setAttributes(updateData, actorData) {
   if (actorData.attributes.int) {
     setProperty(
       updateData,
-      "data.abilities.int.value",
+      "system.abilities.int.value",
       actorData.attributes.int.base
     );
     setProperty(
       updateData,
-      "data.abilities.int.mod",
+      "system.abilities.int.mod",
       actorData.attributes.int.mod
     );
   }
@@ -253,12 +253,12 @@ function setAttributes(updateData, actorData) {
   if (actorData.attributes.str) {
     setProperty(
       updateData,
-      "data.abilities.str.value",
+      "system.abilities.str.value",
       actorData.attributes.str.base
     );
     setProperty(
       updateData,
-      "data.abilities.str.mod",
+      "system.abilities.str.mod",
       actorData.attributes.str.mod
     );
   }
@@ -267,12 +267,12 @@ function setAttributes(updateData, actorData) {
   if (actorData.attributes.wis) {
     setProperty(
       updateData,
-      "data.abilities.wis.value",
+      "system.abilities.wis.value",
       actorData.attributes.wis.base
     );
     setProperty(
       updateData,
-      "data.abilities.wis.mod",
+      "system.abilities.wis.mod",
       actorData.attributes.wis.mod
     );
   }
@@ -286,37 +286,37 @@ function setSaves(updateData, actorData) {
   // CHA
   setProperty(
     updateData,
-    "data.abilities.cha.proficient",
+    "system.abilities.cha.proficient",
     actorData.saves.cha ? 1 : 0
   );
   // CON
   setProperty(
     updateData,
-    "data.abilities.con.proficient",
+    "system.abilities.con.proficient",
     actorData.saves.con ? 1 : 0
   );
   // DEX
   setProperty(
     updateData,
-    "data.abilities.dex.proficient",
+    "system.abilities.dex.proficient",
     actorData.saves.dex ? 1 : 0
   );
   // INT
   setProperty(
     updateData,
-    "data.abilities.int.proficient",
+    "system.abilities.int.proficient",
     actorData.saves.int ? 1 : 0
   );
   // STR
   setProperty(
     updateData,
-    "data.abilities.str.proficient",
+    "system.abilities.str.proficient",
     actorData.saves.str ? 1 : 0
   );
   // WIS
   setProperty(
     updateData,
-    "data.abilities.wis.proficient",
+    "system.abilities.wis.proficient",
     actorData.saves.wis ? 1 : 0
   );
 
@@ -332,43 +332,43 @@ function setSpeed(updateData, actorData) {
   // base speed
   setProperty(
     updateData,
-    "data.attributes.speed.value",
+    "system.attributes.speed.value",
     parseInt(speeds.speed)
   );
   setProperty(
     updateData,
-    "data.attributes.movement.walk",
+    "system.attributes.movement.walk",
     parseInt(speeds.speed)
   );
 
   // burrow
   setProperty(
     updateData,
-    "data.attributes.movement.burrow",
+    "system.attributes.movement.burrow",
     parseInt(speeds.burrow)
   );
 
   // climb
   setProperty(
     updateData,
-    "data.attributes.movement.climb",
+    "system.attributes.movement.climb",
     parseInt(speeds.climb)
   );
 
   // fly
-  setProperty(updateData, "data.attributes.movement.fly", parseInt(speeds.fly));
+  setProperty(updateData, "system.attributes.movement.fly", parseInt(speeds.fly));
 
   // swim
   setProperty(
     updateData,
-    "data.attributes.movement.swim",
+    "system.attributes.movement.swim",
     parseInt(speeds.swim)
   );
 
   // hover
   setProperty(
     updateData,
-    "data.attributes.movement.hover",
+    "system.attributes.movement.hover",
     parseInt(speeds.hover)
   );
 
@@ -377,13 +377,13 @@ function setSpeed(updateData, actorData) {
 
 function setHealth(updateData, actorData) {
   // HP current
-  setProperty(updateData, "data.attributes.hp.value", actorData.health.hp);
+  setProperty(updateData, "system.attributes.hp.value", actorData.health.hp);
   // HP max
-  setProperty(updateData, "data.attributes.hp.max", actorData.health.hp);
+  setProperty(updateData, "system.attributes.hp.max", actorData.health.hp);
   // Formular
   setProperty(
     updateData,
-    "data.attributes.hp.formula",
+    "system.attributes.hp.formula",
     actorData.health.formularBonus
       ? `${actorData.health.formular} + ${actorData.health.formularBonus}`
       : actorData.health.formular
@@ -394,22 +394,22 @@ function setHealth(updateData, actorData) {
 
 function setChallenge(updateData, actorData) {
   // CR
-  setProperty(updateData, "data.details.cr", actorData.challenge.cr);
+  setProperty(updateData, "system.details.cr", actorData.challenge.cr);
   // XP
-  setProperty(updateData, "data.details.xp.value", actorData.challenge.xp);
+  setProperty(updateData, "system.details.xp.value", actorData.challenge.xp);
   return updateData;
 }
 
 function setArmor(updateData, actorData) {
   setProperty(
     updateData,
-    "data.attributes.ac.calc",
+    "system.attributes.ac.calc",
     formatArmor(actorData.armor)
   );
 
   setProperty(
     updateData,
-    "data.attributes.ac.flat",
+    "system.attributes.ac.flat",
     actorData.armor.armorClass?.trim()
   );
 
@@ -419,12 +419,12 @@ function setArmor(updateData, actorData) {
 function setRace(updateData, actorData) {
   setProperty(
     updateData,
-    "data.details.alignment",
+    "system.details.alignment",
     actorData.race.alignment?.trim()
   );
-  setProperty(updateData, "data.details.race", actorData.race.race?.trim());
-  setProperty(updateData, "data.details.type", actorData.race.type?.trim());
-  setProperty(updateData, "data.traits.size", formatSize(actorData.race));
+  setProperty(updateData, "system.details.race", actorData.race.race?.trim());
+  setProperty(updateData, "system.details.type", actorData.race.type?.trim());
+  setProperty(updateData, "system.traits.size", formatSize(actorData.race));
 
   return updateData;
 }
@@ -432,12 +432,12 @@ function setRace(updateData, actorData) {
 function setResistances(updateData, actorData) {
   setProperty(
     updateData,
-    "data.traits.dr.value",
+    "system.traits.dr.value",
     actorData.dmgResistances.resistances
   );
   setProperty(
     updateData,
-    "data.traits.dr.custom",
+    "system.traits.dr.custom",
     actorData.dmgResistances.custom
   );
   return updateData;
@@ -446,12 +446,12 @@ function setResistances(updateData, actorData) {
 function setDmgImmunities(updateData, actorData) {
   setProperty(
     updateData,
-    "data.traits.di.value",
+    "system.traits.di.value",
     actorData.dmgImmunities.immunities
   );
   setProperty(
     updateData,
-    "data.traits.di.custom",
+    "system.traits.di.custom",
     actorData.dmgImmunities.custom
   );
   return updateData;
@@ -460,12 +460,12 @@ function setDmgImmunities(updateData, actorData) {
 function setDmgVulnerabilities(updateData, actorData) {
   setProperty(
     updateData,
-    "data.traits.dv.value",
+    "system.traits.dv.value",
     actorData.dmgVulnerabilities.vulnerabilities
   );
   setProperty(
     updateData,
-    "data.traits.dv.custom",
+    "system.traits.dv.custom",
     actorData.dmgVulnerabilities.custom
   );
   return updateData;
@@ -474,12 +474,12 @@ function setDmgVulnerabilities(updateData, actorData) {
 function setConditionImmunities(updateData, actorData) {
   setProperty(
     updateData,
-    "data.traits.ci.value",
+    "system.traits.ci.value",
     actorData.conditionImmunities.immunities
   );
   setProperty(
     updateData,
-    "data.traits.ci.custom",
+    "system.traits.ci.custom",
     actorData.conditionImmunities.custom
   );
   return updateData;
@@ -488,12 +488,12 @@ function setConditionImmunities(updateData, actorData) {
 function setLanguages(updateData, actorData) {
   setProperty(
     updateData,
-    "data.traits.languages.value",
+    "system.traits.languages.value",
     actorData.languages.langs
   );
   setProperty(
     updateData,
-    "data.traits.languages.custom",
+    "system.traits.languages.custom",
     actorData.languages.custom
   );
   return updateData;
@@ -503,8 +503,8 @@ async function updateLegendaryResistances(actor, legendaryResistances) {
   // actor
   const perDay = parseInt(legendaryResistances.timesADay);
   await actor.update({
-    "data.resources.legres.value": perDay,
-    "data.resources.legres.max": perDay,
+    "system.resources.legres.value": perDay,
+    "system.resources.legres.max": perDay,
   });
   //  feat
   const name = "Legendary Resistance";
@@ -513,11 +513,11 @@ async function updateLegendaryResistances(actor, legendaryResistances) {
     type: "feat",
     img: await retrieveFromPackImg(name),
   };
-  setProperty(itemUpdate, "data.description.value", legendaryResistances.desc);
-  setProperty(itemUpdate, "data.activation.type", "special");
-  setProperty(itemUpdate, "data.consume.type", "attribute");
-  setProperty(itemUpdate, "data.consume.target", "resources.legres.value");
-  setProperty(itemUpdate, "data.consume.amount", 1);
+  setProperty(itemUpdate, "system.description.value", legendaryResistances.desc);
+  setProperty(itemUpdate, "system.activation.type", "special");
+  setProperty(itemUpdate, "system.consume.type", "attribute");
+  setProperty(itemUpdate, "system.consume.target", "resources.legres.value");
+  setProperty(itemUpdate, "system.consume.amount", 1);
 
   const doc = new Item(itemUpdate).toObject();
   await actor.createEmbeddedDocuments("Item", [doc]);
@@ -536,8 +536,8 @@ async function updateSpells(actor, spellcasting) {
         spellsAtWill
       );
       for (const doc of atWillSpellDocs) {
-        doc["data.preparation.mode"] = "atwill";
-        doc["data.preparation.prepared"] = true;
+        doc["system.preparation.mode"] = "atwill";
+        doc["system.preparation.prepared"] = true;
         await actor.createEmbeddedDocuments("Item", [doc]);
       }
     }
@@ -552,11 +552,11 @@ async function updateSpells(actor, spellcasting) {
         );
         for (const doc of spellDocs) {
           const usesPerDay = spellList.timesPerDay;
-          setProperty(doc, "data.uses.value", usesPerDay);
-          setProperty(doc, "data.uses.max", usesPerDay);
-          setProperty(doc, "data.uses.per", "day");
-          setProperty(doc, "data.preparation.mode", "innate");
-          setProperty(doc, "data.preparation.prepared", true);
+          setProperty(doc, "system.uses.value", usesPerDay);
+          setProperty(doc, "system.uses.max", usesPerDay);
+          setProperty(doc, "system.uses.per", "day");
+          setProperty(doc, "system.preparation.mode", "innate");
+          setProperty(doc, "system.preparation.prepared", true);
           await actor.createEmbeddedDocuments("Item", [doc]);
         }
       }
@@ -600,7 +600,7 @@ async function updateFeats(actor, features) {
       img: await retrieveFromPackImg(feat.name),
       // effects: undefined // effects of embeded-documents are currently not supported by FoundryVTT => maybe create feats as seperate document and link with actor?
     };
-    setProperty(featData, "data.description.value", feat.desc);
+    setProperty(featData, "system.description.value", feat.desc);
     logger.logConsole("featData", featData);
     const item = new Item(featData);
     await actor.createEmbeddedDocuments("Item", [item.toObject()]);
@@ -619,11 +619,11 @@ function updateAction(itemUpdate, action, actorData, actionType) {
       parseInt(action.hit)
         ? "str"
         : "dex";
-    setProperty(itemUpdate, "data.ability", abilityMod);
-    setProperty(itemUpdate, "data.weaponType", "natural");
-    setProperty(itemUpdate, "data.identified", true);
-    setProperty(itemUpdate, "data.equipped", true);
-    setProperty(itemUpdate, "data.proficient", true);
+    setProperty(itemUpdate, "system.ability", abilityMod);
+    setProperty(itemUpdate, "system.weaponType", "natural");
+    setProperty(itemUpdate, "system.identified", true);
+    setProperty(itemUpdate, "system.equipped", true);
+    setProperty(itemUpdate, "system.proficient", true);
   }
 
   // damage
@@ -643,66 +643,66 @@ function updateAction(itemUpdate, action, actorData, actionType) {
     }
     parts.push([dmgVal, dmg.type]);
   }
-  setProperty(itemUpdate, "data.damage.parts", parts);
+  setProperty(itemUpdate, "system.damage.parts", parts);
 
   // versatile
   const versatile = action.versatile;
   if (versatile) {
-    setProperty(itemUpdate, "data.damage.versatile", versatile.dmgroll); // todo use formula + @mod ?
-    setProperty(itemUpdate, "data.properties.ver", true);
+    setProperty(itemUpdate, "system.damage.versatile", versatile.dmgroll); // todo use formula + @mod ?
+    setProperty(itemUpdate, "system.properties.ver", true);
   }
 
   // reach
   const reach = action.reach;
   if (reach) {
-    setProperty(itemUpdate, "data.reach.value", reach);
-    setProperty(itemUpdate, "data.reach.units", "ft");
-    setProperty(itemUpdate, "data.actionType", "mwak");
+    setProperty(itemUpdate, "system.reach.value", reach);
+    setProperty(itemUpdate, "system.reach.units", "ft");
+    setProperty(itemUpdate, "system.actionType", "mwak");
 
     // melee attack
     if (isWeaponAttack) {
-      setProperty(itemUpdate, "data.range.value", `${reach} Feet`);
+      setProperty(itemUpdate, "system.range.value", `${reach} Feet`);
     }
   }
 
   // range
   const range = action.range;
   if (range) {
-    setProperty(itemUpdate, "data.range.value", range.normal);
-    setProperty(itemUpdate, "data.range.long", range.far);
-    setProperty(itemUpdate, "data.actionType", "rwak");
-    setProperty(itemUpdate, "data.ability", "dex"); // todo always dex?
+    setProperty(itemUpdate, "system.range.value", range.normal);
+    setProperty(itemUpdate, "system.range.long", range.far);
+    setProperty(itemUpdate, "system.actionType", "rwak");
+    setProperty(itemUpdate, "system.ability", "dex"); // todo always dex?
   }
 
   // shape
   const shape = action.shape;
   if (shape) {
-    setProperty(itemUpdate, "data.target.value", parseInt(shape.range));
-    setProperty(itemUpdate, "data.target.type", shape.shape);
-    setProperty(itemUpdate, "data.target.units", "ft");
+    setProperty(itemUpdate, "system.target.value", parseInt(shape.range));
+    setProperty(itemUpdate, "system.target.type", shape.shape);
+    setProperty(itemUpdate, "system.target.units", "ft");
   }
 
   // saves
   const save = action.savingThrow;
   if (save) {
-    setProperty(itemUpdate, "data.actionType", "save");
-    setProperty(itemUpdate, "data.save.ability", shortenAbility(save.ability));
-    setProperty(itemUpdate, "data.save.dc", save.dc);
-    setProperty(itemUpdate, "data.save.scaling", "flat");
+    setProperty(itemUpdate, "system.actionType", "save");
+    setProperty(itemUpdate, "system.save.ability", shortenAbility(save.ability));
+    setProperty(itemUpdate, "system.save.dc", save.dc);
+    setProperty(itemUpdate, "system.save.scaling", "flat");
   }
 
   // recharge
   const recharge = action.recharge;
   if (recharge) {
-    setProperty(itemUpdate, "data.recharge.value", recharge.from);
-    setProperty(itemUpdate, "data.recharge.charged", true);
+    setProperty(itemUpdate, "system.recharge.value", recharge.from);
+    setProperty(itemUpdate, "system.recharge.charged", true);
   }
 
   // bonus action | reaction
   if (actionType) {
-    setProperty(update, "data.activation.cost", 1);
+    setProperty(update, "system.activation.cost", 1);
     setProperty(update, "flags.adnd5e.itemInfo.type", actionType);
-    setProperty(update, "data.activation.type", actionType);
+    setProperty(update, "system.activation.type", actionType);
   }
 
   return itemUpdate;
@@ -722,12 +722,12 @@ async function updateActions(actor, actorData, actions, actionType) {
       type: "feat",
       img: await retrieveFromPackImg(lowerName),
     };
-    setProperty(itemUpdate, "data.description.value", action.desc);
-    setProperty(itemUpdate, "data.activation.type", actionType);
-    setProperty(itemUpdate, "data.activation.cost", 1);
+    setProperty(itemUpdate, "system.description.value", action.desc);
+    setProperty(itemUpdate, "system.activation.type", actionType);
+    setProperty(itemUpdate, "system.activation.cost", 1);
 
     if (lowerName !== "multiattack") {
-      setProperty(itemUpdate, "data.quantity", 1);
+      setProperty(itemUpdate, "system.quantity", 1);
 
       if (lowerName !== "spellcasting") {
         itemUpdate = updateAction(itemUpdate, action, actorData);
@@ -742,8 +742,8 @@ async function updateActions(actor, actorData, actions, actionType) {
 async function updateLegendaryActions(actor, legendaryActions) {
   const uses = legendaryActions.uses;
   const legendaryResourcesUpdate = {};
-  setProperty(legendaryResourcesUpdate, "data.resources.legact.value", uses);
-  setProperty(legendaryResourcesUpdate, "data.resources.legact.max", uses);
+  setProperty(legendaryResourcesUpdate, "system.resources.legact.value", uses);
+  setProperty(legendaryResourcesUpdate, "system.resources.legact.max", uses);
   await actor.update(legendaryResourcesUpdate);
 
   for (const legAction of legendaryActions.actions) {
@@ -753,14 +753,14 @@ async function updateLegendaryActions(actor, legendaryActions) {
       img: await retrieveFromPackImg(legAction.name),
     };
     setProperty(itemUpdate, "flags.adnd5e.itemInfo.type", "legendary");
-    setProperty(itemUpdate, "data.activation.type", "legendary");
-    setProperty(itemUpdate, "data.activation.cost", legAction.cost);
-    setProperty(itemUpdate, "data.consume.type", "attribute");
-    setProperty(itemUpdate, "data.consume.target", "resources.legact.value");
-    setProperty(itemUpdate, "data.consume.amount", legAction.cost);
-    setProperty(itemUpdate, "data.description.value", legAction.desc);
-    setProperty(itemUpdate, "data.equipped", true);
-    setProperty(itemUpdate, "data.proficient", true);
+    setProperty(itemUpdate, "system.activation.type", "legendary");
+    setProperty(itemUpdate, "system.activation.cost", legAction.cost);
+    setProperty(itemUpdate, "system.consume.type", "attribute");
+    setProperty(itemUpdate, "system.consume.target", "resources.legact.value");
+    setProperty(itemUpdate, "system.consume.amount", legAction.cost);
+    setProperty(itemUpdate, "system.description.value", legAction.desc);
+    setProperty(itemUpdate, "system.equipped", true);
+    setProperty(itemUpdate, "system.proficient", true);
 
     const doc = new Item(itemUpdate).toObject();
     await actor.createEmbeddedDocuments("Item", [doc]);
@@ -774,7 +774,7 @@ async function updateLegendaryActions(actor, legendaryActions) {
   };
   setProperty(
     legendaryActionDesc,
-    "data.description.value",
+    "system.description.value",
     legendaryActions.desc
   );
   const doc = new Item(legendaryActionDesc).toObject();

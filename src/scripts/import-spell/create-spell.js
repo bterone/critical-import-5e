@@ -14,26 +14,26 @@ export async function createSpell(spellData) {
   let itemUpdate = {};
 
   // source
-  setProperty(itemUpdate, "data.source", "Critical Import 5e");
+  setProperty(itemUpdate, "system.source", "Critical Import 5e v2");
 
   // preparation
-  setProperty(itemUpdate, "data.preparation.mode", "prepared");
-  setProperty(itemUpdate, "data.preparation.prepared", false);
+  setProperty(itemUpdate, "system.preparation.mode", "prepared");
+  setProperty(itemUpdate, "system.preparation.prepared", false);
 
   // level
   if (spellData.level) {
-    setProperty(itemUpdate, "data.level", spellData.level);
+    setProperty(itemUpdate, "system.level", spellData.level);
   }
 
   // casting time
   if (spellData.castingTime) {
-    setProperty(itemUpdate, "data.activation.type", spellData.castingTime.type);
+    setProperty(itemUpdate, "system.activation.type", spellData.castingTime.type);
     setProperty(
       itemUpdate,
-      "data.activation.cost",
+      "system.activation.cost",
       spellData.castingTime.value
     );
-    // setProperty(itemUpdate, "data.activation.condition", ""); // todo
+    // setProperty(itemUpdate, "system.activation.condition", ""); // todo
   }
 
   // range
@@ -46,33 +46,33 @@ export async function createSpell(spellData) {
       default:
         setProperty(
           itemUpdate,
-          "data.range.value",
+          "system.range.value",
           parseInt(spellData.range.normal)
         );
-        setProperty(itemUpdate, "data.range.long", 0); // for spells this is always 0
+        setProperty(itemUpdate, "system.range.long", 0); // for spells this is always 0
         break;
     }
-    setProperty(itemUpdate, "data.range.units", spellData.range.type);
+    setProperty(itemUpdate, "system.range.units", spellData.range.type);
   }
 
   // target
   if (spellData.target) {
     const target = spellData.target;
-    setProperty(itemUpdate, "data.target.type", target.type);
-    setProperty(itemUpdate, "data.target.value", target.value);
+    setProperty(itemUpdate, "system.target.type", target.type);
+    setProperty(itemUpdate, "system.target.value", target.value);
   }
 
   // shape
   if (spellData.shape) {
     const shape = spellData.shape;
-    setProperty(itemUpdate, "data.target.type", shape.type);
-    setProperty(itemUpdate, "data.target.units", "ft");
+    setProperty(itemUpdate, "system.target.type", shape.type);
+    setProperty(itemUpdate, "system.target.units", "ft");
     setProperty(
       itemUpdate,
-      "data.target.value",
+      "system.target.value",
       shape.length ? shape.length : shape.value
     );
-    setProperty(itemUpdate, "data.target.width", shape.width);
+    setProperty(itemUpdate, "system.target.width", shape.width);
   }
 
   // components
@@ -86,20 +86,20 @@ export async function createSpell(spellData) {
     //     "concentration": false
     //   },
     const components = spellData.components;
-    setProperty(itemUpdate, "data.components.vocal", components.includes("V"));
+    setProperty(itemUpdate, "system.components.vocal", components.includes("V"));
     setProperty(
       itemUpdate,
-      "data.components.somatic",
+      "system.components.somatic",
       components.includes("S")
     );
     setProperty(
       itemUpdate,
-      "data.components.material",
+      "system.components.material",
       components.includes("M")
     );
     setProperty(
       itemUpdate,
-      "data.components.concentration",
+      "system.components.concentration",
       spellData.concentration
     );
     // todo
@@ -108,32 +108,32 @@ export async function createSpell(spellData) {
 
   // duration
   if (spellData.duration) {
-    setProperty(itemUpdate, "data.duration.value", spellData.duration.value);
-    setProperty(itemUpdate, "data.duration.units", spellData.duration.type);
+    setProperty(itemUpdate, "system.duration.value", spellData.duration.value);
+    setProperty(itemUpdate, "system.duration.units", spellData.duration.type);
   }
 
   // school
   if (spellData.school) {
-    setProperty(itemUpdate, "data.school", spellData.school);
+    setProperty(itemUpdate, "system.school", spellData.school);
   }
 
   // actionType
   if (spellData.actionType) {
-    setProperty(itemUpdate, "data.actionType", spellData.actionType);
+    setProperty(itemUpdate, "system.actionType", spellData.actionType);
   }
 
   // save
   if (spellData.save) {
-    setProperty(itemUpdate, "data.save.ability", spellData.save.ability);
-    setProperty(itemUpdate, "data.save.dc", spellData.save.dc);
-    setProperty(itemUpdate, "data.save.scaling", spellData.save.scaling);
+    setProperty(itemUpdate, "system.save.ability", spellData.save.ability);
+    setProperty(itemUpdate, "system.save.dc", spellData.save.dc);
+    setProperty(itemUpdate, "system.save.scaling", spellData.save.scaling);
   }
 
   // todo attack ?
 
   // damage/effect
   if (spellData.damage) {
-    setProperty(itemUpdate, "data.damage.parts", spellData.damage);
+    setProperty(itemUpdate, "system.damage.parts", spellData.damage);
   }
 
   // versatile damage
@@ -141,7 +141,7 @@ export async function createSpell(spellData) {
     const vDmg = spellData.versatileDmg
       .map((element) => element[0])
       .reduce((prev, curr) => prev + " + " + curr);
-    setProperty(itemUpdate, "data.damage.versatile", vDmg);
+    setProperty(itemUpdate, "system.damage.versatile", vDmg);
   }
 
   // material components
@@ -155,7 +155,7 @@ export async function createSpell(spellData) {
     //   },
     setProperty(
       itemUpdate,
-      "data.materials.value",
+      "system.materials.value",
       spellData.materialComponents
     );
   }
@@ -166,10 +166,10 @@ export async function createSpell(spellData) {
     atHigherLevelsDesc = `<br><br><strong>At higher levels.</strong> ${spellData.atHigherLevels}`;
     setProperty(
       itemUpdate,
-      "data.scaling.formula",
+      "system.scaling.formula",
       spellData.damageAtHigherLevels
     );
-    setProperty(itemUpdate, "data.scaling.mode", "level");
+    setProperty(itemUpdate, "system.scaling.mode", "level");
   }
 
   // cantrip scaling ("at higher levels" for cantrips)
@@ -178,16 +178,16 @@ export async function createSpell(spellData) {
     cantripScalingDesc = `<br><br><strong>Scaling;</strong> ${spellData.cantripScaling.desc}`;
     setProperty(
       itemUpdate,
-      "data.scaling.formula",
+      "system.scaling.formula",
       spellData.cantripScaling.dmg
     );
-    setProperty(itemUpdate, "data.scaling.mode", "cantrip");
+    setProperty(itemUpdate, "system.scaling.mode", "cantrip");
   }
 
   // spell description
   if (spellData.desc) {
     const desc = `<p>${spellData.desc}${atHigherLevelsDesc}${cantripScalingDesc}</p>`;
-    setProperty(itemUpdate, "data.description.value", desc);
+    setProperty(itemUpdate, "system.description.value", desc);
   }
 
   await item.update(itemUpdate);
@@ -205,16 +205,16 @@ function setTarget(itemUpdate, target) {
 
   function setTargetType(itemUpdate, target) {
     // todo
-    setProperty(itemUpdate, "data.target.type", "creature"); // cone, cube, enemy, ...
+    setProperty(itemUpdate, "system.target.type", "creature"); // cone, cube, enemy, ...
   }
   setTargetType(itemUpdate, target);
 
   function setTargetUnits(itemUpdate, target) {
     // todo
-    setProperty(itemUpdate, "data.target.units", undefined); // ft, self, any, ...
+    setProperty(itemUpdate, "system.target.units", undefined); // ft, self, any, ...
   }
   setTargetUnits(itemUpdate, target);
 
-  setProperty(itemUpdate, "data.target.value", 1); // 15
-  setProperty(itemUpdate, "data.target.width", undefined);
+  setProperty(itemUpdate, "system.target.value", 1); // 15
+  setProperty(itemUpdate, "system.target.width", undefined);
 }

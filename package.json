@@ -1,7 +1,7 @@
 {
-  "name": "critical-import-5e",
-  "repository": "https://github.com/PragmaticBeaver/critical-import-5e.git",
-  "author": "PragmaticBeaver",
+  "name": "critical-import-5e-v2",
+  "repository": "https://github.com/bterone/critical-import-5e.git",
+  "author": "bterone",
   "license": "MIT",
   "type": "module",
   "scripts": {
