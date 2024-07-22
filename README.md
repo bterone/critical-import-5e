@@ -61,7 +61,7 @@ For a simple development environment add a symlink from the "dist/PROJECT_NAME" 
 #### MacOS example
 
 ```bash
-ln -s ~/src/critical-import-5e/dist/critical-import-5e/ /Users/Beaver/Library/Application\ Support/FoundryVTT/Data/modules
+ln -s ~/src/critical-import-5e/dist/critical-import-5e/ /Users/<USER>/Library/Application\ Support/FoundryVTT/Data/modules
 ```
 
 ### Build project
