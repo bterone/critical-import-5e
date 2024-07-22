@@ -4,7 +4,7 @@ import path from "path";
 
 const rootPath = "./src/";
 const distDir = "./dist";
-const outDir = distDir + "/critical-import-5e";
+const outDir = distDir + "/critical-import-5e-v2";
 const outDirStyles = outDir + "/styles";
 const outDirScripts = outDir + "/scripts";
 
